@@ -1,14 +1,15 @@
-from typing import Union, Tuple, Iterable, List
+from typing import Dict, Union, Tuple, Iterable, List
 from collections import defaultdict
 
 from matplotlib.collections import LineCollection
 from matplotlib import pyplot as plt
 from matplotlib.patches import CirclePolygon
+from matplotlib.axes import Axes
 
 MatchScore = Tuple[int, int, bool]
 Matches = Iterable[MatchScore]
 
-GOAL_TO_HEIGHT = defaultdict(
+GOAL_TO_HEIGHT: Dict[int, float] = defaultdict(
     lambda: 3, {0: 0, 1: 1, 2: 1.7, 3: 2.25, 4: 2.65, 5: 2.85, 6: 2.925}
 )
 
@@ -21,7 +22,7 @@ def plot_scores(
     show: bool = True,
     output_path=None,
     **plot_kwargs,
-):
+) -> Axes:
 
     _check_scores(scores)
 
@@ -74,21 +75,21 @@ def plot_scores(
         )
 
 
-_sign = lambda x: x and [-1, 1][x > 0]
+_sign: int = lambda x: x and [-1, 1][x > 0]
 
 
-def _dot(x, y):
+def _dot(x, y) -> List[Tuple]:
     return _circle(x, y, radius=0.1)
 
 
-def _circle(x, y, radius=0.25):
+def _circle(x, y, radius=0.25) -> List[Tuple]:
     no_goal_circle = CirclePolygon((x, y), radius=radius)
     verts = no_goal_circle.get_verts()
     edges = [(elem, verts[ind - 1]) for ind, elem in enumerate(verts)]
     return edges
 
 
-def _check_scores(scores):
+def _check_scores(scores) -> None:
 
     if not hasattr(scores, "__iter__"):
         raise TypeError(f"'scores' must be an iterable, not {type(scores)}")
@@ -114,11 +115,12 @@ def _plot(
     outlined=False,
     twogoalline=False,
     output_path: str = None,
-):
+) -> Axes:
 
     h_line_count = 3 if twogoalline else 1
 
     _, ax = plt.subplots(figsize=(0.5 * match_count, 4))
+    ax: Axes
     line_segments = LineCollection(
         lines,
         linewidths=[0.2] * h_line_count + [5] * (len(lines) - h_line_count),
