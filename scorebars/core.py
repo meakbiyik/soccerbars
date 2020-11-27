@@ -50,8 +50,8 @@ def plot_scores(
 
             if scores[0] or scores[1]:
                 slope = 0.1 * _sign(scores[0] - scores[1])
-                offset0 = match_index + slope * scores[0]
-                offset1 = match_index - slope * scores[1]
+                offset0 = match_index + slope * GOAL_TO_HEIGHT[scores[0]]
+                offset1 = match_index - slope * GOAL_TO_HEIGHT[scores[1]]
                 height0 = GOAL_TO_HEIGHT[scores[0]]
                 height1 = -GOAL_TO_HEIGHT[scores[1]]
                 lines.append([(offset1, height1), (offset0, height0)])
