@@ -22,7 +22,7 @@ def plot_scores(
     show: bool = True,
     output_path=None,
     **plot_kwargs,
-) -> Axes:
+) -> Union[Axes, List[Axes]]:
 
     _check_scores(scores)
 
@@ -31,6 +31,7 @@ def plot_scores(
     else:
         matchlists = scores
 
+    axes: List[Axes] = []
     for matches in matchlists:
 
         lines = []
@@ -59,20 +60,23 @@ def plot_scores(
                 lines.extend(_circle(match_index, 0))
 
             if not nozerodots:
-                position = -1 if away_game else 1
                 if not scores[0]:
-                    lines.extend(_dot(match_index, position))
+                    lines.extend(_dot(match_index, 1))
                 if not scores[1]:
-                    lines.extend(_dot(match_index, -position))
+                    lines.extend(_dot(match_index, -1))
 
-        return _plot(
-            lines,
-            match_count,
-            show=show,
-            outlined=outlined,
-            twogoalline=twogoalline,
-            output_path=output_path,
+        axes.append(
+            _plot(
+                lines,
+                match_count,
+                show=show,
+                outlined=outlined,
+                twogoalline=twogoalline,
+                output_path=output_path,
+            )
         )
+
+    return axes if len(axes) > 1 else axes[0]
 
 
 _sign: int = lambda x: x and [-1, 1][x > 0]
