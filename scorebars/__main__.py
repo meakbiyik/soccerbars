@@ -6,7 +6,7 @@ from click_help_colors import HelpColorsCommand
 from scorebars import plot_scores
 
 DESCRIPTION = "Multivariate sparklines making use of Gestalt theory (gestaltlines) for sequences of sports results."
-MATCH_REGEX = re.compile(r"\((\d+),(\d+)\)(\*)?")
+MATCH_REGEX = re.compile(r"\((\d+)[,-](\d+)\)(\*)?")
 
 
 @click.command(
