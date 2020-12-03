@@ -1,0 +1,14 @@
+Package: scorebars
+Title: Multivariate Sparklines for Sports Results
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "M. Eren",
+           family = "Akbiyik",
+           role = c("aut", "cre"),
+           email = "eakbiyik@ethz.ch")
+Description: Multivariate sparklines making use of Gestalt theory (gestaltlines) for sequences of sports results.
+License: use_mit_license()
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
