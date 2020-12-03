@@ -2,11 +2,13 @@
 
 Multivariate sparklines making use of Gestalt theory (gestaltlines) for sequences of sports results.
 
+This repository contains a Python package, an R package, and a cmd tool based on Python.
+
 ## Usage
 
 ### In Python
 
-Give the matches to the ```plot_scores``` function as an iterable, or a list of iterables of tuples in the form ```(score_1: int, score_2: int, away_game: bool)```.
+Give the matches to the ```plot_scores``` function as an iterable, or a list of iterables of tuples in the form ```(score_1: int, score_2: int, away_game: bool)```. pandas DataFrames (or a list of DataFrames for multiple teams) are also supported with the same form and datatypes.
 ```python
 from scorebars import plot_scores
 
@@ -29,6 +31,23 @@ plot_scores(
 )
 ```
 
+### in R
+
+Similarly with its Python counterpart, ```plot_scores``` takes a list, a list of lists, a data.frame or a list of data.frames of match scores, with each match score having the form of a list (or a data.frame row) of (home_team_score: int, away_team_score: int, is_away_game: logical). The latex syntax and flags also apply.
+```R
+library(scorebars)
+
+plot_scores(list(list(1,2,T), list(3,3,F)))
+```
+With the possible flags and paths:
+```R
+plot_scores(
+    list(list(1,2,T), list(3,3,F)), 
+    outlined = T, nozerodots = T,
+    outlined = T, output_path = "out.png"
+)
+```
+
 ### via cmd 
 
 After installing the package (see the instructions below), navigate into the top directory and run
@@ -47,6 +66,18 @@ Since this package is not yet uploaded to PyPI, it needs to be installed as a Gi
 ```bash
 pip install git+https://github.com/snlab-eakbiyik/scorebars.git 
 ```
+
+### As an R package
+
+1. Install the `devtools` package via
+    ```R
+    install.packages("devtools")
+    ```
+2. Install the package from Gituhb
+    ```R
+    library(devtools)
+    install_github("snlab-eakbiyik/scorebars")
+    ```
 
 ### As a cmd tool
 

@@ -20,9 +20,48 @@ def plot_scores(
     nozerodots: bool = False,
     outlined: bool = False,
     show: bool = True,
-    output_path=None,
+    output_path: str = None,
     **plot_kwargs,
 ) -> Union[Axes, List[Axes]]:
+    """Plot Multivariate Sparklines
+
+    Plot the given list or lists of match results as multivariate sparklines.
+    This function can either show the plot, or save it to a given path.
+
+    Parameters
+    ----------
+    scores : Union[Matches, Iterable[Matches]]
+        Matches, or an iterable of matches. Matches are either a pandas DataFrame
+        or a list of tuples, each tuple (or row) in the form
+        (home_team_score: int, away_team_score: int, is_away_game: bool)
+    twogoalline : bool, optional
+        Draw lines for two-goal levels, by default False
+    nozerodots : bool, optional
+        Remove the dots placed for zero scores, by default False
+    outlined : bool, optional
+        Only plot the outlines of the sparklines, by default False
+    show : bool, optional
+        Show the plot with pyplot.show, by default True
+    output_path : str, optional
+        Path to save the plot at (image type is inferred from the path), by default None
+
+    Returns
+    -------
+    Union[Axes, List[Axes]]
+        Axes objects of the plot(s) created.
+
+    Examples
+    --------
+    >>> plot_scores([
+            [1,2,True)], [3,3,False)], [0,2,True)], [0,0,False)], [6,6,True)]
+        ])
+    >>> plot_scores([
+            [1,2,True], [3,3,False], [0,2,True], [0,0,False], [6,6,True],
+            [0,2,False], [0,0,False], [6,6,True], [6,3,True]
+        ], outlined=True, output_path = "out.png")
+    """
+
+    scores = _maybe_convert_dataframe(scores)
 
     _check_scores(scores)
 
@@ -39,8 +78,9 @@ def plot_scores(
         lines.append([(0, 0), (match_count, 0)])
 
         if twogoalline:
-            lines.append([(0, 2), (match_count, 2)])
-            lines.append([(0, -2), (match_count, -2)])
+            two_goals = GOAL_TO_HEIGHT[2]
+            lines.append([(0, two_goals), (match_count, two_goals)])
+            lines.append([(0, -two_goals), (match_count, -two_goals)])
 
         for index, match in enumerate(matches):
 
@@ -79,18 +119,17 @@ def plot_scores(
     return axes if len(axes) > 1 else axes[0]
 
 
-_sign: int = lambda x: x and [-1, 1][x > 0]
+def _maybe_convert_dataframe(scores):
 
+    if type(scores).__name__ == "DataFrame":
+        scores = scores.values
 
-def _dot(x, y) -> List[Tuple]:
-    return _circle(x, y, radius=0.1)
+    if hasattr(scores, "__iter__"):
+        for index, item in enumerate(scores):
+            if type(item).__name__ == "DataFrame":
+                scores[index] = item.values
 
-
-def _circle(x, y, radius=0.25) -> List[Tuple]:
-    no_goal_circle = CirclePolygon((x, y), radius=radius)
-    verts = no_goal_circle.get_verts()
-    edges = [(elem, verts[ind - 1]) for ind, elem in enumerate(verts)]
-    return edges
+    return scores
 
 
 def _check_scores(scores) -> None:
@@ -110,6 +149,20 @@ def _check_scores(scores) -> None:
         raise TypeError(
             f"A game in 'scores' must be represented with Tuple[int, int, bool], not Tuple[{type(elem1).__name__}, { type(elem2).__name__}, {type(elem3).__name__}]"
         )
+
+
+_sign: int = lambda x: x and [-1, 1][x > 0]
+
+
+def _dot(x, y) -> List[Tuple]:
+    return _circle(x, y, radius=0.1)
+
+
+def _circle(x, y, radius=0.25) -> List[Tuple]:
+    no_goal_circle = CirclePolygon((x, y), radius=radius)
+    verts = no_goal_circle.get_verts()
+    edges = [(elem, verts[ind - 1]) for ind, elem in enumerate(verts)]
+    return edges
 
 
 def _plot(
@@ -155,7 +208,7 @@ def _plot(
 
     if output_path:
         plt.savefig(fname=output_path, bbox_inches="tight", pad_inches=0)
-    elif show:
+    if show:
         plt.show()
 
     return ax
