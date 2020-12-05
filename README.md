@@ -43,7 +43,7 @@ With the possible flags and paths:
 ```R
 plot_scores(
     list(list(1,2,T), list(3,3,F)), 
-    outlined = T, nozerodots = T,
+    twogoalline = T, nozerodots = T,
     outlined = T, output_path = "out.png"
 )
 ```
