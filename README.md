@@ -73,7 +73,7 @@ pip install git+https://github.com/snlab-eakbiyik/scorebars.git
     ```R
     install.packages("devtools")
     ```
-2. Install the package from Gituhb
+2. Install the package from Github
     ```R
     library(devtools)
     install_github("snlab-eakbiyik/scorebars")

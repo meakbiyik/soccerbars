@@ -53,11 +53,11 @@ def plot_scores(
     Examples
     --------
     >>> plot_scores([
-            [1,2,True)], [3,3,False)], [0,2,True)], [0,0,False)], [6,6,True)]
+            (1,2,True), (3,3,False), (0,2,True), (0,0,False), (6,6,True)
         ])
     >>> plot_scores([
-            [1,2,True], [3,3,False], [0,2,True], [0,0,False], [6,6,True],
-            [0,2,False], [0,0,False], [6,6,True], [6,3,True]
+            (1,2,True), (3,3,False), (0,2,True), (0,0,False), (6,6,True),
+            (0,2,False), (0,0,False), (6,6,True), (6,3,True)
         ], outlined=True, output_path = "out.png")
     """
 
