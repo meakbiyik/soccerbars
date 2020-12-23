@@ -1,12 +1,16 @@
 import re
+from ast import literal_eval
 
 import click
 from click_help_colors import HelpColorsCommand
 
 from scorebars import plot_scores
 
-DESCRIPTION = "Multivariate sparklines making use of Gestalt theory (gestaltlines) for sequences of sports results."
-MATCH_REGEX = re.compile(r"\((\d+)[,-](\d+)\)(\*)?")
+DESCRIPTION = """Multivariate sparklines making use of Gestalt theory (gestaltlines) for sequences of sports results.
+
+Keyword arguments in the form 'name:value' can be used to further configure the output.
+"""
+MATCH_REGEX = re.compile(r"\((\d+)?[,-](\d+)?\)(\*)?")
 
 
 @click.command(
@@ -51,14 +55,31 @@ MATCH_REGEX = re.compile(r"\((\d+)[,-](\d+)\)(\*)?")
     help="Output path of the image, 'output.png' by default.",
     type=click.Path(),
 )
+@click.argument("plot_kwargs", nargs=-1)
 def cli(
-    matches: str, twogoalline: bool, nozerodots: bool, outlined: bool, output_path: str
+    matches: str,
+    twogoalline: bool,
+    nozerodots: bool,
+    outlined: bool,
+    output_path: str,
+    plot_kwargs: str,
 ):
 
     matches = [
-        (int(score1), int(score2), bool(star))
+        (
+            int(score1) if score1 != "" else None,
+            int(score2) if score2 != "" else None,
+            bool(star),
+        )
         for score1, score2, star in MATCH_REGEX.findall(matches)
     ]
+
+    plot_kwargs = dict(arg.split(":") for arg in plot_kwargs)
+    for k,v in plot_kwargs.items():
+        try:
+            plot_kwargs[k] = literal_eval(v)
+        except ValueError:
+            pass
 
     plot_scores(
         matches,
@@ -67,6 +88,7 @@ def cli(
         nozerodots=nozerodots,
         outlined=outlined,
         output_path=output_path,
+        **plot_kwargs,
     )
 
 

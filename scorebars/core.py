@@ -1,10 +1,14 @@
 from typing import Dict, Union, Tuple, Iterable, List
 from collections import defaultdict
+import math
 
-from matplotlib.collections import LineCollection
+import numpy as np
+from matplotlib.collections import PatchCollection
 from matplotlib import pyplot as plt
-from matplotlib.patches import CirclePolygon
+from matplotlib.patches import Circle, Patch, PathPatch
+from matplotlib.path import Path
 from matplotlib.axes import Axes
+from matplotlib.colors import to_rgba
 
 MatchScore = Tuple[int, int, bool]
 Matches = Iterable[MatchScore]
@@ -12,6 +16,24 @@ Matches = Iterable[MatchScore]
 GOAL_TO_HEIGHT: Dict[int, float] = defaultdict(
     lambda: 3, {0: 0, 1: 1, 2: 1.7, 3: 2.25, 4: 2.65, 5: 2.85, 6: 2.925}
 )
+
+DEFAULT_CONFIG = {
+    "figure_height": 4,
+    "figure_width_per_match": 0.5,
+    "dpi": 300,
+    "thickness": 0.18,
+    "edge_thickness": 3,
+    "zerodot": 0.4 * 0.18,
+    "slant": math.sin(math.radians(14)),
+    "spacing": 0.9,
+    "padding": 0.25,
+    "baseline_factor": 0.2,
+    "brighten": 33,
+    "transparent_background": False,
+    "home_color": (0, 0, 0, 1),
+    "away_color": (0, 0, 0, 1),
+    "baseline_color": (0, 0, 0, 1),
+}
 
 
 def plot_scores(
@@ -33,7 +55,8 @@ def plot_scores(
     scores : Union[Matches, Iterable[Matches]]
         Matches, or an iterable of matches. Matches are either a pandas DataFrame
         or a list of tuples, each tuple (or row) in the form
-        (home_team_score: int, away_team_score: int, is_away_game: bool)
+        (home_team_score: int, away_team_score: int, is_away_game: bool), or
+        (None, None, is_away_game: bool) for matches that are not played yet.
     twogoalline : bool, optional
         Draw lines for two-goal levels, by default False
     nozerodots : bool, optional
@@ -44,6 +67,25 @@ def plot_scores(
         Show the plot with pyplot.show, by default True
     output_path : str, optional
         Path to save the plot at (image type is inferred from the path), by default None
+    **plot_kwargs
+        Additional configuration keywords for the visualization. Not necessarily
+        consistent with its latex counterpart, but mostly a superset of it.
+            - figure_height: Figure height in inches, by default 4
+            - figure_width_per_match: Figure width per match in inches, by default 0.5
+            - dpi: Dots per inch resolution, by default 300
+            - thickness: Line thickness in cartesian coordinates, by default 0.18
+            - edge_thickness: Edge thickness for outlined patches (when outlined=True), by default 3
+            - zerodot: Zero-dot radius ratio to thickness (when nozerodots=False), by default 0.4
+            - slant: Slope for unbalanced scores in degrees, by default 14
+            - spacing: Spacing between matches in cartesian coordinates, by default 0.9
+            - padding: Padding before and after the matches in cartesian coordinates, by default 0.9
+            - baseline_factor: Thickness of baseline with respect to line thickness, by default 0.2
+            - brighten: Brightness percentage of the two-goal lines (when twogoalline=True)
+                and away games (when outlined=False), by default 66
+            - transparent_background: Set the background transparent instead of white, by default False
+            - home_color: Color of home match lines in matplotlib-acceptable formats, by default rgba(0,0,0,1)
+            - away_color: Color of away match lines in matplotlib-acceptable formats, by default rgba(0,0,0,1)
+            - baseline_color: Color of baselines in matplotlib-acceptable formats, by default rgba(0,0,0,1)
 
     Returns
     -------
@@ -65,6 +107,8 @@ def plot_scores(
 
     _check_scores(scores)
 
+    config = _config_factory(outlined, **plot_kwargs)
+
     if isinstance(scores[0][0], int):
         matchlists = [scores]
     else:
@@ -73,44 +117,88 @@ def plot_scores(
     axes: List[Axes] = []
     for matches in matchlists:
 
-        lines = []
+        patches = []
         match_count = len(matches)
-        lines.append([(0, 0), (match_count, 0)])
-
-        if twogoalline:
-            two_goals = GOAL_TO_HEIGHT[2]
-            lines.append([(0, two_goals), (match_count, two_goals)])
-            lines.append([(0, -two_goals), (match_count, -two_goals)])
 
         for index, match in enumerate(matches):
 
             away_game, scores = match[2], match[:2]
             scores = scores[::-1] if away_game else scores
-            match_index = index + 0.5
+            match_index = (index + 0.5) * config["spacing"]
+            facecolor, edgecolor = _colors(away_game, outlined, config)
+
+            if scores[0] is None:
+                if not nozerodots:
+                    patches.append(
+                        Circle(
+                            (match_index, 1),
+                            radius=config["zerodot"],
+                            facecolor=edgecolor,
+                            edgecolor=edgecolor,
+                        )
+                    )
+                    patches.append(
+                        Circle(
+                            (match_index, -1),
+                            radius=config["zerodot"],
+                            facecolor=edgecolor,
+                            edgecolor=edgecolor,
+                        )
+                    )
+                continue
 
             if scores[0] or scores[1]:
-                slope = 0.1 * _sign(scores[0] - scores[1])
+                slope = config["slant"] * np.sign(scores[0] - scores[1])
                 offset0 = match_index + slope * GOAL_TO_HEIGHT[scores[0]]
                 offset1 = match_index - slope * GOAL_TO_HEIGHT[scores[1]]
                 height0 = GOAL_TO_HEIGHT[scores[0]]
                 height1 = -GOAL_TO_HEIGHT[scores[1]]
-                lines.append([(offset1, height1), (offset0, height0)])
-
+                patches.append(
+                    _line(
+                        (offset1, height1),
+                        (offset0, height0),
+                        facecolor,
+                        edgecolor,
+                        config,
+                    )
+                )
             else:
-                lines.extend(_circle(match_index, 0))
+                patches.append(
+                    Circle(
+                        (match_index, 0),
+                        radius=config["thickness"],
+                        facecolor=facecolor,
+                        edgecolor=edgecolor,
+                        linewidth=config["edge_thickness"],
+                    )
+                )
 
             if not nozerodots:
                 if not scores[0]:
-                    lines.extend(_dot(match_index, 1))
+                    patches.append(
+                        Circle(
+                            (match_index, 1),
+                            radius=config["zerodot"],
+                            facecolor=edgecolor,
+                            edgecolor=edgecolor,
+                        )
+                    )
                 if not scores[1]:
-                    lines.extend(_dot(match_index, -1))
+                    patches.append(
+                        Circle(
+                            (match_index, -1),
+                            radius=config["zerodot"],
+                            facecolor=edgecolor,
+                            edgecolor=edgecolor,
+                        )
+                    )
 
         axes.append(
             _plot(
-                lines,
+                patches,
                 match_count,
+                config,
                 show=show,
-                outlined=outlined,
                 twogoalline=twogoalline,
                 output_path=output_path,
             )
@@ -151,63 +239,173 @@ def _check_scores(scores) -> None:
         )
 
 
-_sign: int = lambda x: x and [-1, 1][x > 0]
+def _config_factory(outlined, **kwargs):
+
+    if not kwargs:
+        return DEFAULT_CONFIG
+
+    config = DEFAULT_CONFIG.copy()
+
+    for key, value in kwargs.items():
+
+        if key not in config:
+            raise KeyError(
+                f"Keyword argument '{key}' is not a valid configuration parameter. Available configuration parameters are {list(config.keys())}"
+            )
+
+        if key == "slant":
+            config[key] = (math.sin(math.radians(value)),)
+            continue
+
+        if key == "zerodot":
+            config[key] = value * kwargs.get("thickness", config["thickness"])
+            continue
+
+        if "color" in key:
+            config[key] = to_rgba(value)
+            continue
+
+        config[key] = value
+
+    if not outlined:
+        config["edge_thickness"] = 0
+
+    return config
 
 
-def _dot(x, y) -> List[Tuple]:
-    return _circle(x, y, radius=0.1)
+def _colors(away_game, outlined, config):
+
+    main_color = config["away_color"] if away_game else config["home_color"]
+
+    if away_game and config["brighten"] != 0 and not outlined:
+        main_color = (
+            main_color[0] + (1 - main_color[0]) * config["brighten"] / 100,
+            main_color[1] + (1 - main_color[1]) * config["brighten"] / 100,
+            main_color[2] + (1 - main_color[2]) * config["brighten"] / 100,
+            main_color[3],
+        )
+
+    if away_game and outlined:
+        facecolor = (0, 0, 0, 0)
+        edgecolor = main_color
+    else:
+        facecolor, edgecolor = main_color, main_color
+
+    return facecolor, edgecolor
 
 
-def _circle(x, y, radius=0.25) -> List[Tuple]:
-    no_goal_circle = CirclePolygon((x, y), radius=radius)
-    verts = no_goal_circle.get_verts()
-    edges = [(elem, verts[ind - 1]) for ind, elem in enumerate(verts)]
-    return edges
+def _line(start_xy, end_xy, facecolor, edgecolor, config):
+
+    clipped = start_xy[0] != end_xy[0]
+    thickness = config["thickness"]
+    edge_thickness = config["edge_thickness"]
+    half_th = thickness / 2
+
+    if clipped:
+        path_data = [
+            (Path.MOVETO, (start_xy[0] - half_th, start_xy[1])),
+            (Path.LINETO, start_xy),
+            (Path.LINETO, (start_xy[0] + half_th, start_xy[1])),
+            (Path.LINETO, (end_xy[0] + half_th, end_xy[1])),
+            (Path.LINETO, end_xy),
+            (Path.LINETO, (end_xy[0] - half_th, end_xy[1])),
+            (Path.CLOSEPOLY, (None, None)),
+        ]
+    else:
+        path_data = [
+            (Path.MOVETO, (start_xy[0] - half_th, start_xy[1] + half_th)),
+            (Path.CURVE4, (start_xy[0] - half_th, start_xy[1] - 3 / 8 * half_th)),
+            (Path.CURVE4, (start_xy[0] + half_th, start_xy[1] - 3 / 8 * half_th)),
+            (Path.CURVE4, (start_xy[0] + half_th, start_xy[1] + half_th)),
+            (Path.LINETO, (end_xy[0] + half_th, end_xy[1] - half_th)),
+            (Path.CURVE4, (end_xy[0] + half_th, end_xy[1] + 3 / 8 * half_th)),
+            (Path.CURVE4, (end_xy[0] - half_th, end_xy[1] + 3 / 8 * half_th)),
+            (Path.CURVE4, (end_xy[0] - half_th, end_xy[1] - half_th)),
+            (Path.CLOSEPOLY, (None, None)),
+        ]
+    codes, verts = zip(*path_data)
+    path = Path(verts, codes)
+    return PathPatch(
+        path, facecolor=facecolor, edgecolor=edgecolor, linewidth=edge_thickness
+    )
 
 
 def _plot(
-    lines: List[List[Tuple[int, int]]],
+    patches: List[Patch],
     match_count,
-    show,
-    outlined=False,
+    config,
+    show=True,
     twogoalline=False,
     output_path: str = None,
 ) -> Axes:
 
-    h_line_count = 3 if twogoalline else 1
+    padding = config["padding"]
+    plot_width = match_count * config["spacing"]
 
-    _, ax = plt.subplots(figsize=(0.5 * match_count, 4))
-    ax: Axes
-    line_segments = LineCollection(
-        lines,
-        linewidths=[0.2] * h_line_count + [5] * (len(lines) - h_line_count),
-        capstyle="round",
-        color="black",
+    fig = plt.figure(
+        figsize=(
+            config["figure_width_per_match"] * match_count,
+            config["figure_height"],
+        ),
+        dpi=config["dpi"],
     )
-    ax.add_collection(line_segments)
+    ax: Axes = plt.axes([0, 0, 1, 1], frameon=False)
 
-    if outlined:
-        white_line_segments = LineCollection(
-            lines[h_line_count:],
-            linewidths=[2.5] * (len(lines) - 1),
-            capstyle="round",
-            color="white",
-        )
-        ax.add_collection(white_line_segments)
-
-    ax.autoscale()
     ax.grid(False)
-    ax.set_xticks([])
-    ax.set_yticks([])
-    ax.set_xlim(-0.5, match_count + 0.5)
+    ax.get_xaxis().set_visible(False)
+    ax.get_yaxis().set_visible(False)
+    ax.set_aspect("equal")
+    ax.autoscale(tight=True)
+    ax.set_xlim(-padding, plot_width + padding)
     ax.set_ylim(-3.2, 3.2)
-    ax.spines["right"].set_visible(False)
-    ax.spines["top"].set_visible(False)
-    ax.spines["left"].set_visible(False)
-    ax.spines["bottom"].set_visible(False)
+
+    linewidth_factor = (
+        fig.bbox_inches.height
+        * ax.get_position().height
+        * 72
+        / np.diff(ax.get_ylim())[0]
+    )
+    baseline_width = config["thickness"] * config["baseline_factor"] * linewidth_factor
+    baseline_color = config["baseline_color"]
+
+    ax.plot([0, plot_width], [0, 0], lw=baseline_width, color=baseline_color, zorder=-1)
+
+    if twogoalline:
+        two_goals = GOAL_TO_HEIGHT[2]
+        twogoalline_color = (
+            baseline_color[0] * (1 - baseline_color[0]) * config["brighten"] / 100,
+            baseline_color[1] * (1 - baseline_color[1]) * config["brighten"] / 100,
+            baseline_color[2] * (1 - baseline_color[2]) * config["brighten"] / 100,
+            baseline_color[3],
+        )
+        twogoalline_width = baseline_width * 0.5
+        ax.plot(
+            [0, plot_width],
+            [two_goals, two_goals],
+            lw=twogoalline_width,
+            color=twogoalline_color,
+            zorder=-1,
+        )
+        ax.plot(
+            [0, plot_width],
+            [-two_goals, -two_goals],
+            lw=twogoalline_width,
+            color=twogoalline_color,
+            zorder=-1,
+        )
+
+    patch_collection = PatchCollection(patches, match_original=True)
+    ax.add_collection(patch_collection)
+    for patch in patches:
+        patch.set_clip_path(patch)
 
     if output_path:
-        plt.savefig(fname=output_path, bbox_inches="tight", pad_inches=0)
+        plt.savefig(
+            fname=output_path,
+            bbox_inches="tight",
+            pad_inches=0,
+            transparent=config["transparent_background"],
+        )
     if show:
         plt.show()
 
