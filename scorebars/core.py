@@ -21,9 +21,9 @@ DEFAULT_CONFIG = {
     "figure_height": 4,
     "figure_width_per_match": 0.5,
     "dpi": 300,
-    "thickness": 0.18,
-    "edge_thickness": 3,
-    "zerodot": 0.4 * 0.18,
+    "thickness": 0.36,
+    "edge_thickness": 10,
+    "zerodot": 0.4 * 0.36,
     "slant": math.sin(math.radians(14)),
     "spacing": 0.9,
     "padding": 0.25,
@@ -33,6 +33,7 @@ DEFAULT_CONFIG = {
     "home_color": (0, 0, 0, 1),
     "away_color": (0, 0, 0, 1),
     "baseline_color": (0, 0, 0, 1),
+    "clip_slanted_lines": True,
 }
 
 
@@ -62,7 +63,7 @@ def plot_scores(
     nozerodots : bool, optional
         Remove the dots placed for zero scores, by default False
     outlined : bool, optional
-        Only plot the outlines of the sparklines, by default False
+        Only plot the outlines of the away games, by default False
     show : bool, optional
         Show the plot with pyplot.show, by default True
     output_path : str, optional
@@ -86,6 +87,7 @@ def plot_scores(
             - home_color: Color of home match lines in matplotlib-acceptable formats, by default rgba(0,0,0,1)
             - away_color: Color of away match lines in matplotlib-acceptable formats, by default rgba(0,0,0,1)
             - baseline_color: Color of baselines in matplotlib-acceptable formats, by default rgba(0,0,0,1)
+            - clip_slanted_lines: Clip the ends of the slanted lines, by default True
 
     Returns
     -------
@@ -241,10 +243,10 @@ def _check_scores(scores) -> None:
 
 def _config_factory(outlined, **kwargs):
 
-    if not kwargs:
-        return DEFAULT_CONFIG
-
     config = DEFAULT_CONFIG.copy()
+
+    if not outlined:
+        config["edge_thickness"] = 0
 
     for key, value in kwargs.items():
 
@@ -254,7 +256,7 @@ def _config_factory(outlined, **kwargs):
             )
 
         if key == "slant":
-            config[key] = (math.sin(math.radians(value)),)
+            config[key] = math.sin(math.radians(value))
             continue
 
         if key == "zerodot":
@@ -266,9 +268,6 @@ def _config_factory(outlined, **kwargs):
             continue
 
         config[key] = value
-
-    if not outlined:
-        config["edge_thickness"] = 0
 
     return config
 
@@ -301,7 +300,7 @@ def _line(start_xy, end_xy, facecolor, edgecolor, config):
     edge_thickness = config["edge_thickness"]
     half_th = thickness / 2
 
-    if clipped:
+    if clipped and config["clip_slanted_lines"]:
         path_data = [
             (Path.MOVETO, (start_xy[0] - half_th, start_xy[1])),
             (Path.LINETO, start_xy),
@@ -394,9 +393,8 @@ def _plot(
             zorder=-1,
         )
 
-    patch_collection = PatchCollection(patches, match_original=True)
-    ax.add_collection(patch_collection)
     for patch in patches:
+        ax.add_patch(patch)
         patch.set_clip_path(patch)
 
     if output_path:

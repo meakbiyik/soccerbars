@@ -75,7 +75,7 @@ def cli(
     ]
 
     plot_kwargs = dict(arg.split(":") for arg in plot_kwargs)
-    for k,v in plot_kwargs.items():
+    for k, v in plot_kwargs.items():
         try:
             plot_kwargs[k] = literal_eval(v)
         except ValueError:
