@@ -143,6 +143,9 @@ cython_debug
 # ------------------  R gitignore  -------------------
 # ----------------------------------------------------
 
+^cov\.xml$
+.*?\.rds$
+
 # History files
 \.Rhistory
 \.Rapp\.history
@@ -188,3 +191,4 @@ docs
 
 # translation temp files
 po/.*?~
+^codecov\.yml$

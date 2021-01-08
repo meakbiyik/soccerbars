@@ -1,5 +1,11 @@
 # scorebars
 
+<!-- To include when the repo becomes public.
+<!-- badges: start 
+[![Codecov test coverage](https://codecov.io/gh/snlab-eakbiyik/scorebars/branch/master/graph/badge.svg)](https://codecov.io/gh/snlab-eakbiyik/scorebars?branch=master)
+<!-- badges: end 
+-->
+
 Multivariate sparklines making use of Gestalt theory (gestaltlines) for sequences of sports results.
 
 This repository contains a Python package, an R package, and a cmd tool based on Python.
