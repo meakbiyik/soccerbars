@@ -10,7 +10,8 @@ plot_scores(
   nozerodots = FALSE,
   outlined = FALSE,
   show = TRUE,
-  output_path = NULL
+  output_path = NULL,
+  ...
 )
 }
 \arguments{
@@ -31,6 +32,39 @@ by default FALSE.}
 
 \item{output_path}{A string, Path to save the plot at (image type
 is inferred from the path), by default NULL.}
+
+\item{...}{A named list, additional configuration keywords for the
+visualization. Not necessarily consistent with its latex counterpart,
+but mostly a superset of it.
+\itemize{
+\item figure_height: Figure height in inches, by default 4
+\item figure_width_per_match: Figure width per match in inches, by default 0.5
+\item dpi: Dots per inch resolution, by default 300
+\item thickness: Line thickness in cartesian coordinates, by default 0.18
+\item edge_thickness: Edge thickness for outlined patches
+(when outlined = True), by default 3
+\item zerodot: Zero-dot radius ratio to thickness (when nozerodots = False),
+by default 0.4
+\item slant: Slope for unbalanced scores in degrees, by default 14
+\item spacing: Spacing between matches in cartesian coordinates, by default 0.9
+\item padding: Padding before and after the matches in cartesian coordinates,
+by default 0.9
+\item baseline_factor: Thickness of baseline with respect to line thickness,
+by default 0.2
+\item brighten: Brightness percentage of the two-goal lines (when
+twogoalline = True) and away games (when outlined = False),
+by default 66
+\item transparent_background: Set the background transparent instead of white,
+by default False
+\item home_color: Color of home match lines in matplotlib-acceptable formats,
+by default rgba(0, 0, 0, 1)
+\item away_color: Color of away match lines in matplotlib-acceptable formats,
+by default rgba(0, 0, 0, 1)
+\item baseline_color: Color of baselines in matplotlib-acceptable formats,
+by default rgba(0, 0, 0, 1)
+\item fill_color: Fill color for the outlined sparklines, by default NA.
+\item clip_slanted_lines: Clip the ends of the slanted lines, by default True
+}}
 }
 \value{
 ggplot objects of the plots created.
@@ -41,10 +75,15 @@ This function can either show the plot, or save it to a given path.
 }
 \examples{
 plot_scores(list(
-     list(1,2,T), list(3,3,F), list(0,2,T), list(0,0,F), list(6,6,T)
+    list(1, 2, T), list(3, 3, F), list(0, 2, T), list(0, 0, F), list(6, 6, T)
 ))
 plot_scores(list(
-     list(1,2,T), list(3,3,F), list(0,2,T), list(0,0,F), list(6,6,T),
-     list(0,2,F), list(0,0,F), list(6,6,T), list(6,3,T)
-), outlined=T, output_path = "out.png")
+    list(1, 2, T), list(3, 3, F), list(0, 2, T), list(0, 0, F),
+    list(6, 6, T), list(0, 2, F), list(0, 0, F), list(6, 6, T), list(6, 3, T)
+), outlined = T, output_path = "out.png")
+plot_scores(list(
+    list(8, 0, F), list(4, 1, T), list(4, 4, F), list(1, 4, T),
+    list(5, 0, F), list(0, 0, T), list(1, 1, F), list(2, 3, T),
+    list(NA, NA, F), list(NA, NA, T), list(NA, NA, F)
+))
 }

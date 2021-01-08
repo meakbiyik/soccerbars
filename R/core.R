@@ -5,6 +5,26 @@ goal_to_height <- function(x) {
     if (x %in% c(0, 1, 2, 3, 4, 5, 6)) height_mapping[[x + 1]] else 3
 }
 
+default_config <- list(
+    figure_height = 3.2,
+    figure_width_per_match = 0.5,
+    dpi = 300,
+    thickness = 0.36,
+    edge_thickness = 2,
+    zerodot = 0.4 * 0.36,
+    slant = sin(14 * pi / 180),
+    spacing = 0.9,
+    padding = 0.25,
+    baseline_factor = 0.2,
+    brighten = 33,
+    transparent_background = FALSE,
+    home_color = col2rgb("black", alpha = TRUE),
+    away_color = col2rgb("black", alpha = TRUE),
+    baseline_color = col2rgb("black", alpha = TRUE),
+    fill_color = col2rgb(NA, alpha = TRUE),
+    clip_slanted_lines = TRUE
+)
+
 #' Plot Multivariate Sparklines
 #'
 #' Plot the given list or lists of match results as multivariate sparklines.
@@ -22,6 +42,36 @@ goal_to_height <- function(x) {
 #' @param show A logical, prints the plot, by default TRUE.
 #' @param output_path A string, Path to save the plot at (image type
 #' is inferred from the path), by default NULL.
+#' @param ... A named list, additional configuration keywords for the
+#' visualization. Not necessarily consistent with its latex counterpart,
+#' but mostly a superset of it.
+#'  - figure_height: Figure height in inches, by default 4
+#'  - figure_width_per_match: Figure width per match in inches, by default 0.5
+#'  - dpi: Dots per inch resolution, by default 300
+#'  - thickness: Line thickness in cartesian coordinates, by default 0.18
+#'  - edge_thickness: Edge thickness for outlined patches
+#'      (when outlined = True), by default 3
+#'  - zerodot: Zero-dot radius ratio to thickness (when nozerodots = False),
+#'      by default 0.4
+#'  - slant: Slope for unbalanced scores in degrees, by default 14
+#'  - spacing: Spacing between matches in cartesian coordinates, by default 0.9
+#'  - padding: Padding before and after the matches in cartesian coordinates,
+#'      by default 0.9
+#'  - baseline_factor: Thickness of baseline with respect to line thickness,
+#'      by default 0.2
+#'  - brighten: Brightness percentage of the two-goal lines (when
+#'      twogoalline = True) and away games (when outlined = False),
+#'      by default 66
+#'  - transparent_background: Set the background transparent instead of white,
+#'      by default False
+#'  - home_color: Color of home match lines in matplotlib-acceptable formats,
+#'      by default rgba(0, 0, 0, 1)
+#'  - away_color: Color of away match lines in matplotlib-acceptable formats,
+#'      by default rgba(0, 0, 0, 1)
+#'  - baseline_color: Color of baselines in matplotlib-acceptable formats,
+#'      by default rgba(0, 0, 0, 1)
+#'  - fill_color: Fill color for the outlined sparklines, by default NA.
+#'  - clip_slanted_lines: Clip the ends of the slanted lines, by default True
 #' @return ggplot objects of the plots created.
 #' @examples
 #' plot_scores(list(
@@ -31,16 +81,24 @@ goal_to_height <- function(x) {
 #'     list(1, 2, T), list(3, 3, F), list(0, 2, T), list(0, 0, F),
 #'     list(6, 6, T), list(0, 2, F), list(0, 0, F), list(6, 6, T), list(6, 3, T)
 #' ), outlined = T, output_path = "out.png")
+#' plot_scores(list(
+#'     list(8, 0, F), list(4, 1, T), list(4, 4, F), list(1, 4, T),
+#'     list(5, 0, F), list(0, 0, T), list(1, 1, F), list(2, 3, T),
+#'     list(NA, NA, F), list(NA, NA, T), list(NA, NA, F)
+#' ))
 #' @export
 plot_scores <- function(scores,
                         twogoalline = FALSE,
                         nozerodots = FALSE,
                         outlined = FALSE,
                         show = TRUE,
-                        output_path = NULL) {
+                        output_path = NULL,
+                        ...) {
     scores <- maybe_convert_dataframe(scores)
 
     check_scores(scores)
+
+    config <- config_factory(outlined, ...)
 
     if (is.list(scores[[1]][[1]]) || length(scores[[1]][[1]]) > 1) {
         matchlists <- scores
@@ -50,49 +108,82 @@ plot_scores <- function(scores,
 
     axes <- list()
     for (matches in matchlists) {
-        lines <- list()
-        match_count <- length(matches)
-        lines <- append(lines, list(c(0, 0, match_count, 0)))
 
-        if (twogoalline) {
-            two_goals <- goal_to_height(2)
-            lines <- append(lines, list(c(
-                0, two_goals,
-                match_count, two_goals
-            )))
-            lines <- append(lines, list(c(
-                0, -two_goals,
-                match_count, -two_goals
-            )))
-        }
+        patches <- list()
+        match_count <- length(matches)
 
         for (index in seq_along(matches)) {
             match <- matches[[index]]
-            away_game <- match[[3]]
+            away_game <- as.logical(match[[3]])
             scores <- match[-3]
             scores <- if (away_game) rev(scores) else scores
-            match_index <- index - 0.5
+            match_index <- (index - 0.5) * config[["spacing"]]
+
+            line_colors <- colors(away_game, outlined, config)
+            facecolor <- line_colors[[1]]
+            edgecolor <- line_colors[[2]]
+
+            if (is.na(scores[[1]])) {
+                if (!nozerodots) {
+                    patches <- append(patches,
+                        circle_polygon(
+                            match_index, 1,
+                            radius = config[["zerodot"]],
+                            facecolor = edgecolor,
+                            edgecolor = edgecolor
+                        )
+                    )
+                    patches <- append(patches,
+                        circle_polygon(
+                            match_index, -1,
+                            radius = config[["zerodot"]],
+                            facecolor = edgecolor,
+                            edgecolor = edgecolor
+                        )
+                    )
+                }
+                next
+            }
 
             if (scores[[1]] > 0 || scores[[2]] > 0) {
-                slope <- 0.1 * sign(scores[[1]] - scores[[2]])
+                slope <- config[["slant"]] * sign(scores[[1]] - scores[[2]])
                 offset0 <- match_index + slope * goal_to_height(scores[[1]])
                 offset1 <- match_index - slope * goal_to_height(scores[[2]])
                 height0 <- goal_to_height(scores[[1]])
                 height1 <- -goal_to_height(scores[[2]])
-                lines <- append(lines, list(c(
-                    offset1, height1,
-                    offset0, height0
-                )))
+                patches <- append(patches,
+                    line_polygon(
+                        c(offset1, height1),
+                        c(offset0, height0),
+                        facecolor,
+                        edgecolor,
+                        config
+                    )
+                )
             } else {
-                lines <- append(lines, circle(match_index, 0))
+                patches <- append(patches, circle_polygon(
+                        match_index, 0,
+                        radius = config[["thickness"]],
+                        facecolor = facecolor,
+                        edgecolor = edgecolor,
+                        linewidth = config[["edge_thickness"]]
+                    ))
             }
 
             if (!nozerodots) {
                 if (!scores[[1]]) {
-                    lines <- append(lines, dot(match_index, 1))
+                    patches <- append(patches, circle_polygon(
+                        match_index, 1,
+                        radius = config[["zerodot"]],
+                        facecolor = edgecolor,
+                        edgecolor = edgecolor))
                 }
                 if (!scores[[2]]) {
-                    lines <- append(lines, dot(match_index, -1))
+                    patches <- append(patches, circle_polygon(
+                        match_index, -1,
+                        radius = config[["zerodot"]],
+                        facecolor = edgecolor,
+                        edgecolor = edgecolor))
                 }
             }
         }
@@ -100,17 +191,17 @@ plot_scores <- function(scores,
         axes <- append(
             axes,
             plot(
-                lines,
+                patches,
                 match_count,
+                config,
                 show = show,
-                outlined = outlined,
                 twogoalline = twogoalline,
                 output_path = output_path
             )
         )
     }
 
-    return(if (length(axes) > 1) axes else axes[[0]])
+    return(if (length(axes) > 1) axes else axes[[1]])
 }
 
 maybe_convert_dataframe <- function(scores) {
@@ -129,14 +220,18 @@ maybe_convert_dataframe <- function(scores) {
 }
 
 check_scores <- function(scores) {
-    checkmate::assert_list(scores, min.len = 1, types = c("list"))
+    checkmate::assert_list(scores, min.len = 1, types = c("list", "numeric"))
 
     if (is.list(scores[[1]][[1]]) || length(scores[[1]][[1]]) > 1) {
         first_match <- scores[[1]][[1]]
     } else {
         first_match <- scores[[1]]
     }
-    checkmate::assert_list(first_match, min.len = 1, .var.name = "match vector")
+    checkmate::assert_vector(
+        first_match,
+        len = 3,
+        .var.name = "Match vector"
+    )
     checkmate::assert_int(first_match[[1]],
         null.ok = FALSE,
         .var.name = "Scores of the home team"
@@ -145,71 +240,262 @@ check_scores <- function(scores) {
         null.ok = FALSE,
         .var.name = "Scores of the away team"
     )
-    checkmate::assert_logical(first_match[[3]],
-        len = 1, null.ok = FALSE,
-        any.missing = FALSE, .var.name = "Away flag"
-    )
 }
 
-dot <- function(x, y) circle(x, y, radius = 0.1)
+config_factory <- function(outlined, ...) {
 
-circle <- function(x, y, radius = 0.25) {
-    tt <- seq(0, 2 * pi, length.out = 20)
-    xx <- x + radius * cos(tt)
-    yy <- y + radius * sin(tt)
-    x_start <- xx[1:(length(xx) - 1)]
-    y_start <- yy[1:(length(yy) - 1)]
-    x_end <- xx[2:length(xx)]
-    y_end <- yy[2:length(yy)]
-    line_frame <- data.frame(x_start, y_start, x_end, y_end)
-    listified <- unname(do.call(list, data.frame(t(line_frame))))
-    return(listified)
+    kwargs <- list(...)
+    config <- default_config
+
+    if (!outlined) {
+        config[["edge_thickness"]] <- 0
+    }
+
+    for (key in names(kwargs)) {
+
+        value <- kwargs[[key]]
+
+        if (!(key %in% names(config))) {
+            stop(
+                sprintf(
+                    strwrap(
+                        "Keyword argument '%s' is not a valid configuration
+                        parameter. Available configuration parameters
+                        are (%s)", key, paste(names(config), collapse = ", ")
+                    )
+                )
+            )
+        }
+
+        if (key == "slant") {
+            config[[key]] <- sin(value * pi / 180)
+            next
+        }
+
+        if (key == "zerodot") {
+            if (!is.null(kwargs[["thickness"]])) {
+                thickness <- kwargs[["thickness"]]
+            } else {
+                thickness <- config[["thickness"]]
+            }
+            config[[key]] <- value * thickness
+            next
+        }
+
+        if (grepl("color", key, fixed = TRUE)) {
+            config[[key]] <- col2rgb(value, alpha = TRUE)
+            next
+        }
+
+        config[[key]] <- value
+    }
+
+    return(config)
 }
 
-plot <- function(lines,
-                 match_count,
-                 show,
-                 outlined = FALSE,
-                 twogoalline = FALSE,
-                 output_path = NULL) {
-    h_line_count <- if (twogoalline) 3 else 1
+colors <- function(away_game, outlined, config) {
 
-    lines_dataframe <- as.data.frame(do.call(rbind, lines))
-    linewidths <- c(
-        rep_len(c(0.2), h_line_count),
-        rep_len(c(5), length(lines) - h_line_count)
-    )
+    if (away_game) {
+        main_color <- config[["away_color"]]
+    } else {
+        main_color <- config[["home_color"]]
+    }
 
-    ax <- ggplot(lines_dataframe, dpi = 300) +
-        aes(x = V1, y = V2, xend = V3, yend = V4) +
-        coord_fixed() +
-        geom_segment(size = linewidths, lineend = "round") +
-        xlim(-0.5, match_count + 0.5) +
-        ylim(-3.2, 3.2) +
-        theme_void() +
-        labs(x = NULL, y = NULL)
-
-    if (outlined) {
-        outline_linewidths <- c(
-            rep_len(c(0.2), h_line_count),
-            rep_len(c(2.5), length(lines) - h_line_count)
-        )
-        outline_colors <- c(
-            rep_len(c("black"), h_line_count),
-            rep_len(c("white"), length(lines) - h_line_count)
-        )
-        ax <- ax + geom_segment(
-            size = outline_linewidths,
-            lineend = "round",
-            color = outline_colors
+    if (away_game && config[["brighten"]] != 0 && !outlined) {
+        main_color <- list(
+            red = main_color[[1]] +
+                (255 - main_color[[1]]) * config[["brighten"]] / 100,
+            green = main_color[[2]] +
+                (255 - main_color[[2]]) * config[["brighten"]] / 100,
+            blue = main_color[[3]] +
+                (255 - main_color[[3]]) * config[["brighten"]] / 100,
+            alpha = main_color[[4]]
         )
     }
+
+    if (away_game && outlined) {
+        facecolor <- do.call(
+            rgb, append(config[["fill_color"]], list(maxColorValue = 255))
+        )
+    } else {
+        facecolor <- do.call(
+            rgb, append(main_color, list(maxColorValue = 255))
+        )
+    }
+    edgecolor <- do.call(
+        rgb, append(main_color, list(maxColorValue = 255))
+    )
+
+    return(list(facecolor, edgecolor))
+}
+
+line_polygon <- function(start_xy, end_xy, facecolor, edgecolor, config) {
+
+    clipped <- start_xy[[1]] != end_xy[[1]]
+    thickness <- config[["thickness"]]
+    edge_th <- if (facecolor != edgecolor) config[["edge_thickness"]] else 0
+    half_th <- thickness / 2
+
+    if (clipped && config[["clip_slanted_lines"]]) {
+        path_data <- data.frame(
+            x = c(
+                start_xy[[1]] - half_th,
+                start_xy[[1]] + half_th,
+                end_xy[[1]] + half_th,
+                end_xy[[1]] - half_th
+            ),
+            y = c(
+                start_xy[[2]],
+                start_xy[[2]],
+                end_xy[[2]],
+                end_xy[[2]]
+            )
+        )
+    } else {
+        left_path_data <- data.frame(
+            x = c(
+                start_xy[[1]] + half_th,
+                end_xy[[1]] + half_th
+            ),
+            y = c(
+                start_xy[[2]] + half_th,
+                end_xy[[2]] - half_th
+            )
+        )
+        top_half_circle_path_data <- circle(
+            end_xy[[1]], end_xy[[2]] - half_th, half_th, 0, pi
+        )
+        right_path_data <- data.frame(
+            x = c(
+                end_xy[[1]] - half_th,
+                start_xy[[1]] - half_th
+            ),
+            y = c(
+                end_xy[[2]] - half_th,
+                start_xy[[2]] + half_th
+            )
+        )
+        bottom_half_circle_path_data <- circle(
+            start_xy[[1]], start_xy[[2]] + half_th, half_th, pi, 2 * pi
+        )
+        path_data <- rbind(
+            left_path_data,
+            top_half_circle_path_data,
+            right_path_data,
+            bottom_half_circle_path_data
+        )
+    }
+    polygon <- geom_polygon(
+        aes(
+            x = x, y = y,
+        ), data = path_data, fill = facecolor,
+        colour = edgecolor, size = edge_th
+    )
+    return(polygon)
+}
+
+circle_polygon <- function(x, y, radius, facecolor, edgecolor, linewidth = 0) {
+    path_data <- circle(x, y, radius)
+    return(
+        geom_polygon(
+            aes(
+                x = x, y = y
+            ), data = path_data, fill = facecolor,
+            colour = edgecolor, size = linewidth
+        )
+    )
+}
+
+circle <- function(x, y, radius = 1, start_rad = 0, end_rad = 2 * pi) {
+    tt <- seq(
+        start_rad,
+        end_rad,
+        length.out = as.integer((end_rad - start_rad) / pi) * 100
+    )
+    return(
+        data.frame(
+            x = x + radius * cos(tt),
+            y = y + radius * sin(tt)
+        )
+    )
+}
+
+plot <- function(patches,
+                 match_count,
+                 config,
+                 show,
+                 twogoalline = FALSE,
+                 output_path = NULL) {
+
+    padding <- config[["padding"]]
+    plot_width <- match_count * config[["spacing"]]
+    linewidth_factor <- 72 / (plot_width + 2 * padding)
+    baseline_width <- config[["thickness"]] *
+        config[["baseline_factor"]] * linewidth_factor
+    baseline_color <- config[["baseline_color"]]
+
+    background <- if (config[["transparent_background"]]) "transparent"
+        else "white"
+
+    ax <- ggplot(dpi = config[["dpi"]]) +
+        coord_cartesian(
+            xlim = c(-padding, plot_width + padding),
+            ylim = c(-3.2, 3.2), expand = FALSE, default = TRUE
+        ) +
+        coord_fixed() +
+        labs(x = NULL, y = NULL) +
+        geom_path(
+            aes(x = x, y = y),
+            data.frame(x = c(0, plot_width), y = c(0, 0)),
+            colour = do.call(
+                rgb, append(baseline_color, list(maxColorValue = 255))
+            ),
+            size = baseline_width,
+        )
+
+    if (twogoalline) {
+        two_goals <- goal_to_height(2)
+        twogoalline_color <- list(
+            red = baseline_color[[1]] +
+                (255 - baseline_color[[1]]) * config[["brighten"]] / 100,
+            green = baseline_color[[2]] +
+                (255 - baseline_color[[2]]) * config[["brighten"]] / 100,
+            blue = baseline_color[[3]] +
+                (255 - baseline_color[[3]]) * config[["brighten"]] / 100,
+            alpha = baseline_color[[4]]
+        )
+        twogoalline_color <- do.call(
+            rgb, append(twogoalline_color, list(maxColorValue = 255))
+        )
+        twogoalline_width <- baseline_width * 0.5
+
+        ax <- ax + geom_path(
+            aes(x = x, y = y),
+            data.frame(x = c(0, plot_width), y = c(two_goals, two_goals)),
+            colour = twogoalline_color, size = twogoalline_width
+        ) + geom_path(
+            aes(x = x, y = y),
+            data.frame(x = c(0, plot_width), y = c(-two_goals, -two_goals),
+            colour = twogoalline_color, size = twogoalline_width)
+        )
+}
+
+    ax <- Reduce(`+`, append(list(ax), patches)) +
+        theme_void() +
+        theme(
+            legend.position = "none",
+            panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(),
+            panel.background = element_rect(fill = background, colour = NA),
+            plot.background = element_rect(fill = background, colour = NA)
+        )
 
     if (!is.null(output_path)) {
         ggsave(output_path,
             plot = ax,
-            height = 4, width = 0.5 * match_count,
-            type = "cairo"
+            height = config[["figure_height"]],
+            width = config[["figure_width_per_match"]] * match_count,
+            type = "cairo",  bg = background
         )
     }
     if (show) {
