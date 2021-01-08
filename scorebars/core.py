@@ -3,7 +3,6 @@ from collections import defaultdict
 import math
 
 import numpy as np
-from matplotlib.collections import PatchCollection
 from matplotlib import pyplot as plt
 from matplotlib.patches import Circle, Patch, PathPatch
 from matplotlib.path import Path
@@ -33,6 +32,7 @@ DEFAULT_CONFIG = {
     "home_color": (0, 0, 0, 1),
     "away_color": (0, 0, 0, 1),
     "baseline_color": (0, 0, 0, 1),
+    "fill_color": (0, 0, 0, 0),
     "clip_slanted_lines": True,
 }
 
@@ -87,6 +87,7 @@ def plot_scores(
             - home_color: Color of home match lines in matplotlib-acceptable formats, by default rgba(0,0,0,1)
             - away_color: Color of away match lines in matplotlib-acceptable formats, by default rgba(0,0,0,1)
             - baseline_color: Color of baselines in matplotlib-acceptable formats, by default rgba(0,0,0,1)
+            - fill_color: Fill color for the outlined sparklines, by default rgba(0,0,0,0).
             - clip_slanted_lines: Clip the ends of the slanted lines, by default True
 
     Returns
@@ -212,12 +213,12 @@ def plot_scores(
 def _maybe_convert_dataframe(scores):
 
     if type(scores).__name__ == "DataFrame":
-        scores = scores.values
+        scores = scores.values.tolist()
 
     if hasattr(scores, "__iter__"):
         for index, item in enumerate(scores):
             if type(item).__name__ == "DataFrame":
-                scores[index] = item.values
+                scores[index] = item.values.tolist()
 
     return scores
 
@@ -284,11 +285,8 @@ def _colors(away_game, outlined, config):
             main_color[3],
         )
 
-    if away_game and outlined:
-        facecolor = (0, 0, 0, 0)
-        edgecolor = main_color
-    else:
-        facecolor, edgecolor = main_color, main_color
+    facecolor = config["fill_color"] if away_game and outlined else main_color
+    edgecolor = main_color
 
     return facecolor, edgecolor
 
@@ -303,10 +301,8 @@ def _line(start_xy, end_xy, facecolor, edgecolor, config):
     if clipped and config["clip_slanted_lines"]:
         path_data = [
             (Path.MOVETO, (start_xy[0] - half_th, start_xy[1])),
-            (Path.LINETO, start_xy),
             (Path.LINETO, (start_xy[0] + half_th, start_xy[1])),
             (Path.LINETO, (end_xy[0] + half_th, end_xy[1])),
-            (Path.LINETO, end_xy),
             (Path.LINETO, (end_xy[0] - half_th, end_xy[1])),
             (Path.CLOSEPOLY, (None, None)),
         ]
