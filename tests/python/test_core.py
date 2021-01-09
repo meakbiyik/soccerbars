@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 
 from scorebars.core import (
+    _colors,
     _maybe_convert_dataframe,
     _check_scores,
     _config_factory,
@@ -91,11 +92,11 @@ test_dataframes = [
     ),
 ]
 
-bad_dataframes = [
+bad_scores = [
     (3, TypeError),
     ([], ValueError),
     ([(1, "A", False)], TypeError),
-    ([(1, 2, 3)], TypeError),
+    ([[(1, 2, 3), (1, 2, 3)]], TypeError),
 ]
 
 
@@ -106,7 +107,7 @@ def test__maybe_convert_dataframe(input, expected):
         assert np.array_equal(elem1, elem2, equal_nan=True)
 
 
-@pytest.mark.parametrize("input,expected_error", bad_dataframes)
+@pytest.mark.parametrize("input,expected_error", bad_scores)
 def test__check_scores(input, expected_error):
     with pytest.raises(expected_error):
         _check_scores(input)
@@ -130,3 +131,32 @@ def test__config_factory():
     )
     with pytest.raises(KeyError):
         _config_factory(True, fake_argument=False)
+
+
+def test__colors():
+    bright_away_color = (
+        DEFAULT_CONFIG["away_color"][0]
+        + (1 - DEFAULT_CONFIG["away_color"][0]) * DEFAULT_CONFIG["brighten"] / 100,
+        DEFAULT_CONFIG["away_color"][1]
+        + (1 - DEFAULT_CONFIG["away_color"][1]) * DEFAULT_CONFIG["brighten"] / 100,
+        DEFAULT_CONFIG["away_color"][2]
+        + (1 - DEFAULT_CONFIG["away_color"][2]) * DEFAULT_CONFIG["brighten"] / 100,
+        DEFAULT_CONFIG["away_color"][3],
+    )
+
+    assert _colors(False, False, DEFAULT_CONFIG) == (
+        DEFAULT_CONFIG["home_color"],
+        DEFAULT_CONFIG["home_color"],
+    )
+    assert _colors(True, False, DEFAULT_CONFIG) == (
+        bright_away_color,
+        bright_away_color,
+    )
+    assert _colors(False, True, DEFAULT_CONFIG) == (
+        DEFAULT_CONFIG["home_color"],
+        DEFAULT_CONFIG["home_color"],
+    )
+    assert _colors(True, True, DEFAULT_CONFIG) == (
+        DEFAULT_CONFIG["fill_color"],
+        DEFAULT_CONFIG["away_color"],
+    )
