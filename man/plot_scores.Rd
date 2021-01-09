@@ -53,7 +53,7 @@ by default 0.9
 by default 0.2
 \item brighten: Brightness percentage of the two-goal lines (when
 twogoalline = True) and away games (when outlined = False),
-by default 66
+by default 33
 \item transparent_background: Set the background transparent instead of white,
 by default False
 \item home_color: Color of home match lines in matplotlib-acceptable formats,

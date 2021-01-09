@@ -82,7 +82,7 @@ def plot_scores(
             - padding: Padding before and after the matches in cartesian coordinates, by default 0.9
             - baseline_factor: Thickness of baseline with respect to line thickness, by default 0.2
             - brighten: Brightness percentage of the two-goal lines (when twogoalline=True)
-                and away games (when outlined=False), by default 66
+                and away games (when outlined=False), by default 33
             - transparent_background: Set the background transparent instead of white, by default False
             - home_color: Color of home match lines in matplotlib-acceptable formats, by default rgba(0,0,0,1)
             - away_color: Color of away match lines in matplotlib-acceptable formats, by default rgba(0,0,0,1)

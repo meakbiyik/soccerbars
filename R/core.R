@@ -61,7 +61,7 @@ default_config <- list(
 #'      by default 0.2
 #'  - brighten: Brightness percentage of the two-goal lines (when
 #'      twogoalline = True) and away games (when outlined = False),
-#'      by default 66
+#'      by default 33
 #'  - transparent_background: Set the background transparent instead of white,
 #'      by default False
 #'  - home_color: Color of home match lines in matplotlib-acceptable formats,
@@ -94,6 +94,7 @@ plot_scores <- function(scores,
                         show = TRUE,
                         output_path = NULL,
                         ...) {
+
     scores <- maybe_convert_dataframe(scores)
 
     check_scores(scores)
@@ -205,14 +206,21 @@ plot_scores <- function(scores,
 }
 
 maybe_convert_dataframe <- function(scores) {
+
     if (is.data.frame(scores)) {
-        scores <- unname(do.call(list, data.frame(t(scores))))
+        scores <- lapply(
+            seq_len(nrow(scores)),
+            function(i) lapply(scores, "[", i)
+        )
     }
 
     if (is.list(scores)) {
         for (index in seq_along(scores)) {
             if (is.data.frame(scores[[index]])) {
-                scores[[index]] <- unname(do.call(list, data.frame(t(scores))))
+                scores[[index]] <- lapply(
+                    seq_len(nrow(scores[[index]])),
+                    function(i) lapply(scores[[index]], "[", i)
+                )
             }
         }
     }
@@ -220,6 +228,7 @@ maybe_convert_dataframe <- function(scores) {
 }
 
 check_scores <- function(scores) {
+
     checkmate::assert_list(scores, min.len = 1, types = c("list", "numeric"))
 
     if (is.list(scores[[1]][[1]]) || length(scores[[1]][[1]]) > 1) {
@@ -239,6 +248,10 @@ check_scores <- function(scores) {
     checkmate::assert_int(first_match[[2]],
         null.ok = FALSE,
         .var.name = "Scores of the away team"
+    )
+    checkmate::assert_logical(first_match[[3]],
+        len = 1, null.ok = FALSE,
+        any.missing = FALSE, .var.name = "Away flag"
     )
 }
 
@@ -261,8 +274,9 @@ config_factory <- function(outlined, ...) {
                     strwrap(
                         "Keyword argument '%s' is not a valid configuration
                         parameter. Available configuration parameters
-                        are (%s)", key, paste(names(config), collapse = ", ")
-                    )
+                        are (%s)", width = 1200
+                    ),
+                    key, paste(names(config), collapse = ", ")
                 )
             )
         }
@@ -395,6 +409,7 @@ line_polygon <- function(start_xy, end_xy, facecolor, edgecolor, config) {
 }
 
 circle_polygon <- function(x, y, radius, facecolor, edgecolor, linewidth = 0) {
+
     path_data <- circle(x, y, radius)
     return(
         geom_polygon(
@@ -407,6 +422,7 @@ circle_polygon <- function(x, y, radius, facecolor, edgecolor, linewidth = 0) {
 }
 
 circle <- function(x, y, radius = 1, start_rad = 0, end_rad = 2 * pi) {
+
     tt <- seq(
         start_rad,
         end_rad,
@@ -478,7 +494,7 @@ plot <- function(patches,
             data.frame(x = c(0, plot_width), y = c(-two_goals, -two_goals),
             colour = twogoalline_color, size = twogoalline_width)
         )
-}
+    }
 
     ax <- Reduce(`+`, append(list(ax), patches)) +
         theme_void() +
