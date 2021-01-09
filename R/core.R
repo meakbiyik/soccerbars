@@ -491,8 +491,8 @@ plot <- function(patches,
             colour = twogoalline_color, size = twogoalline_width
         ) + geom_path(
             aes(x = x, y = y),
-            data.frame(x = c(0, plot_width), y = c(-two_goals, -two_goals),
-            colour = twogoalline_color, size = twogoalline_width)
+            data.frame(x = c(0, plot_width), y = c(-two_goals, -two_goals)),
+            colour = twogoalline_color, size = twogoalline_width
         )
     }
 
