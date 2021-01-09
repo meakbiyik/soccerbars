@@ -1,6 +1,8 @@
 library(testthat)
 library(scorebars)
 
+pdf(NULL)
+
 test_dataframes <- list(
     list(
         data.frame(
@@ -107,6 +109,107 @@ bad_scores <- list(
     'double'.", width = 1200))
 )
 
+test_inputs <- list(
+    list(
+        list(home_team_score = 8, away_team_score = 0, is_away_game = F),
+        list(home_team_score = 4, away_team_score = 1, is_away_game = T),
+        list(home_team_score = 4, away_team_score = 4, is_away_game = F),
+        list(home_team_score = 1, away_team_score = 4, is_away_game = T),
+        list(home_team_score = 5, away_team_score = 0, is_away_game = F),
+        list(home_team_score = 0, away_team_score = 0, is_away_game = T),
+        list(home_team_score = 1, away_team_score = 1, is_away_game = F),
+        list(home_team_score = 2, away_team_score = 3, is_away_game = T),
+        list(
+            home_team_score = NA,
+            away_team_score = NA,
+            is_away_game = F
+        ),
+        list(
+            home_team_score = NA,
+            away_team_score = NA,
+            is_away_game = T
+        ),
+        list(
+            home_team_score = NA,
+            away_team_score = NA,
+            is_away_game = F
+        )
+    ),
+    list(
+        list(
+            list(
+                home_team_score = 8,
+                away_team_score = 0,
+                is_away_game = F
+            ),
+            list(
+                home_team_score = 4,
+                away_team_score = 1,
+                is_away_game = T
+            ),
+            list(
+                home_team_score = 4,
+                away_team_score = 4,
+                is_away_game = F
+            )
+        ),
+        list(
+            list(
+                home_team_score = NA,
+                away_team_score = NA,
+                is_away_game = F
+            ),
+            list(
+                home_team_score = NA,
+                away_team_score = NA,
+                is_away_game = T
+            ),
+            list(
+                home_team_score = NA,
+                away_team_score = NA,
+                is_away_game = F
+            )
+        )
+    )
+)
+
+dummy_file_name <- ".dummy.png"
+
+test_parameters <- list(
+    list(outlined = F, twogoalline = F,
+        nozerodots = F, show = F, output_path = NULL),
+    list(outlined = F, twogoalline = F,
+        nozerodots = F, show = T, output_path = NULL),
+    list(outlined = F, twogoalline = F,
+        nozerodots = T, show = F, output_path = NULL),
+    list(outlined = F, twogoalline = F,
+        nozerodots = T, show = T, output_path = NULL),
+    list(outlined = F, twogoalline = T,
+        nozerodots = F, show = F, output_path = NULL),
+    list(outlined = F, twogoalline = T,
+        nozerodots = F, show = T, output_path = NULL),
+    list(outlined = F, twogoalline = T,
+        nozerodots = T, show = F, output_path = NULL),
+    list(outlined = F, twogoalline = T,
+        nozerodots = T, show = T, output_path = NULL),
+    list(outlined = T, twogoalline = F,
+        nozerodots = F, show = F, output_path = dummy_file_name),
+    list(outlined = T, twogoalline = F,
+        nozerodots = F, show = T, output_path = dummy_file_name),
+    list(outlined = T, twogoalline = F,
+        nozerodots = T, show = F, output_path = dummy_file_name),
+    list(outlined = T, twogoalline = F,
+        nozerodots = T, show = T, output_path = dummy_file_name),
+    list(outlined = T, twogoalline = T,
+        nozerodots = F, show = F, output_path = dummy_file_name),
+    list(outlined = T, twogoalline = T,
+        nozerodots = F, show = T, output_path = dummy_file_name),
+    list(outlined = T, twogoalline = T,
+        nozerodots = T, show = F, output_path = dummy_file_name),
+    list(outlined = T, twogoalline = T,
+        nozerodots = T, show = T, output_path = dummy_file_name)
+)
+
 test_that("scores are lazily converted from data.frame", {
         for (example in test_dataframes) {
             expect_equal(maybe_convert_dataframe(example[[1]]), example[[2]])
@@ -176,5 +279,19 @@ test_that("colors are consistent with the match and config", {
             list(bright_away_color, bright_away_color))
         expect_equal(colors(F, T, default_config), list(home_color, home_color))
         expect_equal(colors(T, T, default_config), list(fill_color, away_color))
+    }
+)
+
+test_that("plot_scores run without any errors, warnings or prints", {
+        for (example in test_inputs) {
+            for (parameters in test_parameters) {
+                expect_silent(
+                    do.call(plot_scores, append(list(example), parameters))
+                )
+            }
+        }
+        if (file.exists(dummy_file_name)) {
+            file.remove(dummy_file_name)
+        }
     }
 )

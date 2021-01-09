@@ -130,7 +130,7 @@ def plot_scores(
             match_index = (index + 0.5) * config["spacing"]
             facecolor, edgecolor = _colors(away_game, outlined, config)
 
-            if scores[0] is None:
+            if scores[0] is None or np.isnan(scores[0]):
                 if not nozerodots:
                     patches.append(
                         Circle(

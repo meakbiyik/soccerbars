@@ -21,6 +21,7 @@ ipykernel = "^5.3.4"
 pytest = "^6.1.2"
 pandas = "^1.1.5"
 coverage = "^5.3.1"
+mock = "^4.0.3"
 
 [tool.poetry.scripts]
 scorebars = "scorebars.__main__:cli"

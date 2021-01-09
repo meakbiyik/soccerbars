@@ -1,7 +1,12 @@
 import math
+import itertools
+from pathlib import Path
+from mock import patch
+
 import pytest
 import numpy as np
 import pandas as pd
+from matplotlib import pyplot as plt
 
 from scorebars.core import (
     _colors,
@@ -9,6 +14,7 @@ from scorebars.core import (
     _check_scores,
     _config_factory,
     DEFAULT_CONFIG,
+    plot_scores,
 )
 
 test_dataframes = [
@@ -99,6 +105,151 @@ bad_scores = [
     ([[(1, 2, 3), (1, 2, 3)]], TypeError),
 ]
 
+dummy_file_name = Path(".dummy.png")
+
+test_inputs = [
+    [
+        [8, 0, False],
+        [4, 1, True],
+        [4, 4, False],
+        [1, 4, True],
+        [5, 0, False],
+        [0, 0, True],
+        [1, 1, False],
+        [2, 3, True],
+        [np.nan, np.nan, False],
+        [np.nan, np.nan, True],
+        [np.nan, np.nan, False],
+    ],
+    [
+        [
+            [8, 0, False],
+            [4, 1, True],
+            [4, 4, False],
+        ],
+        [
+            [np.nan, np.nan, False],
+            [np.nan, np.nan, True],
+            [np.nan, np.nan, False],
+        ],
+    ],
+]
+
+test_parameters = [
+    {
+        "outlined": False,
+        "twogoalline": False,
+        "nozerodots": False,
+        "show": False,
+        "output_path": None,
+    },
+    {
+        "outlined": False,
+        "twogoalline": False,
+        "nozerodots": False,
+        "show": True,
+        "output_path": None,
+    },
+    {
+        "outlined": False,
+        "twogoalline": False,
+        "nozerodots": True,
+        "show": False,
+        "output_path": None,
+    },
+    {
+        "outlined": False,
+        "twogoalline": False,
+        "nozerodots": True,
+        "show": True,
+        "output_path": None,
+    },
+    {
+        "outlined": False,
+        "twogoalline": True,
+        "nozerodots": False,
+        "show": False,
+        "output_path": None,
+    },
+    {
+        "outlined": False,
+        "twogoalline": True,
+        "nozerodots": False,
+        "show": True,
+        "output_path": None,
+    },
+    {
+        "outlined": False,
+        "twogoalline": True,
+        "nozerodots": True,
+        "show": False,
+        "output_path": None,
+    },
+    {
+        "outlined": True,
+        "twogoalline": True,
+        "nozerodots": True,
+        "show": True,
+        "output_path": None,
+    },
+    {
+        "outlined": True,
+        "twogoalline": False,
+        "nozerodots": False,
+        "show": False,
+        "output_path": dummy_file_name,
+    },
+    {
+        "outlined": True,
+        "twogoalline": False,
+        "nozerodots": False,
+        "show": True,
+        "output_path": dummy_file_name,
+    },
+    {
+        "outlined": True,
+        "twogoalline": False,
+        "nozerodots": True,
+        "show": False,
+        "output_path": dummy_file_name,
+    },
+    {
+        "outlined": True,
+        "twogoalline": False,
+        "nozerodots": True,
+        "show": True,
+        "output_path": dummy_file_name,
+    },
+    {
+        "outlined": True,
+        "twogoalline": True,
+        "nozerodots": False,
+        "show": False,
+        "output_path": dummy_file_name,
+    },
+    {
+        "outlined": True,
+        "twogoalline": True,
+        "nozerodots": False,
+        "show": True,
+        "output_path": dummy_file_name,
+    },
+    {
+        "outlined": True,
+        "twogoalline": True,
+        "nozerodots": True,
+        "show": False,
+        "output_path": dummy_file_name,
+    },
+    {
+        "outlined": True,
+        "twogoalline": True,
+        "nozerodots": True,
+        "show": True,
+        "output_path": dummy_file_name,
+    },
+]
+
 
 @pytest.mark.parametrize("input,expected", test_dataframes)
 def test__maybe_convert_dataframe(input, expected):
@@ -160,3 +311,19 @@ def test__colors():
         DEFAULT_CONFIG["fill_color"],
         DEFAULT_CONFIG["away_color"],
     )
+
+
+@pytest.mark.filterwarnings("error")
+@pytest.mark.parametrize(
+    "input,params", itertools.product(test_inputs, test_parameters)
+)
+@patch("matplotlib.pyplot.show")
+def test_plot_scores(_, input, params, capsys):
+    plot_scores(input, **params)
+    outputs = capsys.readouterr()
+    assert not outputs.out
+    assert not outputs.err
+    plt.close("all")
+
+
+dummy_file_name.unlink(missing_ok=True)
