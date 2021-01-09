@@ -8,6 +8,7 @@
 		"Ikuyadeu.r",
 		"REditorSupport.r-lsp",
 		"spmeesseman.vscode-taskexplorer",
-		"ryanluker.vscode-coverage-gutters"
+		"ryanluker.vscode-coverage-gutters",
+		"eamodio.gitlens"
 	],
 }
