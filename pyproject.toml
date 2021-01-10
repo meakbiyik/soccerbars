@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Multivariate sparklines making use of Gestalt theory (gestaltlines) for sequences of sports results."
 authors = ["M. Eren Akbiyik <erenakbiyik@gmail.com>"]
 license = "MIT"
-exclude = ["R/",".vscode/","DESCRIPTION","NAMESPACE","tests/R","man/",".Rbuildignore"]
+exclude = ["R/",".vscode/",".gitignore","DESCRIPTION","NAMESPACE","tests/testthat/","tests/testthat.R","man/",".Rbuildignore"]
 
 [tool.poetry.dependencies]
 python = "^3.6.1"
