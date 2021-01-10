@@ -41,7 +41,7 @@ but mostly a superset of it.
 \item figure_width_per_match: Figure width per match in inches, by default 0.5
 \item dpi: Dots per inch resolution, by default 300
 \item thickness: Line thickness in cartesian coordinates, by default 0.18
-\item edge_thickness: Edge thickness for outlined patches
+\item edge_thickness: Edge thickness for outlined away games
 (when outlined = True), by default 3
 \item zerodot: Zero-dot radius ratio to thickness (when nozerodots = False),
 by default 0.4
@@ -56,13 +56,16 @@ twogoalline = True) and away games (when outlined = False),
 by default 33
 \item transparent_background: Set the background transparent instead of white,
 by default False
-\item home_color: Color of home match lines in matplotlib-acceptable formats,
-by default rgba(0, 0, 0, 1)
-\item away_color: Color of away match lines in matplotlib-acceptable formats,
-by default rgba(0, 0, 0, 1)
-\item baseline_color: Color of baselines in matplotlib-acceptable formats,
-by default rgba(0, 0, 0, 1)
-\item fill_color: Fill color for the outlined sparklines, by default NA.
+\item home_color: Color of home match lines in any of the three kinds of R
+color specifications (i.e. either a color name as listed by colors(),
+a hexadecimal string of the form "#rrggbb" or "#rrggbbaa",
+or a positive integer i meaning palette()\link{i}), by default "black"
+\item away_color: Color of away match lines in any of the three kinds of R
+color specifications, by default "black"
+\item baseline_color: Color of baselines in any of the three kinds of R
+color specifications, by default "black"
+\item fill_color: Fill color for the outlined sparklines in any of the three
+kinds of R color specifications, by default NA.
 \item clip_slanted_lines: Clip the ends of the slanted lines, by default True
 }}
 }
@@ -85,5 +88,5 @@ plot_scores(list(
     list(8, 0, F), list(4, 1, T), list(4, 4, F), list(1, 4, T),
     list(5, 0, F), list(0, 0, T), list(1, 1, F), list(2, 3, T),
     list(NA, NA, F), list(NA, NA, T), list(NA, NA, F)
-))
+), home_color = "red")
 }

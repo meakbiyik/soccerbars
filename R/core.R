@@ -49,7 +49,7 @@ default_config <- list(
 #'  - figure_width_per_match: Figure width per match in inches, by default 0.5
 #'  - dpi: Dots per inch resolution, by default 300
 #'  - thickness: Line thickness in cartesian coordinates, by default 0.18
-#'  - edge_thickness: Edge thickness for outlined patches
+#'  - edge_thickness: Edge thickness for outlined away games
 #'      (when outlined = True), by default 3
 #'  - zerodot: Zero-dot radius ratio to thickness (when nozerodots = False),
 #'      by default 0.4
@@ -64,13 +64,16 @@ default_config <- list(
 #'      by default 33
 #'  - transparent_background: Set the background transparent instead of white,
 #'      by default False
-#'  - home_color: Color of home match lines in matplotlib-acceptable formats,
-#'      by default rgba(0, 0, 0, 1)
-#'  - away_color: Color of away match lines in matplotlib-acceptable formats,
-#'      by default rgba(0, 0, 0, 1)
-#'  - baseline_color: Color of baselines in matplotlib-acceptable formats,
-#'      by default rgba(0, 0, 0, 1)
-#'  - fill_color: Fill color for the outlined sparklines, by default NA.
+#'  - home_color: Color of home match lines in any of the three kinds of R
+#'      color specifications (i.e. either a color name as listed by colors(),
+#'      a hexadecimal string of the form "#rrggbb" or "#rrggbbaa",
+#'      or a positive integer i meaning palette()[i]), by default "black"
+#'  - away_color: Color of away match lines in any of the three kinds of R
+#'      color specifications, by default "black"
+#'  - baseline_color: Color of baselines in any of the three kinds of R
+#'      color specifications, by default "black"
+#'  - fill_color: Fill color for the outlined sparklines in any of the three
+#'      kinds of R color specifications, by default NA.
 #'  - clip_slanted_lines: Clip the ends of the slanted lines, by default True
 #' @return ggplot objects of the plots created.
 #' @examples
@@ -85,7 +88,7 @@ default_config <- list(
 #'     list(8, 0, F), list(4, 1, T), list(4, 4, F), list(1, 4, T),
 #'     list(5, 0, F), list(0, 0, T), list(1, 1, F), list(2, 3, T),
 #'     list(NA, NA, F), list(NA, NA, T), list(NA, NA, F)
-#' ))
+#' ), home_color = "red")
 #' @export
 plot_scores <- function(scores,
                         twogoalline = FALSE,
