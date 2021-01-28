@@ -17,5 +17,6 @@ Suggests:
     covr
 Imports:
     ggplot2
+    checkmate
 URL: https://github.com/snlab-eakbiyik/scorebars
 BugReports: https://github.com/snlab-eakbiyik/scorebars/issues
