@@ -78,6 +78,7 @@ default_config <- list(
 #'  - clip_slanted_lines: Clip the ends of the slanted lines, by default True
 #' @return ggplot objects of the plots created.
 #' @examples
+#' \dontrun{
 #' plot_scores(list(
 #'     list(1, 2, TRUE), list(3, 3, FALSE), list(0, 2, TRUE),
 #'     list(0, 0, FALSE), list(6, 6, TRUE)
@@ -92,6 +93,7 @@ default_config <- list(
 #'     list(5, 0, FALSE), list(0, 0, TRUE), list(1, 1, FALSE), list(2, 3, TRUE),
 #'     list(NA, NA, FALSE), list(NA, NA, TRUE), list(NA, NA, FALSE)
 #' ), home_color = "red")
+#' }
 #' @export
 plot_scores <- function(scores,
                         twogoalline = FALSE,
@@ -407,9 +409,8 @@ line_polygon <- function(start_xy, end_xy, facecolor, edgecolor, config) {
     }
     polygon <- geom_polygon(
         aes(
-            x = x, y = y,
-        ), data = path_data, fill = facecolor,
-        colour = edgecolor, size = edge_th
+            x = path_data$x, y = path_data$y,
+        ), fill = facecolor, colour = edgecolor, size = edge_th
     )
     return(polygon)
 }
@@ -467,8 +468,7 @@ plot <- function(patches,
         coord_fixed() +
         labs(x = NULL, y = NULL) +
         geom_path(
-            aes(x = x, y = y),
-            data.frame(x = c(0, plot_width), y = c(0, 0)),
+            aes(x = c(0, plot_width), y = c(0, 0)),
             colour = do.call(
                 rgb, append(baseline_color, list(maxColorValue = 255))
             ),
@@ -492,12 +492,10 @@ plot <- function(patches,
         twogoalline_width <- baseline_width * 0.5
 
         ax <- ax + geom_path(
-            aes(x = x, y = y),
-            data.frame(x = c(0, plot_width), y = c(two_goals, two_goals)),
+            aes(x = c(0, plot_width), y = c(two_goals, two_goals)),
             colour = twogoalline_color, size = twogoalline_width
         ) + geom_path(
-            aes(x = x, y = y),
-            data.frame(x = c(0, plot_width), y = c(-two_goals, -two_goals)),
+            aes(x = c(0, plot_width), y = c(-two_goals, -two_goals)),
             colour = twogoalline_color, size = twogoalline_width
         )
     }

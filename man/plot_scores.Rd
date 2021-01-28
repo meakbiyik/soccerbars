@@ -77,6 +77,7 @@ Plot the given list or lists of match results as multivariate sparklines.
 This function can either show the plot, or save it to a given path.
 }
 \examples{
+\dontrun{
 plot_scores(list(
     list(1, 2, TRUE), list(3, 3, FALSE), list(0, 2, TRUE),
     list(0, 0, FALSE), list(6, 6, TRUE)
@@ -91,4 +92,5 @@ plot_scores(list(
     list(5, 0, FALSE), list(0, 0, TRUE), list(1, 1, FALSE), list(2, 3, TRUE),
     list(NA, NA, FALSE), list(NA, NA, TRUE), list(NA, NA, FALSE)
 ), home_color = "red")
+}
 }
