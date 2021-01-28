@@ -44,14 +44,14 @@ Similarly with its Python counterpart, ```plot_scores``` takes a list, a list of
 ```R
 library(scorebars)
 
-plot_scores(list(list(1,2,T), list(3,3,F)))
+plot_scores(list(list(1,2,TRUE), list(3,3,FALSE)))
 ```
 With the possible flags and paths:
 ```R
 plot_scores(
-    list(list(1,2,T), list(3,3,F)), 
-    twogoalline = T, nozerodots = T,
-    outlined = T, output_path = "out.png"
+    list(list(1,2,TRUE), list(3,3,FALSE)), 
+    twogoalline = TRUE, nozerodots = TRUE,
+    outlined = TRUE, output_path = "out.png"
 )
 ```
 

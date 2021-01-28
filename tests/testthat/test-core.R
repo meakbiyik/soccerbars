@@ -8,31 +8,50 @@ test_dataframes <- list(
         data.frame(
             home_team_score = c(8, 4, 4, 1, 5, 0, 1, 2, NA, NA, NA),
             away_team_score = c(0, 1, 4, 4, 0, 0, 1, 3, NA, NA, NA),
-            is_away_game = c(F, T, F, T, F, T, F, T, F, T, F)
+            is_away_game = c(
+                FALSE, TRUE, FALSE, TRUE, FALSE, TRUE,
+                FALSE, TRUE, FALSE, TRUE, FALSE
+            )
         ),
         list(
-            list(home_team_score = 8, away_team_score = 0, is_away_game = F),
-            list(home_team_score = 4, away_team_score = 1, is_away_game = T),
-            list(home_team_score = 4, away_team_score = 4, is_away_game = F),
-            list(home_team_score = 1, away_team_score = 4, is_away_game = T),
-            list(home_team_score = 5, away_team_score = 0, is_away_game = F),
-            list(home_team_score = 0, away_team_score = 0, is_away_game = T),
-            list(home_team_score = 1, away_team_score = 1, is_away_game = F),
-            list(home_team_score = 2, away_team_score = 3, is_away_game = T),
             list(
-                home_team_score = NA_integer_,
-                away_team_score = NA_integer_,
-                is_away_game = F
+                home_team_score = 8, away_team_score = 0, is_away_game = FALSE
+            ),
+            list(
+                home_team_score = 4, away_team_score = 1, is_away_game = TRUE
+            ),
+            list(
+                home_team_score = 4, away_team_score = 4, is_away_game = FALSE
+            ),
+            list(
+                home_team_score = 1, away_team_score = 4, is_away_game = TRUE
+            ),
+            list(
+                home_team_score = 5, away_team_score = 0, is_away_game = FALSE
+            ),
+            list(
+                home_team_score = 0, away_team_score = 0, is_away_game = TRUE
+            ),
+            list(
+                home_team_score = 1, away_team_score = 1, is_away_game = FALSE
+            ),
+            list(
+                home_team_score = 2, away_team_score = 3, is_away_game = TRUE
             ),
             list(
                 home_team_score = NA_integer_,
                 away_team_score = NA_integer_,
-                is_away_game = T
+                is_away_game = FALSE
             ),
             list(
                 home_team_score = NA_integer_,
                 away_team_score = NA_integer_,
-                is_away_game = F
+                is_away_game = TRUE
+            ),
+            list(
+                home_team_score = NA_integer_,
+                away_team_score = NA_integer_,
+                is_away_game = FALSE
             )
         )
     ),
@@ -49,12 +68,12 @@ test_dataframes <- list(
             data.frame(
                 home_team_score = c(8, 4, 4),
                 away_team_score = c(0, 1, 4),
-                is_away_game = c(F, T, F)
+                is_away_game = c(FALSE, TRUE, FALSE)
             ),
             data.frame(
                 home_team_score = c(NA, NA, NA),
                 away_team_score = c(NA, NA, NA),
-                is_away_game = c(F, T, F)
+                is_away_game = c(FALSE, TRUE, FALSE)
             )
         ),
         list(
@@ -62,34 +81,34 @@ test_dataframes <- list(
                 list(
                     home_team_score = 8,
                     away_team_score = 0,
-                    is_away_game = F
+                    is_away_game = FALSE
                 ),
                 list(
                     home_team_score = 4,
                     away_team_score = 1,
-                    is_away_game = T
+                    is_away_game = TRUE
                 ),
                 list(
                     home_team_score = 4,
                     away_team_score = 4,
-                    is_away_game = F
+                    is_away_game = FALSE
                 )
             ),
             list(
                 list(
                     home_team_score = NA,
                     away_team_score = NA,
-                    is_away_game = F
+                    is_away_game = FALSE
                 ),
                 list(
                     home_team_score = NA,
                     away_team_score = NA,
-                    is_away_game = T
+                    is_away_game = TRUE
                 ),
                 list(
                     home_team_score = NA,
                     away_team_score = NA,
-                    is_away_game = F
+                    is_away_game = FALSE
                 )
             )
         )
@@ -101,7 +120,7 @@ bad_scores <- list(
         be of type 'list', not 'double'.")),
     list(list(), strwrap("Assertion on 'scores' failed:
         Must have length >= 1, but has length 0.")),
-    list(list(list(1, "A", F)), strwrap("Assertion on 'Scores
+    list(list(list(1, "A", FALSE)), strwrap("Assertion on 'Scores
     of the away team' failed: Must be of type 'single integerish
     value', not 'character'.", width = 1200)),
     list(list(list(list(1, 2, 3), list(1, 2, 3))), strwrap("Assertion
@@ -111,28 +130,28 @@ bad_scores <- list(
 
 test_inputs <- list(
     list(
-        list(home_team_score = 8, away_team_score = 0, is_away_game = F),
-        list(home_team_score = 4, away_team_score = 1, is_away_game = T),
-        list(home_team_score = 4, away_team_score = 4, is_away_game = F),
-        list(home_team_score = 1, away_team_score = 4, is_away_game = T),
-        list(home_team_score = 5, away_team_score = 0, is_away_game = F),
-        list(home_team_score = 0, away_team_score = 0, is_away_game = T),
-        list(home_team_score = 1, away_team_score = 1, is_away_game = F),
-        list(home_team_score = 2, away_team_score = 3, is_away_game = T),
+        list(home_team_score = 8, away_team_score = 0, is_away_game = FALSE),
+        list(home_team_score = 4, away_team_score = 1, is_away_game = TRUE),
+        list(home_team_score = 4, away_team_score = 4, is_away_game = FALSE),
+        list(home_team_score = 1, away_team_score = 4, is_away_game = TRUE),
+        list(home_team_score = 5, away_team_score = 0, is_away_game = FALSE),
+        list(home_team_score = 0, away_team_score = 0, is_away_game = TRUE),
+        list(home_team_score = 1, away_team_score = 1, is_away_game = FALSE),
+        list(home_team_score = 2, away_team_score = 3, is_away_game = TRUE),
         list(
             home_team_score = NA,
             away_team_score = NA,
-            is_away_game = F
+            is_away_game = FALSE
         ),
         list(
             home_team_score = NA,
             away_team_score = NA,
-            is_away_game = T
+            is_away_game = TRUE
         ),
         list(
             home_team_score = NA,
             away_team_score = NA,
-            is_away_game = F
+            is_away_game = FALSE
         )
     ),
     list(
@@ -140,34 +159,34 @@ test_inputs <- list(
             list(
                 home_team_score = 8,
                 away_team_score = 0,
-                is_away_game = F
+                is_away_game = FALSE
             ),
             list(
                 home_team_score = 4,
                 away_team_score = 1,
-                is_away_game = T
+                is_away_game = TRUE
             ),
             list(
                 home_team_score = 4,
                 away_team_score = 4,
-                is_away_game = F
+                is_away_game = FALSE
             )
         ),
         list(
             list(
                 home_team_score = NA,
                 away_team_score = NA,
-                is_away_game = F
+                is_away_game = FALSE
             ),
             list(
                 home_team_score = NA,
                 away_team_score = NA,
-                is_away_game = T
+                is_away_game = TRUE
             ),
             list(
                 home_team_score = NA,
                 away_team_score = NA,
-                is_away_game = F
+                is_away_game = FALSE
             )
         )
     )
@@ -176,38 +195,38 @@ test_inputs <- list(
 dummy_file_name <- ".dummy.png"
 
 test_parameters <- list(
-    list(outlined = F, twogoalline = F,
-        nozerodots = F, show = F, output_path = NULL),
-    list(outlined = F, twogoalline = F,
-        nozerodots = F, show = T, output_path = NULL),
-    list(outlined = F, twogoalline = F,
-        nozerodots = T, show = F, output_path = NULL),
-    list(outlined = F, twogoalline = F,
-        nozerodots = T, show = T, output_path = NULL),
-    list(outlined = F, twogoalline = T,
-        nozerodots = F, show = F, output_path = NULL),
-    list(outlined = F, twogoalline = T,
-        nozerodots = F, show = T, output_path = NULL),
-    list(outlined = F, twogoalline = T,
-        nozerodots = T, show = F, output_path = NULL),
-    list(outlined = F, twogoalline = T,
-        nozerodots = T, show = T, output_path = NULL),
-    list(outlined = T, twogoalline = F,
-        nozerodots = F, show = F, output_path = dummy_file_name),
-    list(outlined = T, twogoalline = F,
-        nozerodots = F, show = T, output_path = dummy_file_name),
-    list(outlined = T, twogoalline = F,
-        nozerodots = T, show = F, output_path = dummy_file_name),
-    list(outlined = T, twogoalline = F,
-        nozerodots = T, show = T, output_path = dummy_file_name),
-    list(outlined = T, twogoalline = T,
-        nozerodots = F, show = F, output_path = dummy_file_name),
-    list(outlined = T, twogoalline = T,
-        nozerodots = F, show = T, output_path = dummy_file_name),
-    list(outlined = T, twogoalline = T,
-        nozerodots = T, show = F, output_path = dummy_file_name),
-    list(outlined = T, twogoalline = T,
-        nozerodots = T, show = T, output_path = dummy_file_name)
+    list(outlined = FALSE, twogoalline = FALSE,
+        nozerodots = FALSE, show = FALSE, output_path = NULL),
+    list(outlined = FALSE, twogoalline = FALSE,
+        nozerodots = FALSE, show = TRUE, output_path = NULL),
+    list(outlined = FALSE, twogoalline = FALSE,
+        nozerodots = TRUE, show = FALSE, output_path = NULL),
+    list(outlined = FALSE, twogoalline = FALSE,
+        nozerodots = TRUE, show = TRUE, output_path = NULL),
+    list(outlined = FALSE, twogoalline = TRUE,
+        nozerodots = FALSE, show = FALSE, output_path = NULL),
+    list(outlined = FALSE, twogoalline = TRUE,
+        nozerodots = FALSE, show = TRUE, output_path = NULL),
+    list(outlined = FALSE, twogoalline = TRUE,
+        nozerodots = TRUE, show = FALSE, output_path = NULL),
+    list(outlined = FALSE, twogoalline = TRUE,
+        nozerodots = TRUE, show = TRUE, output_path = NULL),
+    list(outlined = TRUE, twogoalline = FALSE,
+        nozerodots = FALSE, show = FALSE, output_path = dummy_file_name),
+    list(outlined = TRUE, twogoalline = FALSE,
+        nozerodots = FALSE, show = TRUE, output_path = dummy_file_name),
+    list(outlined = TRUE, twogoalline = FALSE,
+        nozerodots = TRUE, show = FALSE, output_path = dummy_file_name),
+    list(outlined = TRUE, twogoalline = FALSE,
+        nozerodots = TRUE, show = TRUE, output_path = dummy_file_name),
+    list(outlined = TRUE, twogoalline = TRUE,
+        nozerodots = FALSE, show = FALSE, output_path = dummy_file_name),
+    list(outlined = TRUE, twogoalline = TRUE,
+        nozerodots = FALSE, show = TRUE, output_path = dummy_file_name),
+    list(outlined = TRUE, twogoalline = TRUE,
+        nozerodots = TRUE, show = FALSE, output_path = dummy_file_name),
+    list(outlined = TRUE, twogoalline = TRUE,
+        nozerodots = TRUE, show = TRUE, output_path = dummy_file_name)
 )
 
 test_that("scores are lazily converted from data.frame", {
@@ -225,24 +244,25 @@ test_that("bad inputs are correctly identified", {
 )
 
 test_that("config factory produces correct configuration lists", {
-        expect_equal(config_factory(T), default_config)
-        expect_equal(config_factory(F)[["edge_thickness"]], 0)
-        expect_equal(config_factory(T, slant = 20)[["slant"]],
+        expect_equal(config_factory(TRUE), default_config)
+        expect_equal(config_factory(FALSE)[["edge_thickness"]], 0)
+        expect_equal(config_factory(TRUE, slant = 20)[["slant"]],
             sin(20 * pi / 180))
-        expect_equal(config_factory(T, zerodot = 10)[["zerodot"]],
+        expect_equal(config_factory(TRUE, zerodot = 10)[["zerodot"]],
             10 * default_config[["thickness"]])
-        expect_equal(config_factory(T, zerodot = 10,
+        expect_equal(config_factory(TRUE, zerodot = 10,
             thickness = 5)[["zerodot"]], 10 * 5)
-        expect_equal(config_factory(T, fill_color = "red")[["fill_color"]],
+        expect_equal(config_factory(TRUE, fill_color = "red")[["fill_color"]],
             col2rgb("red", alpha = TRUE))
-        expect_equal(config_factory(T, fill_color = "#FF0000")[["fill_color"]],
+        expect_equal(
+            config_factory(TRUE, fill_color = "#FF0000")[["fill_color"]],
             col2rgb("red", alpha = TRUE))
-        expect_equal(config_factory(T,
+        expect_equal(config_factory(TRUE,
             fill_color = "#FF0000FF")[["fill_color"]],
             col2rgb("red", alpha = TRUE))
-        expect_equal(config_factory(T,
-            clip_slanted_lines = F)[["clip_slanted_lines"]], F)
-        expect_error(config_factory(T, fake_argument = F),
+        expect_equal(config_factory(TRUE,
+            clip_slanted_lines = FALSE)[["clip_slanted_lines"]], FALSE)
+        expect_error(config_factory(TRUE, fake_argument = FALSE),
             ".+?is not a valid configuration parameter.+")
     }
 )
@@ -274,11 +294,17 @@ test_that("colors are consistent with the match and config", {
             rgb, append(default_config[["fill_color"]],
             list(maxColorValue = 255))
         )
-        expect_equal(colors(F, F, default_config), list(home_color, home_color))
-        expect_equal(colors(T, F, default_config),
+        expect_equal(
+            colors(FALSE, FALSE, default_config), list(home_color, home_color)
+        )
+        expect_equal(colors(TRUE, FALSE, default_config),
             list(bright_away_color, bright_away_color))
-        expect_equal(colors(F, T, default_config), list(home_color, home_color))
-        expect_equal(colors(T, T, default_config), list(fill_color, away_color))
+        expect_equal(
+            colors(FALSE, TRUE, default_config), list(home_color, home_color)
+        )
+        expect_equal(
+            colors(TRUE, TRUE, default_config), list(fill_color, away_color)
+        )
     }
 )
 

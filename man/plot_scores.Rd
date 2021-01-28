@@ -78,15 +78,17 @@ This function can either show the plot, or save it to a given path.
 }
 \examples{
 plot_scores(list(
-    list(1, 2, T), list(3, 3, F), list(0, 2, T), list(0, 0, F), list(6, 6, T)
+    list(1, 2, TRUE), list(3, 3, FALSE), list(0, 2, TRUE),
+    list(0, 0, FALSE), list(6, 6, TRUE)
 ))
 plot_scores(list(
-    list(1, 2, T), list(3, 3, F), list(0, 2, T), list(0, 0, F),
-    list(6, 6, T), list(0, 2, F), list(0, 0, F), list(6, 6, T), list(6, 3, T)
-), outlined = T, output_path = "out.png")
+    list(1, 2, TRUE), list(3, 3, FALSE), list(0, 2, TRUE), list(0, 0, FALSE),
+    list(6, 6, TRUE), list(0, 2, FALSE), list(0, 0, FALSE), list(6, 6, TRUE),
+    list(6, 3, TRUE)
+), outlined = TRUE, output_path = "out.png")
 plot_scores(list(
-    list(8, 0, F), list(4, 1, T), list(4, 4, F), list(1, 4, T),
-    list(5, 0, F), list(0, 0, T), list(1, 1, F), list(2, 3, T),
-    list(NA, NA, F), list(NA, NA, T), list(NA, NA, F)
+    list(8, 0, FALSE), list(4, 1, TRUE), list(4, 4, FALSE), list(1, 4, TRUE),
+    list(5, 0, FALSE), list(0, 0, TRUE), list(1, 1, FALSE), list(2, 3, TRUE),
+    list(NA, NA, FALSE), list(NA, NA, TRUE), list(NA, NA, FALSE)
 ), home_color = "red")
 }
