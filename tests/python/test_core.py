@@ -325,5 +325,5 @@ def test_plot_scores(_, input, params, capsys):
     assert not outputs.err
     plt.close("all")
 
-
-dummy_file_name.unlink(missing_ok=True)
+if dummy_file_name.exists():
+    dummy_file_name.unlink()
