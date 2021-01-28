@@ -32,7 +32,7 @@ jobs:
         poetry install
     - name: Run black
       run: |
-        poetry run python -m black -t py38 .
+        poetry run python -m black -t py38 . --check
     - name: Run pytest
       run: |
         poetry run python -m pytest
