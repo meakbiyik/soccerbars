@@ -17,6 +17,8 @@ from scorebars.core import (
     plot_scores,
 )
 
+# TODO: Check out pytest-mpl for image comparison tests.
+
 test_dataframes = [
     (
         pd.DataFrame(
@@ -324,6 +326,7 @@ def test_plot_scores(_, input, params, capsys):
     assert not outputs.out
     assert not outputs.err
     plt.close("all")
+
 
 if dummy_file_name.exists():
     dummy_file_name.unlink()
