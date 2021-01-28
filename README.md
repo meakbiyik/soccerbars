@@ -1,7 +1,8 @@
 # scorebars
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/snlab-eakbiyik/scorebars/workflows/R-CMD-check/badge.svg)](https://github.com/snlab-eakbiyik/scorebars/actions)
+[![R CMD check](https://github.com/snlab-eakbiyik/scorebars/workflows/R%20CMD%20check/badge.svg)](https://github.com/snlab-eakbiyik/scorebars/actions)
+[![Python package](https://github.com/snlab-eakbiyik/scorebars/workflows/Python%20package/badge.svg)](https://github.com/snlab-eakbiyik/scorebars/actions)
 <!-- To include when the repo becomes public.
 [![Codecov test coverage](https://codecov.io/gh/snlab-eakbiyik/scorebars/branch/master/graph/badge.svg)](https://codecov.io/gh/snlab-eakbiyik/scorebars?branch=master)
 -->
