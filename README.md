@@ -1,10 +1,11 @@
 # scorebars
 
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/snlab-eakbiyik/scorebars/workflows/R-CMD-check/badge.svg)](https://github.com/snlab-eakbiyik/scorebars/actions)
 <!-- To include when the repo becomes public.
-<!-- badges: start 
 [![Codecov test coverage](https://codecov.io/gh/snlab-eakbiyik/scorebars/branch/master/graph/badge.svg)](https://codecov.io/gh/snlab-eakbiyik/scorebars?branch=master)
-<!-- badges: end 
 -->
+<!-- badges: end -->
 
 Multivariate sparklines making use of Gestalt theory (gestaltlines) for sequences of sports results.
 

@@ -192,3 +192,4 @@ docs
 # translation temp files
 po/.*?~
 ^codecov\.yml$
+^\.github$
