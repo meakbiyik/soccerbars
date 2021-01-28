@@ -1,13 +1,13 @@
 Package: scorebars
 Title: Multivariate Sparklines for Sports Results
-Version: 0.0.0.9000
+Version: 0.0.1
 Authors@R: 
     person(given = "M. Eren",
            family = "Akbiyik",
            role = c("aut", "cre"),
            email = "eakbiyik@ethz.ch")
 Description: Multivariate sparklines making use of Gestalt theory (gestaltlines) for sequences of sports results.
-License: use_mit_license()
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
@@ -17,6 +17,7 @@ Suggests:
     covr
 Imports:
     ggplot2,
-    checkmate
+    checkmate,
+    grDevices
 URL: https://github.com/snlab-eakbiyik/scorebars
 BugReports: https://github.com/snlab-eakbiyik/scorebars/issues

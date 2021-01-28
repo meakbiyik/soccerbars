@@ -59,7 +59,7 @@ by default False
 \item home_color: Color of home match lines in any of the three kinds of R
 color specifications (i.e. either a color name as listed by colors(),
 a hexadecimal string of the form "#rrggbb" or "#rrggbbaa",
-or a positive integer i meaning palette()\link{i}), by default "black"
+or a positive integer i meaning \code{palette()[i]}), by default "black"
 \item away_color: Color of away match lines in any of the three kinds of R
 color specifications, by default "black"
 \item baseline_color: Color of baselines in any of the three kinds of R

@@ -2,3 +2,5 @@
 
 export(plot_scores)
 import(ggplot2)
+importFrom(grDevices,col2rgb)
+importFrom(grDevices,rgb)

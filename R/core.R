@@ -1,4 +1,5 @@
 #' @import ggplot2
+#' @importFrom grDevices col2rgb rgb
 
 height_mapping <- c(0, 1, 1.7, 2.25, 2.65, 2.85, 2.925)
 goal_to_height <- function(x) {
@@ -67,7 +68,7 @@ default_config <- list(
 #'  - home_color: Color of home match lines in any of the three kinds of R
 #'      color specifications (i.e. either a color name as listed by colors(),
 #'      a hexadecimal string of the form "#rrggbb" or "#rrggbbaa",
-#'      or a positive integer i meaning palette()[i]), by default "black"
+#'      or a positive integer i meaning `palette()[i]`), by default "black"
 #'  - away_color: Color of away match lines in any of the three kinds of R
 #'      color specifications, by default "black"
 #'  - baseline_color: Color of baselines in any of the three kinds of R
