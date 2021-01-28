@@ -9,6 +9,8 @@
 		"REditorSupport.r-lsp",
 		"spmeesseman.vscode-taskexplorer",
 		"ryanluker.vscode-coverage-gutters",
-		"eamodio.gitlens"
+		"eamodio.gitlens",
+		"littlefoxteam.vscode-python-test-adapter",
+		"meakbiyik.vscode-r-test-adapter"
 	],
 }
