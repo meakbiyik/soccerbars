@@ -20,7 +20,7 @@
             }
         },
         {
-            "label": "Run Python Tests",
+            "label": "Run Python Tests with coverage",
             "type": "shell",
             "command": "poetry run coverage run --include scorebars/**  -m pytest && poetry run coverage xml --include scorebars/**",
             "options": {
@@ -33,7 +33,7 @@
             }
         },
         {
-            "label": "Run R Tests",
+            "label": "Run R Tests with coverage",
             "type": "shell",
             "command": "Rscript",
             "args":[

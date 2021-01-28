@@ -1,6 +1,7 @@
 {
     "python.pythonPath": "${workspaceFolder}/.venv",
+    "pythonTestExplorer.testFramework": "pytest",
     "taskExplorer.exclude": [
         "**/.venv/**"
-    ],
+    ]
 }
