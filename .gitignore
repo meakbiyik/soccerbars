@@ -138,6 +138,7 @@ cython_debug/
 
 cov.xml
 *.rds
+check/
 
 # History files
 .Rhistory
