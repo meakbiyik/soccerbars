@@ -48,6 +48,7 @@ jobs:
           install.packages(c("remotes"))
           remotes::install_deps(dependencies = TRUE)
           remotes::install_cran("lintr")
+          remotes::install_cran("spelling")
         shell: Rscript {0}
 
       - name: Install package
@@ -55,4 +56,8 @@ jobs:
 
       - name: Lint
         run: lintr::lint_package()
+        shell: Rscript {0}
+
+      - name: Spelling
+        run: spelling::spell_check_package()
         shell: Rscript {0}

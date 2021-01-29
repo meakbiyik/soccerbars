@@ -2,11 +2,16 @@ Package: scorebars
 Title: Multivariate Sparklines for Sports Results
 Version: 0.0.1
 Authors@R: 
+    c(person(given = "Ulrik",
+           family = "Brandes",
+           role = c("aut", "cph"),
+           email = "ubrandes@ethz.ch"),
     person(given = "M. Eren",
            family = "Akbiyik",
-           role = c("aut", "cre"),
-           email = "eakbiyik@ethz.ch")
-Description: Multivariate sparklines making use of Gestalt theory (gestaltlines) for sequences of sports results.
+           role = c("cre", "cph"),
+           email = "eakbiyik@ethz.ch"))
+Description: Multivariate sparklines making use of Gestalt theory 
+    (gestaltlines) for sequences of sports results.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -14,10 +19,12 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
 Suggests: 
     testthat,
-    covr
+    covr,
+    spelling
 Imports:
     ggplot2,
     checkmate,
     grDevices
 URL: https://github.com/snlab-eakbiyik/scorebars
 BugReports: https://github.com/snlab-eakbiyik/scorebars/issues
+Language: en-US
