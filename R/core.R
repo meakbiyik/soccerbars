@@ -136,7 +136,7 @@ plot_scores <- function(scores,
                 if (!nozerodots) {
                     patches <- append(patches,
                         circle_polygon(
-                            match_index, 1,
+                            match_index, 1 - config[["zerodot"]],
                             radius = config[["zerodot"]],
                             facecolor = edgecolor,
                             edgecolor = edgecolor
@@ -144,7 +144,7 @@ plot_scores <- function(scores,
                     )
                     patches <- append(patches,
                         circle_polygon(
-                            match_index, -1,
+                            match_index, -1 + config[["zerodot"]],
                             radius = config[["zerodot"]],
                             facecolor = edgecolor,
                             edgecolor = edgecolor
@@ -182,14 +182,14 @@ plot_scores <- function(scores,
             if (!nozerodots) {
                 if (!scores[[1]]) {
                     patches <- append(patches, circle_polygon(
-                        match_index, 1,
+                        match_index, 1 - config[["zerodot"]],
                         radius = config[["zerodot"]],
                         facecolor = edgecolor,
                         edgecolor = edgecolor))
                 }
                 if (!scores[[2]]) {
                     patches <- append(patches, circle_polygon(
-                        match_index, -1,
+                        match_index, -1 + config[["zerodot"]],
                         radius = config[["zerodot"]],
                         facecolor = edgecolor,
                         edgecolor = edgecolor))

@@ -134,7 +134,7 @@ def plot_scores(
                 if not nozerodots:
                     patches.append(
                         Circle(
-                            (match_index, 1),
+                            (match_index, 1 - config["zerodot"]),
                             radius=config["zerodot"],
                             facecolor=edgecolor,
                             edgecolor=edgecolor,
@@ -142,7 +142,7 @@ def plot_scores(
                     )
                     patches.append(
                         Circle(
-                            (match_index, -1),
+                            (match_index, -1 + config["zerodot"]),
                             radius=config["zerodot"],
                             facecolor=edgecolor,
                             edgecolor=edgecolor,
@@ -180,7 +180,7 @@ def plot_scores(
                 if not scores[0]:
                     patches.append(
                         Circle(
-                            (match_index, 1),
+                            (match_index, 1 - config["zerodot"]),
                             radius=config["zerodot"],
                             facecolor=edgecolor,
                             edgecolor=edgecolor,
@@ -189,7 +189,7 @@ def plot_scores(
                 if not scores[1]:
                     patches.append(
                         Circle(
-                            (match_index, -1),
+                            (match_index, -1 + config["zerodot"]),
                             radius=config["zerodot"],
                             facecolor=edgecolor,
                             edgecolor=edgecolor,
