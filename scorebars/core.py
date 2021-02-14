@@ -13,7 +13,8 @@ MatchScore = Tuple[int, int, bool]
 Matches = Iterable[MatchScore]
 
 GOAL_TO_HEIGHT: Dict[int, float] = defaultdict(
-    lambda: 3, {0: 0, 1: 1, 2: 1.7, 3: 2.25, 4: 2.65, 5: 2.85, 6: 2.925}
+    lambda: 3.75,
+    {0: 0, 1: 1, 2: 1.7, 3: 2.25, 4: 2.65, 5: 2.95, 6: 3.20, 7: 3.40, 8: 3.60},
 )
 
 DEFAULT_CONFIG = {
