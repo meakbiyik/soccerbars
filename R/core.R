@@ -36,7 +36,7 @@ default_config <- list(
 #' row) of (home team score: int, away team score: int, is away game: logical)
 #' @param twogoalline A logical, draws lines for two-goal levels,
 #' by default FALSE.
-#' @param nozerodots A logical, removes the dots placed for zero scores,
+#' @param zerodots A logical, marks no goals scored with a small dot,
 #' by default FALSE.
 #' @param outlined A logical, only plots the outlines of the sparklines,
 #' by default FALSE.
@@ -52,7 +52,7 @@ default_config <- list(
 #'  - thickness: Line thickness in cartesian coordinates, by default 0.18
 #'  - edge_thickness: Edge thickness for outlined away games
 #'      (when outlined = True), by default 3
-#'  - zerodot: Zero-dot radius ratio to thickness (when nozerodots = False),
+#'  - zerodot: Zero-dot radius ratio to thickness (when zerodots = True),
 #'      by default 0.4
 #'  - slant: Slope for unbalanced scores in degrees, by default 14
 #'  - spacing: Spacing between matches in cartesian coordinates, by default 0.9
@@ -97,12 +97,11 @@ default_config <- list(
 #' @export
 plot_scores <- function(scores,
                         twogoalline = FALSE,
-                        nozerodots = FALSE,
+                        zerodots = FALSE,
                         outlined = FALSE,
                         show = TRUE,
                         output_path = NULL,
                         ...) {
-
     scores <- maybe_convert_dataframe(scores)
 
     check_scores(scores)
@@ -117,7 +116,6 @@ plot_scores <- function(scores,
 
     axes <- list()
     for (matches in matchlists) {
-
         patches <- list()
         match_count <- length(matches)
 
@@ -133,8 +131,9 @@ plot_scores <- function(scores,
             edgecolor <- line_colors[[2]]
 
             if (is.na(scores[[1]])) {
-                if (!nozerodots) {
-                    patches <- append(patches,
+                if (zerodots) {
+                    patches <- append(
+                        patches,
                         circle_polygon(
                             match_index, 1 - config[["zerodot"]],
                             radius = config[["zerodot"]],
@@ -142,7 +141,8 @@ plot_scores <- function(scores,
                             edgecolor = edgecolor
                         )
                     )
-                    patches <- append(patches,
+                    patches <- append(
+                        patches,
                         circle_polygon(
                             match_index, -1 + config[["zerodot"]],
                             radius = config[["zerodot"]],
@@ -160,7 +160,8 @@ plot_scores <- function(scores,
                 offset1 <- match_index - slope * goal_to_height(scores[[2]])
                 height0 <- goal_to_height(scores[[1]])
                 height1 <- -goal_to_height(scores[[2]])
-                patches <- append(patches,
+                patches <- append(
+                    patches,
                     line_polygon(
                         c(offset1, height1),
                         c(offset0, height0),
@@ -171,28 +172,30 @@ plot_scores <- function(scores,
                 )
             } else {
                 patches <- append(patches, circle_polygon(
-                        match_index, 0,
-                        radius = config[["thickness"]],
-                        facecolor = facecolor,
-                        edgecolor = edgecolor,
-                        linewidth = config[["edge_thickness"]]
-                    ))
+                    match_index, 0,
+                    radius = config[["thickness"]],
+                    facecolor = facecolor,
+                    edgecolor = edgecolor,
+                    linewidth = config[["edge_thickness"]]
+                ))
             }
 
-            if (!nozerodots) {
+            if (zerodots) {
                 if (!scores[[1]]) {
                     patches <- append(patches, circle_polygon(
                         match_index, 1 - config[["zerodot"]],
                         radius = config[["zerodot"]],
                         facecolor = edgecolor,
-                        edgecolor = edgecolor))
+                        edgecolor = edgecolor
+                    ))
                 }
                 if (!scores[[2]]) {
                     patches <- append(patches, circle_polygon(
                         match_index, -1 + config[["zerodot"]],
                         radius = config[["zerodot"]],
                         facecolor = edgecolor,
-                        edgecolor = edgecolor))
+                        edgecolor = edgecolor
+                    ))
                 }
             }
         }
@@ -214,7 +217,6 @@ plot_scores <- function(scores,
 }
 
 maybe_convert_dataframe <- function(scores) {
-
     if (is.data.frame(scores)) {
         scores <- lapply(
             seq_len(nrow(scores)),
@@ -236,7 +238,6 @@ maybe_convert_dataframe <- function(scores) {
 }
 
 check_scores <- function(scores) {
-
     checkmate::assert_list(scores, min.len = 1, types = c("list", "numeric"))
 
     if (is.list(scores[[1]][[1]]) || length(scores[[1]][[1]]) > 1) {
@@ -264,7 +265,6 @@ check_scores <- function(scores) {
 }
 
 config_factory <- function(outlined, ...) {
-
     kwargs <- list(...)
     config <- default_config
 
@@ -273,7 +273,6 @@ config_factory <- function(outlined, ...) {
     }
 
     for (key in names(kwargs)) {
-
         value <- kwargs[[key]]
 
         if (!(key %in% names(config))) {
@@ -282,7 +281,8 @@ config_factory <- function(outlined, ...) {
                     strwrap(
                         "Keyword argument '%s' is not a valid configuration
                         parameter. Available configuration parameters
-                        are (%s)", width = 1200
+                        are (%s)",
+                        width = 1200
                     ),
                     key, paste(names(config), collapse = ", ")
                 )
@@ -316,7 +316,6 @@ config_factory <- function(outlined, ...) {
 }
 
 colors <- function(away_game, outlined, config) {
-
     if (away_game) {
         main_color <- config[["away_color"]]
     } else {
@@ -352,7 +351,6 @@ colors <- function(away_game, outlined, config) {
 }
 
 line_polygon <- function(start_xy, end_xy, facecolor, edgecolor, config) {
-
     clipped <- start_xy[[1]] != end_xy[[1]]
     thickness <- config[["thickness"]]
     edge_th <- if (facecolor != edgecolor) config[["edge_thickness"]] else 0
@@ -410,26 +408,26 @@ line_polygon <- function(start_xy, end_xy, facecolor, edgecolor, config) {
     polygon <- geom_polygon(
         aes(
             x = path_data$x, y = path_data$y,
-        ), fill = facecolor, colour = edgecolor, size = edge_th
+        ),
+        fill = facecolor, colour = edgecolor, size = edge_th
     )
     return(polygon)
 }
 
 circle_polygon <- function(x, y, radius, facecolor, edgecolor, linewidth = 0) {
-
     path_data <- circle(x, y, radius)
     return(
         geom_polygon(
             aes(
                 x = x, y = y
-            ), data = path_data, fill = facecolor,
+            ),
+            data = path_data, fill = facecolor,
             colour = edgecolor, size = linewidth
         )
     )
 }
 
 circle <- function(x, y, radius = 1, start_rad = 0, end_rad = 2 * pi) {
-
     tt <- seq(
         start_rad,
         end_rad,
@@ -449,7 +447,6 @@ plot <- function(patches,
                  show,
                  twogoalline = FALSE,
                  output_path = NULL) {
-
     padding <- config[["padding"]]
     plot_width <- match_count * config[["spacing"]]
     linewidth_factor <- 72 / (plot_width + 2 * padding)
@@ -457,8 +454,11 @@ plot <- function(patches,
         config[["baseline_factor"]] * linewidth_factor
     baseline_color <- config[["baseline_color"]]
 
-    background <- if (config[["transparent_background"]]) "transparent"
-        else "white"
+    background <- if (config[["transparent_background"]]) {
+        "transparent"
+    } else {
+        "white"
+    }
 
     ax <- ggplot(dpi = config[["dpi"]]) +
         coord_cartesian(
@@ -515,7 +515,7 @@ plot <- function(patches,
             plot = ax,
             height = config[["figure_height"]],
             width = config[["figure_width_per_match"]] * match_count,
-            type = "cairo",  bg = background
+            type = "cairo", bg = background
         )
     }
     if (show) {

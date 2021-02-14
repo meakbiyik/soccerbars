@@ -40,7 +40,7 @@ DEFAULT_CONFIG = {
 def plot_scores(
     scores: Union[Matches, Iterable[Matches]],
     twogoalline: bool = False,
-    nozerodots: bool = False,
+    zerodots: bool = False,
     outlined: bool = False,
     show: bool = True,
     output_path: str = None,
@@ -60,8 +60,8 @@ def plot_scores(
         (None, None, is_away_game: bool) for matches that are not played yet.
     twogoalline : bool, optional
         Draw lines for two-goal levels, by default False
-    nozerodots : bool, optional
-        Remove the dots placed for zero scores, by default False
+    zerodots : bool, optional
+        Mark no goals scored with a small dot, by default False
     outlined : bool, optional
         Only plot the outlines of the away games, by default False
     show : bool, optional
@@ -76,7 +76,7 @@ def plot_scores(
             - dpi: Dots per inch resolution, by default 300
             - thickness: Line thickness in cartesian coordinates, by default 0.18
             - edge_thickness: Edge thickness for outlined patches (when outlined=True), by default 3
-            - zerodot: Zero-dot radius ratio to thickness (when nozerodots=False), by default 0.4
+            - zerodot: Zero-dot radius ratio to thickness (when zerodots=True), by default 0.4
             - slant: Slope for unbalanced scores in degrees, by default 14
             - spacing: Spacing between matches in cartesian coordinates, by default 0.9
             - padding: Padding before and after the matches in cartesian coordinates, by default 0.9
@@ -131,7 +131,7 @@ def plot_scores(
             facecolor, edgecolor = _colors(away_game, outlined, config)
 
             if scores[0] is None or np.isnan(scores[0]):
-                if not nozerodots:
+                if zerodots:
                     patches.append(
                         Circle(
                             (match_index, 1 - config["zerodot"]),
@@ -176,7 +176,7 @@ def plot_scores(
                     )
                 )
 
-            if not nozerodots:
+            if zerodots:
                 if not scores[0]:
                     patches.append(
                         Circle(

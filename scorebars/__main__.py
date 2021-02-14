@@ -22,7 +22,7 @@ MATCH_REGEX = re.compile(r"\((\d+)?[,-](\d+)?\)(\*)?")
 @click.option(
     "--matches",
     prompt="Matches",
-    help="Matches in the form ([s_1],[s_2])[* {if away game}].",
+    help="Matches in the form ([s_1],[s_2])[* {if away game}]",
 )
 @click.option(
     "-t",
@@ -34,10 +34,10 @@ MATCH_REGEX = re.compile(r"\((\d+)?[,-](\d+)?\)(\*)?")
 )
 @click.option(
     "-n",
-    "--nozerodots",
-    prompt="No zero dots",
+    "--zerodots",
+    prompt="Zero dots",
     default=False,
-    help="Do not add dots in place of zero goals.",
+    help="Add dots in place of no goals",
     is_flag=True,
 )
 @click.option(
@@ -45,21 +45,21 @@ MATCH_REGEX = re.compile(r"\((\d+)?[,-](\d+)?\)(\*)?")
     "--outlined",
     prompt="Outlined",
     default=False,
-    help="Plot the outlines.",
+    help="Plot the outlines",
     is_flag=True,
 )
 @click.option(
     "-o",
     "--output-path",
     default="output.png",
-    help="Output path of the image, 'output.png' by default.",
+    help="Output path of the image, 'output.png' by default",
     type=click.Path(),
 )
 @click.argument("plot_kwargs", nargs=-1)
 def cli(
     matches: str,
     twogoalline: bool,
-    nozerodots: bool,
+    zerodots: bool,
     outlined: bool,
     output_path: str,
     plot_kwargs: str,
@@ -85,7 +85,7 @@ def cli(
         matches,
         show=False,
         twogoalline=twogoalline,
-        nozerodots=nozerodots,
+        zerodots=zerodots,
         outlined=outlined,
         output_path=output_path,
         **plot_kwargs,

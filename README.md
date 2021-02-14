@@ -30,7 +30,7 @@ It is possible to use the same flags from the Latex package by just passing them
 plot_scores(
     [(1, 2, True), (3, 3, False)], 
     twogoalline = True,
-    nozerodots = True,
+    zerodots = True,
     outlined = True,
 )
 ```
@@ -59,7 +59,7 @@ With the possible flags and paths:
 ```R
 plot_scores(
     list(list(1,2,TRUE), list(3,3,FALSE)), 
-    twogoalline = TRUE, nozerodots = TRUE,
+    twogoalline = TRUE, zerodots = TRUE,
     outlined = TRUE, output_path = "out.png"
 )
 ```

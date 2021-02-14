@@ -7,7 +7,7 @@
 plot_scores(
   scores,
   twogoalline = FALSE,
-  nozerodots = FALSE,
+  zerodots = FALSE,
   outlined = FALSE,
   show = TRUE,
   output_path = NULL,
@@ -22,7 +22,7 @@ row) of (home team score: int, away team score: int, is away game: logical)}
 \item{twogoalline}{A logical, draws lines for two-goal levels,
 by default FALSE.}
 
-\item{nozerodots}{A logical, removes the dots placed for zero scores,
+\item{zerodots}{A logical, marks no goals scored with a small dot,
 by default FALSE.}
 
 \item{outlined}{A logical, only plots the outlines of the sparklines,
@@ -43,7 +43,7 @@ but mostly a superset of it.
 \item thickness: Line thickness in cartesian coordinates, by default 0.18
 \item edge_thickness: Edge thickness for outlined away games
 (when outlined = True), by default 3
-\item zerodot: Zero-dot radius ratio to thickness (when nozerodots = False),
+\item zerodot: Zero-dot radius ratio to thickness (when zerodots = True),
 by default 0.4
 \item slant: Slope for unbalanced scores in degrees, by default 14
 \item spacing: Spacing between matches in cartesian coordinates, by default 0.9
