@@ -131,26 +131,24 @@ plot_scores <- function(scores,
             edgecolor <- line_colors[[2]]
 
             if (is.na(scores[[1]])) {
-                if (zerodots) {
-                    patches <- append(
-                        patches,
-                        circle_polygon(
-                            match_index, 1 - config[["zerodot"]],
-                            radius = config[["zerodot"]],
-                            facecolor = edgecolor,
-                            edgecolor = edgecolor
-                        )
+                patches <- append(
+                    patches,
+                    circle_polygon(
+                        match_index, 1 - config[["zerodot"]],
+                        radius = config[["zerodot"]],
+                        facecolor = edgecolor,
+                        edgecolor = edgecolor
                     )
-                    patches <- append(
-                        patches,
-                        circle_polygon(
-                            match_index, -1 + config[["zerodot"]],
-                            radius = config[["zerodot"]],
-                            facecolor = edgecolor,
-                            edgecolor = edgecolor
-                        )
+                )
+                patches <- append(
+                    patches,
+                    circle_polygon(
+                        match_index, -1 + config[["zerodot"]],
+                        radius = config[["zerodot"]],
+                        facecolor = edgecolor,
+                        edgecolor = edgecolor
                     )
-                }
+                )
                 next
             }
 

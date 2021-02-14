@@ -132,23 +132,22 @@ def plot_scores(
             facecolor, edgecolor = _colors(away_game, outlined, config)
 
             if scores[0] is None or np.isnan(scores[0]):
-                if zerodots:
-                    patches.append(
-                        Circle(
-                            (match_index, 1 - config["zerodot"]),
-                            radius=config["zerodot"],
-                            facecolor=edgecolor,
-                            edgecolor=edgecolor,
-                        )
+                patches.append(
+                    Circle(
+                        (match_index, 1 - config["zerodot"]),
+                        radius=config["zerodot"],
+                        facecolor=edgecolor,
+                        edgecolor=edgecolor,
                     )
-                    patches.append(
-                        Circle(
-                            (match_index, -1 + config["zerodot"]),
-                            radius=config["zerodot"],
-                            facecolor=edgecolor,
-                            edgecolor=edgecolor,
-                        )
+                )
+                patches.append(
+                    Circle(
+                        (match_index, -1 + config["zerodot"]),
+                        radius=config["zerodot"],
+                        facecolor=edgecolor,
+                        edgecolor=edgecolor,
                     )
+                )
                 continue
 
             if scores[0] or scores[1]:
