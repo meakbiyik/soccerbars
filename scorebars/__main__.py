@@ -4,7 +4,7 @@ from ast import literal_eval
 import click
 from click_help_colors import HelpColorsCommand
 
-from scorebars import plot_scores
+from scorebars import scorebar
 
 DESCRIPTION = """Multivariate sparklines making use of Gestalt theory (gestaltlines) for sequences of sports results.
 
@@ -81,7 +81,7 @@ def cli(
         except ValueError:
             pass
 
-    plot_scores(
+    scorebar(
         matches,
         show=False,
         twogoalline=twogoalline,

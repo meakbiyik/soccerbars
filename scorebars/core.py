@@ -38,7 +38,7 @@ DEFAULT_CONFIG = {
 }
 
 
-def plot_scores(
+def scorebar(
     scores: Union[Matches, Iterable[Matches]],
     twogoalline: bool = False,
     zerodots: bool = False,
@@ -98,10 +98,10 @@ def plot_scores(
 
     Examples
     --------
-    >>> plot_scores([
+    >>> scorebar([
             (1,2,True), (3,3,False), (0,2,True), (0,0,False), (6,6,True)
         ])
-    >>> plot_scores([
+    >>> scorebar([
             (1,2,True), (3,3,False), (0,2,True), (0,0,False), (6,6,True),
             (0,2,False), (0,0,False), (6,6,True), (6,3,True)
         ], outlined=True, output_path = "out.png")

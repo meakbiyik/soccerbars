@@ -14,7 +14,7 @@ from scorebars.core import (
     _check_scores,
     _config_factory,
     DEFAULT_CONFIG,
-    plot_scores,
+    scorebar,
 )
 
 # TODO: Check out pytest-mpl for image comparison tests.
@@ -320,8 +320,8 @@ def test__colors():
     "input,params", itertools.product(test_inputs, test_parameters)
 )
 @patch("matplotlib.pyplot.show")
-def test_plot_scores(_, input, params, capsys):
-    plot_scores(input, **params)
+def test_scorebar(_, input, params, capsys):
+    scorebar(input, **params)
     outputs = capsys.readouterr()
     assert not outputs.out
     assert not outputs.err

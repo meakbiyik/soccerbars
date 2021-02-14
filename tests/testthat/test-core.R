@@ -308,11 +308,11 @@ test_that("colors are consistent with the match and config", {
     }
 )
 
-test_that("plot_scores run without any errors, warnings or prints", {
+test_that("scorebar run without any errors, warnings or prints", {
         for (example in test_inputs) {
             for (parameters in test_parameters) {
                 expect_silent(
-                    do.call(plot_scores, append(list(example), parameters))
+                    do.call(scorebar, append(list(example), parameters))
                 )
             }
         }

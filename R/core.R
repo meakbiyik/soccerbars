@@ -79,23 +79,23 @@ default_config <- list(
 #' @return ggplot objects of the plots created.
 #' @examples
 #' \dontrun{
-#' plot_scores(list(
+#' scorebar(list(
 #'     list(1, 2, TRUE), list(3, 3, FALSE), list(0, 2, TRUE),
 #'     list(0, 0, FALSE), list(6, 6, TRUE)
 #' ))
-#' plot_scores(list(
+#' scorebar(list(
 #'     list(1, 2, TRUE), list(3, 3, FALSE), list(0, 2, TRUE), list(0, 0, FALSE),
 #'     list(6, 6, TRUE), list(0, 2, FALSE), list(0, 0, FALSE), list(6, 6, TRUE),
 #'     list(6, 3, TRUE)
 #' ), outlined = TRUE, output_path = "out.png")
-#' plot_scores(list(
+#' scorebar(list(
 #'     list(8, 0, FALSE), list(4, 1, TRUE), list(4, 4, FALSE), list(1, 4, TRUE),
 #'     list(5, 0, FALSE), list(0, 0, TRUE), list(1, 1, FALSE), list(2, 3, TRUE),
 #'     list(NA, NA, FALSE), list(NA, NA, TRUE), list(NA, NA, FALSE)
 #' ), home_color = "red")
 #' }
 #' @export
-plot_scores <- function(scores,
+scorebar <- function(scores,
                         twogoalline = FALSE,
                         zerodots = FALSE,
                         outlined = FALSE,

@@ -16,18 +16,18 @@ This repository contains a Python package, an R package, and a cmd tool based on
 
 ### In Python
 
-Give the matches to the ```plot_scores``` function as an iterable, or a list of iterables of tuples in the form ```(score_1: int, score_2: int, away_game: bool)```. pandas DataFrames (or a list of DataFrames for multiple teams) are also supported with the same form and datatypes.
+Give the matches to the ```scorebar``` function as an iterable, or a list of iterables of tuples in the form ```(score_1: int, score_2: int, away_game: bool)```. pandas DataFrames (or a list of DataFrames for multiple teams) are also supported with the same form and datatypes.
 
 ```python
-from scorebars import plot_scores
+from scorebars import scorebar
 
-plot_scores([(1, 2, True), (3, 3, False)])
+scorebar([(1, 2, True), (3, 3, False)])
 ```
 
 It is possible to use the same flags from the Latex package by just passing them as booleans set to True.
 
 ```python
-plot_scores(
+scorebar(
     [(1, 2, True), (3, 3, False)], 
     twogoalline = True,
     zerodots = True,
@@ -38,7 +38,7 @@ plot_scores(
 You can either show the resulting plot by default, or save it by specifying an output path.
 
 ```python
-plot_scores(
+scorebar(
     [(1, 2, True), (3, 3, False)], 
     output_path = "out.png"
 )
@@ -46,18 +46,18 @@ plot_scores(
 
 ### in R
 
-Similarly with its Python counterpart, ```plot_scores``` takes a list, a list of lists, a data.frame or a list of data.frames of match scores, with each match score having the form of a list (or a data.frame row) of (home_team_score: int, away_team_score: int, is_away_game: logical). The latex syntax and flags also apply.
+Similarly with its Python counterpart, ```scorebar``` takes a list, a list of lists, a data.frame or a list of data.frames of match scores, with each match score having the form of a list (or a data.frame row) of (home_team_score: int, away_team_score: int, is_away_game: logical). The latex syntax and flags also apply.
 
 ```R
 library(scorebars)
 
-plot_scores(list(list(1,2,TRUE), list(3,3,FALSE)))
+scorebar(list(list(1,2,TRUE), list(3,3,FALSE)))
 ```
 
 With the possible flags and paths:
 
 ```R
-plot_scores(
+scorebar(
     list(list(1,2,TRUE), list(3,3,FALSE)), 
     twogoalline = TRUE, zerodots = TRUE,
     outlined = TRUE, output_path = "out.png"

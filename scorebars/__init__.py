@@ -1,1 +1,1 @@
-from scorebars.core import plot_scores
+from scorebars.core import scorebar
