@@ -7,14 +7,14 @@ goal_to_height <- function(x) {
 }
 
 default_config <- list(
-    figure_height = 3.2,
+    figure_height = 4,
     figure_width_per_match = 0.5,
     dpi = 300,
     thickness = 0.36,
-    edge_thickness = 2,
+    edge_thickness = 10,
     zerodot = 0.4 * 0.36,
     slant = sin(14 * pi / 180),
-    spacing = 0.9,
+    spacing = 0.8,
     padding = 0.25,
     baseline_factor = 0.2,
     brighten = 33,
@@ -148,7 +148,7 @@ scorebar <- function(scores,
             away_game <- as.logical(match[[3]])
             scores <- match[-3]
             scores <- if (away_game) rev(scores) else scores
-            match_index <- (index - 0.5) * config[["spacing"]]
+            match_index <- index * config[["spacing"]]
 
             line_colors <- get_colors(away_game, outlined, config, matchcolor)
             facecolor <- line_colors[[1]]
@@ -568,8 +568,8 @@ plot <- function(patches,
                  twogoalline = FALSE,
                  output_path = NULL) {
     padding <- config[["padding"]]
-    plot_width <- match_count * config[["spacing"]]
-    linewidth_factor <- 72 / (plot_width + 2 * padding)
+    plot_width <- (match_count + 1) * config[["spacing"]] + padding
+    linewidth_factor <- config[["figure_height"]] * 72 / 7.5 / 2
     baseline_width <- config[["thickness"]] *
         config[["baseline_factor"]] * linewidth_factor
     baseline_color <- config[["baseline_color"]]
@@ -582,8 +582,8 @@ plot <- function(patches,
 
     ax <- ggplot(dpi = config[["dpi"]]) +
         coord_cartesian(
-            xlim = c(-padding, plot_width + padding),
-            ylim = c(-3.2, 3.2), expand = FALSE, default = TRUE
+            xlim = c(0, plot_width),
+            ylim = c(-3.75, 3.75), expand = FALSE, default = TRUE
         ) +
         coord_fixed() +
         labs(x = NULL, y = NULL) +

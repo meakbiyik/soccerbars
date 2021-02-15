@@ -26,7 +26,7 @@ DEFAULT_CONFIG = {
     "edge_thickness": 10,
     "zerodot": 0.4 * 0.36,
     "slant": math.sin(math.radians(14)),
-    "spacing": 0.9,
+    "spacing": 0.8,
     "padding": 0.25,
     "baseline_factor": 0.2,
     "brighten": 33,
@@ -149,7 +149,7 @@ def scorebar(
 
             away_game, scores = match[2], match[:2]
             scores = scores[::-1] if away_game else scores
-            match_index = (index + 0.5) * config["spacing"]
+            match_index = (index + 1) * config["spacing"]
             matchcolor = colors[index] if color is not None else None
             facecolor, edgecolor = _colors(away_game, outlined, config, matchcolor)
 
@@ -469,7 +469,7 @@ def _plot(
 ) -> Axes:
 
     padding = config["padding"]
-    plot_width = match_count * config["spacing"]
+    plot_width = (match_count + 1) * config["spacing"] + padding
 
     fig = plt.figure(
         figsize=(
@@ -485,8 +485,8 @@ def _plot(
     ax.get_yaxis().set_visible(False)
     ax.set_aspect("equal")
     ax.autoscale(tight=True)
-    ax.set_xlim(-padding, plot_width + padding)
-    ax.set_ylim(-3.2, 3.2)
+    ax.set_xlim(0, plot_width)
+    ax.set_ylim(-3.75, 3.75)
 
     linewidth_factor = (
         fig.bbox_inches.height
