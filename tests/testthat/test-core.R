@@ -120,7 +120,7 @@ bad_scores <- list(
         be of type 'list', not 'double'.")),
     list(list(), strwrap("Assertion on 'scores' failed:
         Must have length >= 1, but has length 0.")),
-    list(list(list(1, "A", FALSE)), strwrap("Assertion on 'Scores
+    list(list(list(1, "A", FALSE)), strwrap("Assertion on 'Score
     of the away team' failed: Must be of type 'single integerish
     value', not 'character'.", width = 1200)),
     list(list(list(list(1, 2, 3), list(1, 2, 3))), strwrap("Assertion

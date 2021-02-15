@@ -32,8 +32,16 @@ default_config <- list(
 #' This function can either show the plot, or save it to a given path.
 #'
 #' @param scores A list, a list of lists, a data.frame or a list of data.frames
-#' of match scores. Each match score has the form of a list (or a data.frame
-#' row) of (home team score: int, away team score: int, is away game: logical)
+#' of match scores. A match score list has the elements (matches) in either
+#' of two alternative forms: three vectors of format
+#'      <home team score: int, away team score: int, is away game: logical>
+#' or lists of three length-one elements with these datatypes. If the matches
+#' are given as data.frames, then each column is expected to have the same
+#' structure and data types as these alternatives. Some valid examples:
+#'      list(c(1,2,3), c(4,5,6), c(T,F,T))
+#'      list(list(1,4,T), list(2,5,F), list(3,6,T))
+#'      data.frame(list(home=c(1,2,3), away=c(4,5,6), flag=c(T,F,T)))
+#'      list(list(c(1,2), c(3,4), c(T,F)), list(c(5,6), c(7,8), c(T,F)))
 #' @param twogoalline A logical, draws lines for two-goal levels,
 #' by default FALSE.
 #' @param zerodots A logical, marks no goals scored with a small dot,
@@ -96,13 +104,15 @@ default_config <- list(
 #' }
 #' @export
 scorebar <- function(scores,
-                        twogoalline = FALSE,
-                        zerodots = FALSE,
-                        outlined = FALSE,
-                        show = TRUE,
-                        output_path = NULL,
-                        ...) {
+                     twogoalline = FALSE,
+                     zerodots = FALSE,
+                     outlined = FALSE,
+                     show = TRUE,
+                     output_path = NULL,
+                     ...) {
     scores <- maybe_convert_dataframe(scores)
+
+    scores <- maybe_flatten_vectors(scores)
 
     check_scores(scores)
 
@@ -235,31 +245,102 @@ maybe_convert_dataframe <- function(scores) {
     return(scores)
 }
 
-check_scores <- function(scores) {
-    checkmate::assert_list(scores, min.len = 1, types = c("list", "numeric"))
+maybe_flatten_vectors <- function(scores) {
 
-    if (is.list(scores[[1]][[1]]) || length(scores[[1]][[1]]) > 1) {
-        first_match <- scores[[1]][[1]]
-    } else {
-        first_match <- scores[[1]]
+    if (is.list(scores)) {
+
+        if (
+            length(scores) == 3 &&
+            is.atomic(scores[[1]]) &&
+            is.atomic(scores[[2]]) &&
+            is.atomic(scores[[3]]) &&
+            length(scores[[1]]) == length(scores[[2]]) &&
+            length(scores[[2]]) == length(scores[[3]])
+        ) {
+            scores <- maybe_convert_dataframe(data.frame(scores))
+        }
+
+        for (index in seq_along(scores)) {
+            scores_elem <- scores[[index]]
+            if (
+                is.list(scores_elem) &&
+                length(scores_elem) == 3 &&
+                is.atomic(scores_elem[[1]]) && length(scores_elem[[1]]) > 1 &&
+                is.atomic(scores_elem[[2]]) && length(scores_elem[[2]]) > 1 &&
+                is.atomic(scores_elem[[3]]) && length(scores_elem[[3]]) > 1 &&
+                length(scores_elem[[1]]) == length(scores_elem[[2]]) &&
+                length(scores_elem[[2]]) == length(scores_elem[[3]])
+            ) {
+                scores[[index]] <- maybe_convert_dataframe(
+                    data.frame(scores_elem)
+                )
+            }
+        }
     }
-    checkmate::assert_vector(
-        first_match,
-        len = 3,
-        .var.name = "Match vector"
+    return(scores)
+}
+
+check_scores <- function(scores) {
+
+    checkmate::assert_list(
+        scores, types = c("list"), min.len = 1
     )
-    checkmate::assert_int(first_match[[1]],
-        null.ok = FALSE,
-        .var.name = "Scores of the home team"
+
+    is_listofmatchlists <- checkmate::test_list(
+        scores[[1]], types = c("list")
     )
-    checkmate::assert_int(first_match[[2]],
-        null.ok = FALSE,
-        .var.name = "Scores of the away team"
-    )
-    checkmate::assert_logical(first_match[[3]],
-        len = 1, null.ok = FALSE,
-        any.missing = FALSE, .var.name = "Away flag"
-    )
+
+    if (!is_listofmatchlists) {
+        scores <- list(scores)
+    }
+
+    for (index in seq_along(scores)) {
+        scores_elem <- scores[[index]]
+
+        is_vectorlist <- checkmate::test_list(
+            scores_elem, len = 3, types = c("atomic")
+        )
+
+        if (is_vectorlist) {
+            first_length <- length(scores_elem[[1]])
+            checkmate::assert_integerish(
+                scores_elem[[1]], .var.name = "Scores of the home team"
+            )
+            checkmate::assert_integerish(
+                scores_elem[[2]],
+                len = first_length,
+                .var.name = "Scores of the away team"
+            )
+            checkmate::assert_logical(
+                scores_elem[[3]], len = first_length, .var.name = "Away flags"
+            )
+        } else {
+            checkmate::assert_list(
+                scores_elem, min.len = 1, types = c("list", "numeric"),
+                .var.name = "scores"
+            )
+            first_match <- scores_elem[[1]]
+            checkmate::assert_vector(
+                first_match,
+                len = 3,
+                .var.name = "Match vector"
+            )
+            checkmate::assert_int(first_match[[1]],
+                na.ok = TRUE,
+                null.ok = FALSE,
+                .var.name = "Score of the home team"
+            )
+            checkmate::assert_int(first_match[[2]],
+                na.ok = TRUE,
+                null.ok = FALSE,
+                .var.name = "Score of the away team"
+            )
+            checkmate::assert_logical(first_match[[3]],
+                len = 1, null.ok = FALSE,
+                any.missing = FALSE, .var.name = "Away flag"
+            )
+        }
+    }
 }
 
 config_factory <- function(outlined, ...) {
