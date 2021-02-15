@@ -13,8 +13,10 @@ MatchScore = Tuple[int, int, bool]
 Matches = Iterable[MatchScore]
 ScoreLists = Tuple[Tuple[int], Tuple[int], Tuple[bool]]
 
+PPI = 72
+MAX_HEIGHT = 3.75
 GOAL_TO_HEIGHT: Dict[int, float] = defaultdict(
-    lambda: 3.75,
+    lambda: MAX_HEIGHT,
     {0: 0, 1: 1, 2: 1.7, 3: 2.25, 4: 2.65, 5: 2.95, 6: 3.20, 7: 3.40, 8: 3.60},
 )
 
@@ -23,7 +25,8 @@ DEFAULT_CONFIG = {
     "figure_width_per_match": 0.5,
     "dpi": 300,
     "thickness": 0.36,
-    "edge_thickness": 10,
+    "edge_thickness": 0.35 * 2 * 0.36,
+    "goalless_edge_thickness": 0.5 * 2 * 0.36,
     "zerodot": 0.4 * 0.36,
     "slant": math.sin(math.radians(14)),
     "spacing": 0.8,
@@ -36,6 +39,7 @@ DEFAULT_CONFIG = {
     "baseline_color": (0, 0, 0, 1),
     "fill_color": (0, 0, 0, 0),
     "clip_slanted_lines": True,
+    "_linewidth_factor": 4 * PPI / (2 * MAX_HEIGHT),
 }
 
 
@@ -90,7 +94,10 @@ def scorebar(
             - figure_width_per_match: Figure width per match in inches, by default 0.5
             - dpi: Dots per inch resolution, by default 300
             - thickness: Line thickness in cartesian coordinates, by default 0.18
-            - edge_thickness: Edge thickness for outlined patches (when outlined=True), by default 3
+            - edge_thickness: Edge thickness for outlined patches (when outlined=True) as the ratio to the
+            line thickness, by default 0.35
+            - goalless_edge_thickness: Edge thickness for outlined no-goal patches (when outlined=True) as
+            the ratio to the line thickness, by default 0.5
             - zerodot: Zero-dot radius ratio to thickness (when zerodots=True), by default 0.4
             - slant: Slope for unbalanced scores in degrees, by default 14
             - spacing: Spacing between matches in cartesian coordinates, by default 0.9
@@ -142,6 +149,7 @@ def scorebar(
     for matches_index, matches in enumerate(matchlists):
 
         patches = []
+        baseline_jumps = []
         colors = matchcolors[matches_index] if color is not None else None
         match_count = len(matches)
 
@@ -194,8 +202,24 @@ def scorebar(
                         radius=config["thickness"],
                         facecolor=facecolor,
                         edgecolor=edgecolor,
-                        linewidth=config["edge_thickness"],
+                        linewidth=config["goalless_edge_thickness"]
+                        * config["_linewidth_factor"],
                     )
+                )
+
+            if scores[0] and scores[1]:
+                baseline_jumps.extend(
+                    [
+                        match_index - config["thickness"] / 2,
+                        match_index + config["thickness"] / 2,
+                    ]
+                )
+            elif not (scores[0] or scores[1]):
+                baseline_jumps.extend(
+                    [
+                        match_index - config["thickness"],
+                        match_index + config["thickness"],
+                    ]
                 )
 
             if zerodots:
@@ -221,6 +245,7 @@ def scorebar(
         axes.append(
             _plot(
                 patches,
+                baseline_jumps,
                 match_count,
                 config,
                 show=show,
@@ -379,6 +404,7 @@ def _config_factory(outlined, **kwargs):
 
     if not outlined:
         config["edge_thickness"] = 0
+        config["goalless_edge_thickness"] = 0
 
     for key, value in kwargs.items():
 
@@ -395,11 +421,17 @@ def _config_factory(outlined, **kwargs):
             config[key] = value * kwargs.get("thickness", config["thickness"])
             continue
 
+        if "edge_thickness" in key and not outlined:
+            config[key] = value * kwargs.get("thickness", config["thickness"])
+            continue
+
         if "color" in key:
             config[key] = to_rgba(value)
             continue
 
         config[key] = value
+
+    config["_linewidth_factor"] = config["figure_height"] * PPI / (2 * MAX_HEIGHT)
 
     return config
 
@@ -429,7 +461,7 @@ def _line(start_xy, end_xy, facecolor, edgecolor, config):
 
     clipped = start_xy[0] != end_xy[0]
     thickness = config["thickness"]
-    edge_thickness = config["edge_thickness"]
+    edge_thickness = config["edge_thickness"] * config["_linewidth_factor"]
     half_th = thickness / 2
 
     if clipped and config["clip_slanted_lines"]:
@@ -461,6 +493,7 @@ def _line(start_xy, end_xy, facecolor, edgecolor, config):
 
 def _plot(
     patches: List[Patch],
+    baseline_jumps: List[float],
     match_count,
     config,
     show=True,
@@ -486,7 +519,7 @@ def _plot(
     ax.set_aspect("equal")
     ax.autoscale(tight=True)
     ax.set_xlim(0, plot_width)
-    ax.set_ylim(-3.75, 3.75)
+    ax.set_ylim(-MAX_HEIGHT, MAX_HEIGHT)
 
     linewidth_factor = (
         fig.bbox_inches.height
@@ -497,7 +530,10 @@ def _plot(
     baseline_width = config["thickness"] * config["baseline_factor"] * linewidth_factor
     baseline_color = config["baseline_color"]
 
-    ax.plot([0, plot_width], [0, 0], lw=baseline_width, color=baseline_color, zorder=-1)
+    baseline_endpoints = [0] + baseline_jumps + [plot_width]
+    baseline_segments = zip(baseline_endpoints[::2], baseline_endpoints[1::2])
+    for x1, x2 in baseline_segments:
+        ax.plot([x1, x2], [0, 0], lw=baseline_width, color=baseline_color, zorder=-1)
 
     if twogoalline:
         two_goals = GOAL_TO_HEIGHT[2]

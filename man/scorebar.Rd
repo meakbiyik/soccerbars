@@ -56,8 +56,10 @@ but mostly a superset of it.
 \item figure_width_per_match: Figure width per match in inches, by default 0.5
 \item dpi: Dots per inch resolution, by default 300
 \item thickness: Line thickness in cartesian coordinates, by default 0.18
-\item edge_thickness: Edge thickness for outlined away games
-(when outlined = True), by default 3
+\item edge_thickness: Edge thickness for outlined patches (when outlined=True)
+as the ratio to the line thickness, by default 0.35
+\item goalless_edge_thickness: Edge thickness for outlined no-goal patches
+(when outlined=True) as the ratio to the line thickness, by default 0.5
 \item zerodot: Zero-dot radius ratio to thickness (when zerodots = True),
 by default 0.4
 \item slant: Slope for unbalanced scores in degrees, by default 14

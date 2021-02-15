@@ -1,6 +1,8 @@
 #' @import ggplot2
 #' @importFrom grDevices col2rgb rgb
 
+ppi <- 72
+max_height <- 3.75
 height_mapping <- c(0, 1, 1.7, 2.25, 2.65, 2.95, 3.20, 3.40, 3.60)
 goal_to_height <- function(x) {
     if (x %in% c(0, 1, 2, 3, 4, 5, 6, 7, 8)) height_mapping[[x + 1]] else 3.75
@@ -11,7 +13,8 @@ default_config <- list(
     figure_width_per_match = 0.5,
     dpi = 300,
     thickness = 0.36,
-    edge_thickness = 10,
+    edge_thickness = 0.35 * 0.36,
+    goalless_edge_thickness = 0.5 * 0.36,
     zerodot = 0.4 * 0.36,
     slant = sin(14 * pi / 180),
     spacing = 0.8,
@@ -23,7 +26,8 @@ default_config <- list(
     away_color = col2rgb("black", alpha = TRUE),
     baseline_color = col2rgb("black", alpha = TRUE),
     fill_color = col2rgb(NA, alpha = TRUE),
-    clip_slanted_lines = TRUE
+    clip_slanted_lines = TRUE,
+    linewidth_factor = 4 * ppi / (2 * max_height)
 )
 
 #' Plot Multivariate Sparklines
@@ -63,8 +67,10 @@ default_config <- list(
 #'  - figure_width_per_match: Figure width per match in inches, by default 0.5
 #'  - dpi: Dots per inch resolution, by default 300
 #'  - thickness: Line thickness in cartesian coordinates, by default 0.18
-#'  - edge_thickness: Edge thickness for outlined away games
-#'      (when outlined = True), by default 3
+#'  - edge_thickness: Edge thickness for outlined patches (when outlined=True)
+#'      as the ratio to the line thickness, by default 0.35
+#'  - goalless_edge_thickness: Edge thickness for outlined no-goal patches
+#'      (when outlined=True) as the ratio to the line thickness, by default 0.5
 #'  - zerodot: Zero-dot radius ratio to thickness (when zerodots = True),
 #'      by default 0.4
 #'  - slant: Slope for unbalanced scores in degrees, by default 14
@@ -138,6 +144,7 @@ scorebar <- function(scores,
     axes <- list()
     for (matches_index in seq_along(matchlists)) {
         patches <- list()
+        baseline_jumps <- c()
         matches <- matchlists[[matches_index]]
         colors <- if (!is.null(color)) matchcolors[[matches_index]] else NULL
         match_count <- length(matches)
@@ -198,8 +205,29 @@ scorebar <- function(scores,
                     radius = config[["thickness"]],
                     facecolor = facecolor,
                     edgecolor = edgecolor,
-                    linewidth = config[["edge_thickness"]]
+                    linewidth = (
+                        config[["goalless_edge_thickness"]] *
+                        config[["linewidth_factor"]]
+                    )
                 ))
+            }
+
+            if (scores[[1]] > 0 && scores[[2]] > 0) {
+                baseline_jumps <- c(
+                    baseline_jumps,
+                    c(
+                        match_index - config[["thickness"]] / 2,
+                        match_index + config[["thickness"]] / 2
+                    )
+                )
+            } else if (scores[[1]] == 0 && scores[[2]] == 0) {
+                baseline_jumps <- c(
+                    baseline_jumps,
+                    c(
+                        match_index - config[["thickness"]],
+                        match_index + config[["thickness"]]
+                    )
+                )
             }
 
             if (zerodots) {
@@ -226,6 +254,7 @@ scorebar <- function(scores,
             axes,
             plot(
                 patches,
+                baseline_jumps,
                 match_count,
                 config,
                 show = show,
@@ -385,6 +414,7 @@ config_factory <- function(outlined, ...) {
 
     if (!outlined) {
         config[["edge_thickness"]] <- 0
+        config[["goalless_edge_thickness"]] <- 0
     }
 
     for (key in names(kwargs)) {
@@ -419,12 +449,37 @@ config_factory <- function(outlined, ...) {
             next
         }
 
+        if (grepl("edge_thickness", key, fixed = TRUE) && !outlined){
+            if (!is.null(kwargs[["thickness"]])) {
+                config[[key]] <- value * kwargs[["thickness"]]
+            } else {
+                config[[key]] <- value * config[["thickness"]]
+            }
+            next
+        }
+
         if (grepl("color", key, fixed = TRUE)) {
             config[[key]] <- col2rgb(value, alpha = TRUE)
             next
         }
 
         config[[key]] <- value
+    }
+
+    config[["linewidth_factor"]] <- (
+        config[["figure_height"]] * ppi / (2 * max_height)
+    )
+
+    if (outlined) {
+        config[["thickness"]] <- (
+            config[["thickness"]] - config[["edge_thickness"]]
+        )
+        config[["edge_thickness"]] <- (
+            config[["edge_thickness"]] / 2
+        )
+        config[["goalless_edge_thickness"]] <- (
+            config[["goalless_edge_thickness"]] / 2
+        )
     }
 
     return(config)
@@ -473,7 +528,7 @@ get_colors <- function(away_game, outlined, config, matchcolor=NULL) {
 line_polygon <- function(start_xy, end_xy, facecolor, edgecolor, config) {
     clipped <- start_xy[[1]] != end_xy[[1]]
     thickness <- config[["thickness"]]
-    edge_th <- if (facecolor != edgecolor) config[["edge_thickness"]] else 0
+    edge_th <- config[["edge_thickness"]] * config[["linewidth_factor"]]
     half_th <- thickness / 2
 
     if (clipped && config[["clip_slanted_lines"]]) {
@@ -562,6 +617,7 @@ circle <- function(x, y, radius = 1, start_rad = 0, end_rad = 2 * pi) {
 }
 
 plot <- function(patches,
+                 baseline_jumps,
                  match_count,
                  config,
                  show,
@@ -569,9 +625,8 @@ plot <- function(patches,
                  output_path = NULL) {
     padding <- config[["padding"]]
     plot_width <- (match_count + 1) * config[["spacing"]] + padding
-    linewidth_factor <- config[["figure_height"]] * 72 / 7.5 / 2
     baseline_width <- config[["thickness"]] *
-        config[["baseline_factor"]] * linewidth_factor
+        config[["baseline_factor"]] * config[["linewidth_factor"]]
     baseline_color <- config[["baseline_color"]]
 
     background <- if (config[["transparent_background"]]) {
@@ -583,17 +638,23 @@ plot <- function(patches,
     ax <- ggplot(dpi = config[["dpi"]]) +
         coord_cartesian(
             xlim = c(0, plot_width),
-            ylim = c(-3.75, 3.75), expand = FALSE, default = TRUE
+            ylim = c(-max_height, max_height), expand = FALSE, default = TRUE
         ) +
         coord_fixed() +
-        labs(x = NULL, y = NULL) +
-        geom_path(
-            aes(x = c(0, plot_width), y = c(0, 0)),
-            colour = do.call(
-                rgb, append(baseline_color, list(maxColorValue = 255))
-            ),
-            size = baseline_width,
-        )
+        labs(x = NULL, y = NULL)
+
+    baseline_endpoints <- c(0, baseline_jumps, plot_width)
+    baseline_seg_count <- length(baseline_endpoints)
+    ax <- ax + geom_path(
+        aes(x = baseline_endpoints,
+            y = rep(0, each = baseline_seg_count),
+            group = rep(1:(baseline_seg_count / 2), each = 2)
+        ),
+        colour = do.call(
+            rgb, append(baseline_color, list(maxColorValue = 255))
+        ),
+        size = baseline_width,
+    )
 
     if (twogoalline) {
         two_goals <- goal_to_height(2)
@@ -601,10 +662,14 @@ plot <- function(patches,
 
         ax <- ax + geom_path(
             aes(x = c(0, plot_width), y = c(two_goals, two_goals)),
-            colour = baseline_color, size = twogoalline_width
+            colour = do.call(
+                rgb, append(baseline_color, list(maxColorValue = 255))
+            ), size = twogoalline_width
         ) + geom_path(
             aes(x = c(0, plot_width), y = c(-two_goals, -two_goals)),
-            colour = baseline_color, size = twogoalline_width
+            colour = do.call(
+                rgb, append(baseline_color, list(maxColorValue = 255))
+            ), size = twogoalline_width
         )
     }
 

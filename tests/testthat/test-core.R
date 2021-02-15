@@ -229,6 +229,18 @@ test_parameters <- list(
         zerodots = TRUE, show = TRUE, output_path = dummy_file_name)
 )
 
+outlined_true_default_config <- default_config
+outlined_true_default_config[["thickness"]] <- (
+    outlined_true_default_config[["thickness"]] -
+    outlined_true_default_config[["edge_thickness"]]
+)
+outlined_true_default_config[["edge_thickness"]] <- (
+    outlined_true_default_config[["edge_thickness"]] / 2
+)
+outlined_true_default_config[["goalless_edge_thickness"]] <- (
+    outlined_true_default_config[["goalless_edge_thickness"]] / 2
+)
+
 test_that("scores are lazily converted from data.frame", {
         for (example in test_dataframes) {
             expect_equal(maybe_convert_dataframe(example[[1]]), example[[2]])
@@ -244,7 +256,7 @@ test_that("bad inputs are correctly identified", {
 )
 
 test_that("config factory produces correct configuration lists", {
-        expect_equal(config_factory(TRUE), default_config)
+        expect_equal(config_factory(TRUE), outlined_true_default_config)
         expect_equal(config_factory(FALSE)[["edge_thickness"]], 0)
         expect_equal(config_factory(TRUE, slant = 20)[["slant"]],
             sin(20 * pi / 180))
