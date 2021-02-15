@@ -9,6 +9,7 @@ scorebar(
   twogoalline = FALSE,
   zerodots = FALSE,
   outlined = FALSE,
+  color = NULL,
   show = TRUE,
   output_path = NULL,
   ...
@@ -35,6 +36,12 @@ by default FALSE.}
 
 \item{outlined}{A logical, only plots the outlines of the sparklines,
 by default FALSE.}
+
+\item{color}{A vector or a list of vectors, specifying the color of each
+scorebar. This option is provided to be consistent with LaTeX package API
+and allows high configurability, but \code{home_color}, \code{away_color} and
+\code{fill_color} options should already be sufficient for most of the use cases,
+by default NULL.}
 
 \item{show}{A logical, prints the plot, by default TRUE.}
 

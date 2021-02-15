@@ -295,15 +295,17 @@ test_that("colors are consistent with the match and config", {
             list(maxColorValue = 255))
         )
         expect_equal(
-            colors(FALSE, FALSE, default_config), list(home_color, home_color)
+            get_colors(FALSE, FALSE, default_config),
+            list(home_color, home_color)
         )
-        expect_equal(colors(TRUE, FALSE, default_config),
+        expect_equal(get_colors(TRUE, FALSE, default_config),
             list(bright_away_color, bright_away_color))
         expect_equal(
-            colors(FALSE, TRUE, default_config), list(home_color, home_color)
+            get_colors(FALSE, TRUE, default_config),
+            list(home_color, home_color)
         )
         expect_equal(
-            colors(TRUE, TRUE, default_config), list(fill_color, away_color)
+            get_colors(TRUE, TRUE, default_config), list(fill_color, away_color)
         )
     }
 )

@@ -43,6 +43,7 @@ def scorebar(
     twogoalline: bool = False,
     zerodots: bool = False,
     outlined: bool = False,
+    color: list = None,
     show: bool = True,
     output_path: str = None,
     **plot_kwargs,
@@ -65,6 +66,11 @@ def scorebar(
         Mark no goals scored with a small dot, by default False
     outlined : bool, optional
         Only plot the outlines of the away games, by default False
+    color : list, optional
+        A list or a list of lists of valid matplotlib colors, specifying the color of each
+        scorebar. This option is provided to be consistent with LaTeX package API
+        and allows high configurability, but `home_color`, `away_color` and `fill_color`
+        options should already be sufficient for most of the use cases, by default None.
     show : bool, optional
         Show the plot with pyplot.show, by default True
     output_path : str, optional
@@ -110,18 +116,22 @@ def scorebar(
     scores = _maybe_convert_dataframe(scores)
 
     _check_scores(scores)
+    _check_color(color, scores)
 
     config = _config_factory(outlined, **plot_kwargs)
 
     if isinstance(scores[0][0], int):
         matchlists = [scores]
+        matchcolors = [color]
     else:
         matchlists = scores
+        matchcolors = color
 
     axes: List[Axes] = []
-    for matches in matchlists:
+    for matches_index, matches in enumerate(matchlists):
 
         patches = []
+        colors = matchcolors[matches_index] if color is not None else None
         match_count = len(matches)
 
         for index, match in enumerate(matches):
@@ -129,7 +139,8 @@ def scorebar(
             away_game, scores = match[2], match[:2]
             scores = scores[::-1] if away_game else scores
             match_index = (index + 0.5) * config["spacing"]
-            facecolor, edgecolor = _colors(away_game, outlined, config)
+            matchcolor = colors[index] if color is not None else None
+            facecolor, edgecolor = _colors(away_game, outlined, config, matchcolor)
 
             if scores[0] is None or np.isnan(scores[0]):
                 patches.append(
@@ -238,8 +249,28 @@ def _check_scores(scores) -> None:
         isinstance(elem1, int) and isinstance(elem2, int) and isinstance(elem3, bool)
     ):
         raise TypeError(
-            f"A game in 'scores' must be represented with Tuple[int, int, bool], not Tuple[{type(elem1).__name__}, { type(elem2).__name__}, {type(elem3).__name__}]"
+            f"A game in 'scores' must be represented with Tuple[int, int, bool], "
+            f"not Tuple[{type(elem1).__name__}, { type(elem2).__name__}, {type(elem3).__name__}]"
         )
+
+
+def _check_color(color, scores) -> None:
+
+    if color is None:
+        return
+
+    if isinstance(scores[0][0], int):
+        matchlists = [scores]
+        matchcolors = [color]
+    else:
+        matchlists = scores
+        matchcolors = color
+    for matches, colors in zip(matchlists, matchcolors):
+        if len(matches) != len(colors):
+            raise ValueError(
+                f"Length of matches {len(matches)} is not consistent with the length "
+                f"of colors {len(colors)}"
+            )
 
 
 def _config_factory(outlined, **kwargs):
@@ -273,17 +304,20 @@ def _config_factory(outlined, **kwargs):
     return config
 
 
-def _colors(away_game, outlined, config):
+def _colors(away_game, outlined, config, matchcolor=None):
 
-    main_color = config["away_color"] if away_game else config["home_color"]
+    if matchcolor is not None:
+        main_color = to_rgba(matchcolor)
+    else:
+        main_color = config["away_color"] if away_game else config["home_color"]
 
-    if away_game and config["brighten"] != 0 and not outlined:
-        main_color = (
-            main_color[0] + (1 - main_color[0]) * config["brighten"] / 100,
-            main_color[1] + (1 - main_color[1]) * config["brighten"] / 100,
-            main_color[2] + (1 - main_color[2]) * config["brighten"] / 100,
-            main_color[3],
-        )
+        if away_game and config["brighten"] != 0 and not outlined:
+            main_color = (
+                main_color[0] + (1 - main_color[0]) * config["brighten"] / 100,
+                main_color[1] + (1 - main_color[1]) * config["brighten"] / 100,
+                main_color[2] + (1 - main_color[2]) * config["brighten"] / 100,
+                main_color[3],
+            )
 
     facecolor = config["fill_color"] if away_game and outlined else main_color
     edgecolor = main_color

@@ -48,6 +48,11 @@ default_config <- list(
 #' by default FALSE.
 #' @param outlined A logical, only plots the outlines of the sparklines,
 #' by default FALSE.
+#' @param color A vector or a list of vectors, specifying the color of each
+#' scorebar. This option is provided to be consistent with LaTeX package API
+#' and allows high configurability, but `home_color`, `away_color` and
+#' `fill_color` options should already be sufficient for most of the use cases,
+#' by default NULL.
 #' @param show A logical, prints the plot, by default TRUE.
 #' @param output_path A string, Path to save the plot at (image type
 #' is inferred from the path), by default NULL.
@@ -107,6 +112,7 @@ scorebar <- function(scores,
                      twogoalline = FALSE,
                      zerodots = FALSE,
                      outlined = FALSE,
+                     color = NULL,
                      show = TRUE,
                      output_path = NULL,
                      ...) {
@@ -115,28 +121,34 @@ scorebar <- function(scores,
     scores <- maybe_flatten_vectors(scores)
 
     check_scores(scores)
+    check_color(color, scores)
 
     config <- config_factory(outlined, ...)
 
     if (is.list(scores[[1]][[1]]) || length(scores[[1]][[1]]) > 1) {
         matchlists <- scores
+        matchcolors <- color
     } else {
         matchlists <- list(scores)
+        matchcolors <- list(color)
     }
 
     axes <- list()
-    for (matches in matchlists) {
+    for (matches_index in seq_along(matchlists)) {
         patches <- list()
+        matches <- matchlists[[matches_index]]
+        colors <- if (!is.null(color)) matchcolors[[matches_index]] else NULL
         match_count <- length(matches)
 
         for (index in seq_along(matches)) {
             match <- matches[[index]]
+            matchcolor <- if (!is.null(color)) colors[[index]] else NULL
             away_game <- as.logical(match[[3]])
             scores <- match[-3]
             scores <- if (away_game) rev(scores) else scores
             match_index <- (index - 0.5) * config[["spacing"]]
 
-            line_colors <- colors(away_game, outlined, config)
+            line_colors <- get_colors(away_game, outlined, config, matchcolor)
             facecolor <- line_colors[[1]]
             edgecolor <- line_colors[[2]]
 
@@ -343,6 +355,25 @@ check_scores <- function(scores) {
     }
 }
 
+check_color <- function(color, scores) {
+    if (is.null(color)) {
+        return(NULL)
+    }
+
+    if (is.list(scores[[1]][[1]]) || length(scores[[1]][[1]]) > 1) {
+        matchlists <- scores
+        matchcolors <- color
+    } else {
+        matchlists <- list(scores)
+        matchcolors <- list(color)
+    }
+    for (matches_index in seq_along(matchlists)) {
+        matches <- matchlists[[matches_index]]
+        colors <- if (!is.null(color)) matchcolors[[matches_index]] else NULL
+        checkmate::assert_vector(colors, len = length(matches))
+    }
+}
+
 config_factory <- function(outlined, ...) {
     kwargs <- list(...)
     config <- default_config
@@ -394,23 +425,28 @@ config_factory <- function(outlined, ...) {
     return(config)
 }
 
-colors <- function(away_game, outlined, config) {
-    if (away_game) {
-        main_color <- config[["away_color"]]
-    } else {
-        main_color <- config[["home_color"]]
-    }
+get_colors <- function(away_game, outlined, config, matchcolor=NULL) {
 
-    if (away_game && config[["brighten"]] != 0 && !outlined) {
-        main_color <- list(
-            red = main_color[[1]] +
-                (255 - main_color[[1]]) * config[["brighten"]] / 100,
-            green = main_color[[2]] +
-                (255 - main_color[[2]]) * config[["brighten"]] / 100,
-            blue = main_color[[3]] +
-                (255 - main_color[[3]]) * config[["brighten"]] / 100,
-            alpha = main_color[[4]]
-        )
+    if (!is.null(matchcolor)) {
+        main_color <- col2rgb(matchcolor, alpha = TRUE)
+    } else {
+        if (away_game) {
+            main_color <- config[["away_color"]]
+        } else {
+            main_color <- config[["home_color"]]
+        }
+
+        if (away_game && config[["brighten"]] != 0 && !outlined) {
+            main_color <- list(
+                red = main_color[[1]] +
+                    (255 - main_color[[1]]) * config[["brighten"]] / 100,
+                green = main_color[[2]] +
+                    (255 - main_color[[2]]) * config[["brighten"]] / 100,
+                blue = main_color[[3]] +
+                    (255 - main_color[[3]]) * config[["brighten"]] / 100,
+                alpha = main_color[[4]]
+            )
+        }
     }
 
     if (away_game && outlined) {
