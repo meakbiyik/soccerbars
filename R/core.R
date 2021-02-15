@@ -89,7 +89,9 @@ default_config <- list(
 #'  - fill_color: Fill color for the outlined sparklines in any of the three
 #'      kinds of R color specifications, by default NA.
 #'  - clip_slanted_lines: Clip the ends of the slanted lines, by default True
-#' @return ggplot objects of the plots created.
+#' @return ggplot objects of the plots created. If the input is a list of
+#' multiple matches, then the return is an iterable of ggplot objects, one per
+#' each match score list.
 #' @examples
 #' \dontrun{
 #' scorebar(list(
@@ -270,22 +272,25 @@ maybe_flatten_vectors <- function(scores) {
             length(scores[[2]]) == length(scores[[3]])
         ) {
             scores <- maybe_convert_dataframe(data.frame(scores))
-        }
-
-        for (index in seq_along(scores)) {
-            scores_elem <- scores[[index]]
-            if (
-                is.list(scores_elem) &&
-                length(scores_elem) == 3 &&
-                is.atomic(scores_elem[[1]]) && length(scores_elem[[1]]) > 1 &&
-                is.atomic(scores_elem[[2]]) && length(scores_elem[[2]]) > 1 &&
-                is.atomic(scores_elem[[3]]) && length(scores_elem[[3]]) > 1 &&
-                length(scores_elem[[1]]) == length(scores_elem[[2]]) &&
-                length(scores_elem[[2]]) == length(scores_elem[[3]])
-            ) {
-                scores[[index]] <- maybe_convert_dataframe(
-                    data.frame(scores_elem)
-                )
+        } else {
+            for (index in seq_along(scores)) {
+                scores_elem <- scores[[index]]
+                if (
+                    is.list(scores_elem) &&
+                    length(scores_elem) == 3 &&
+                    is.atomic(scores_elem[[1]]) &&
+                    length(scores_elem[[1]]) > 1 &&
+                    is.atomic(scores_elem[[2]]) &&
+                    length(scores_elem[[2]]) > 1 &&
+                    is.atomic(scores_elem[[3]]) &&
+                    length(scores_elem[[3]]) > 1 &&
+                    length(scores_elem[[1]]) == length(scores_elem[[2]]) &&
+                    length(scores_elem[[2]]) == length(scores_elem[[3]])
+                ) {
+                    scores[[index]] <- maybe_convert_dataframe(
+                        data.frame(scores_elem)
+                    )
+                }
             }
         }
     }

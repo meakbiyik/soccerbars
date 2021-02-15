@@ -11,6 +11,7 @@ from matplotlib.colors import to_rgba
 
 MatchScore = Tuple[int, int, bool]
 Matches = Iterable[MatchScore]
+ScoreLists = Tuple[Tuple[int], Tuple[int], Tuple[bool]]
 
 GOAL_TO_HEIGHT: Dict[int, float] = defaultdict(
     lambda: 3.75,
@@ -39,7 +40,7 @@ DEFAULT_CONFIG = {
 
 
 def scorebar(
-    scores: Union[Matches, Iterable[Matches]],
+    scores: Union[Matches, Iterable[Matches], ScoreLists, Iterable[ScoreLists]],
     twogoalline: bool = False,
     zerodots: bool = False,
     outlined: bool = False,
@@ -55,11 +56,18 @@ def scorebar(
 
     Parameters
     ----------
-    scores : Union[Matches, Iterable[Matches]]
-        Matches, or an iterable of matches. Matches are either a pandas DataFrame
+    scores : Union[Matches, Iterable[Matches], ScoreLists, Iterable[ScoreLists]]
+        Matches, ScoreLists, or an iterable of those. Matches are either a pandas DataFrame
         or a list of tuples, each tuple (or row) in the form
         (home_team_score: int, away_team_score: int, is_away_game: bool), or
-        (None, None, is_away_game: bool) for matches that are not played yet.
+        (None, None, is_away_game: bool) for matches that are not played yet. ScoreLists
+        are basically the same entities in a columnar format, with a tuple of
+        the lists with types int, int and bool representing the same components
+        as each row of Matches. Some valid examples:
+            >>> [(1,4,True), (2,5,False), (3,6,True)]
+            >>> [(1,2,3), (4,5,6), (True,False,True)]
+            >>> pd.DataFrame([(1,4,True), (2,5,False), (3,6,True)])
+            >>> [[(1,4,True), (2,5,False)], [(3,6,True), (4,7,False)]]
     twogoalline : bool, optional
         Draw lines for two-goal levels, by default False
     zerodots : bool, optional
@@ -100,7 +108,8 @@ def scorebar(
     Returns
     -------
     Union[Axes, List[Axes]]
-        Axes objects of the plot(s) created.
+        Axes objects of the plot(s) created. If the input is an iterable of multiple matches,
+        then the return is an iterable of Axes objects, one per each match score list.
 
     Examples
     --------
@@ -115,12 +124,14 @@ def scorebar(
 
     scores = _maybe_convert_dataframe(scores)
 
+    scores = _maybe_flatten_vectors(scores)
+
     _check_scores(scores)
     _check_color(color, scores)
 
     config = _config_factory(outlined, **plot_kwargs)
 
-    if isinstance(scores[0][0], int):
+    if _is_integerish(scores[0][0]):
         matchlists = [scores]
         matchcolors = [color]
     else:
@@ -234,6 +245,52 @@ def _maybe_convert_dataframe(scores):
     return scores
 
 
+def _is_integerish(val, allow_nan=True):
+    if isinstance(val, int):
+        return True
+    else:
+        if (
+            not hasattr(val, "__iter__") and allow_nan and np.isnan(val)
+        ) or val is None:
+            return True
+        elif isinstance(val, float) and val.is_integer():
+            return True
+        else:
+            return False
+
+
+def _maybe_flatten_vectors(scores):
+
+    if hasattr(scores, "__iter__"):
+
+        if (
+            len(scores) == 3
+            and hasattr(scores[0], "__iter__")
+            and all(_is_integerish(item) for item in scores[0])
+            and hasattr(scores[1], "__iter__")
+            and all(_is_integerish(item) for item in scores[1])
+            and hasattr(scores[2], "__iter__")
+            and all(isinstance(item, bool) for item in scores[2])
+            and len(scores[0]) == len(scores[1]) == len(scores[2])
+        ):
+            scores = list(zip(*scores))
+        else:
+            for index, item in enumerate(scores):
+                if (
+                    len(item) == 3
+                    and hasattr(item[0], "__iter__")
+                    and all(_is_integerish(elem) for elem in item[0])
+                    and hasattr(item[1], "__iter__")
+                    and all(_is_integerish(elem) for elem in item[1])
+                    and hasattr(item[2], "__iter__")
+                    and all(isinstance(elem, bool) for elem in item[2])
+                    and len(item[0]) == len(item[1]) == len(item[2])
+                ):
+                    scores[index] = list(zip(*item))
+
+    return scores
+
+
 def _check_scores(scores) -> None:
 
     if not hasattr(scores, "__iter__"):
@@ -242,16 +299,59 @@ def _check_scores(scores) -> None:
     if not scores:
         raise ValueError(f"'scores' cannot be empty")
 
-    first_match = scores[0] if not hasattr(scores[0][0], "__iter__") else scores[0][0]
-    elem1, elem2, elem3 = first_match
+    is_listofmatchlists = hasattr(scores[0], "__iter__") and hasattr(
+        scores[0][0], "__iter__"
+    )
+    if not is_listofmatchlists:
+        scores = [scores]
 
-    if not (
-        isinstance(elem1, int) and isinstance(elem2, int) and isinstance(elem3, bool)
-    ):
-        raise TypeError(
-            f"A game in 'scores' must be represented with Tuple[int, int, bool], "
-            f"not Tuple[{type(elem1).__name__}, { type(elem2).__name__}, {type(elem3).__name__}]"
+    for item in scores:
+
+        is_possibly_vectorlist = len(item) == 3 and all(
+            len(elem) != 3 or not isinstance(elem[-1], bool) for elem in item
         )
+
+        if is_possibly_vectorlist:
+            first_elem_length = len(item[0])
+            if not all(_is_integerish(elem) for elem in item[0]):
+                raise TypeError(
+                    f"In columnwise match inputs, all values in the home scores column is expected "
+                    f"to have type int, not {[type(elem).__name__ for elem in item[0]]}"
+                )
+            if not all(_is_integerish(elem) for elem in item[1]):
+                raise TypeError(
+                    f"In columnwise match inputs, all values in the away scores column is expected "
+                    f"to have type int, not {[type(elem).__name__ for elem in item[1]]}"
+                )
+            if not len(item[1]) == first_elem_length:
+                raise ValueError(
+                    f"In columnwise match inputs, all columns must have equal lengths, "
+                    f"but away scores column had length {len(item[1])} instead of {first_elem_length}"
+                )
+            if not all(isinstance(elem, bool) for elem in item[2]):
+                raise TypeError(
+                    f"In columnwise match inputs, all values in the away flags column is expected "
+                    f"to have type bool, not {[type(elem).__name__ for elem in item[2]]}"
+                )
+            if not len(item[2]) == first_elem_length:
+                raise ValueError(
+                    f"In columnwise match inputs, all columns must have equal lengths, "
+                    f"but away flags column had length {len(item[2])} instead of {first_elem_length}"
+                )
+
+        else:
+            first_match = item[0]
+            elem1, elem2, elem3 = first_match
+
+            if not (
+                _is_integerish(elem1)
+                and _is_integerish(elem2)
+                and isinstance(elem3, bool)
+            ):
+                raise TypeError(
+                    f"A game in 'scores' must be represented with Tuple[int, int, bool], "
+                    f"not Tuple[{type(elem1).__name__}, {type(elem2).__name__}, {type(elem3).__name__}]"
+                )
 
 
 def _check_color(color, scores) -> None:
@@ -259,7 +359,7 @@ def _check_color(color, scores) -> None:
     if color is None:
         return
 
-    if isinstance(scores[0][0], int):
+    if _is_integerish(scores[0][0]):
         matchlists = [scores]
         matchcolors = [color]
     else:

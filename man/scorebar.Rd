@@ -85,7 +85,9 @@ kinds of R color specifications, by default NA.
 }}
 }
 \value{
-ggplot objects of the plots created.
+ggplot objects of the plots created. If the input is a list of
+multiple matches, then the return is an iterable of ggplot objects, one per
+each match score list.
 }
 \description{
 Plot the given list or lists of match results as multivariate sparklines.
