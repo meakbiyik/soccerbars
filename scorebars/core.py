@@ -210,15 +210,15 @@ def scorebar(
             if scores[0] and scores[1]:
                 baseline_jumps.extend(
                     [
-                        match_index - config["thickness"] / 2,
-                        match_index + config["thickness"] / 2,
+                        match_index - config["thickness"] * 0.98 / 2,
+                        match_index + config["thickness"] * 0.98 / 2,
                     ]
                 )
             elif not (scores[0] or scores[1]):
                 baseline_jumps.extend(
                     [
-                        match_index - config["thickness"],
-                        match_index + config["thickness"],
+                        match_index - config["thickness"] * 0.98,
+                        match_index + config["thickness"] * 0.98,
                     ]
                 )
 

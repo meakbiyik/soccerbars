@@ -216,16 +216,16 @@ scorebar <- function(scores,
                 baseline_jumps <- c(
                     baseline_jumps,
                     c(
-                        match_index - config[["thickness"]] / 2,
-                        match_index + config[["thickness"]] / 2
+                        match_index - config[["thickness"]] * 0.98 / 2,
+                        match_index + config[["thickness"]] * 0.98 / 2
                     )
                 )
             } else if (scores[[1]] == 0 && scores[[2]] == 0) {
                 baseline_jumps <- c(
                     baseline_jumps,
                     c(
-                        match_index - config[["thickness"]],
-                        match_index + config[["thickness"]]
+                        match_index - config[["thickness"]] * 0.98,
+                        match_index + config[["thickness"]] * 0.98
                     )
                 )
             }
@@ -329,7 +329,7 @@ maybe_flatten_vectors <- function(scores) {
 check_scores <- function(scores) {
 
     checkmate::assert_list(
-        scores, types = c("list"), min.len = 1
+        scores, types = c("list", "numeric", "logical"), min.len = 1
     )
 
     is_listofmatchlists <- checkmate::test_list(
@@ -449,7 +449,7 @@ config_factory <- function(outlined, ...) {
             next
         }
 
-        if (grepl("edge_thickness", key, fixed = TRUE) && !outlined){
+        if (grepl("edge_thickness", key, fixed = TRUE) && !outlined) {
             if (!is.null(kwargs[["thickness"]])) {
                 config[[key]] <- value * kwargs[["thickness"]]
             } else {
@@ -470,6 +470,9 @@ config_factory <- function(outlined, ...) {
         config[["figure_height"]] * ppi / (2 * max_height)
     )
 
+    # TODO: remove below modification along with baseline_width
+    #       adjustment when outlined=TRUE starts using subgroups
+    #       instead of edges for transparent center.
     if (outlined) {
         config[["thickness"]] <- (
             config[["thickness"]] - config[["edge_thickness"]]
@@ -625,8 +628,8 @@ plot <- function(patches,
                  output_path = NULL) {
     padding <- config[["padding"]]
     plot_width <- (match_count + 1) * config[["spacing"]] + padding
-    baseline_width <- config[["thickness"]] *
-        config[["baseline_factor"]] * config[["linewidth_factor"]]
+    baseline_width <- (config[["thickness"]] + config[["edge_thickness"]]) *
+        config[["baseline_factor"]] * config[["linewidth_factor"]] / 2
     baseline_color <- config[["baseline_color"]]
 
     background <- if (config[["transparent_background"]]) {
