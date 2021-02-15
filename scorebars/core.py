@@ -501,25 +501,19 @@ def _plot(
 
     if twogoalline:
         two_goals = GOAL_TO_HEIGHT[2]
-        twogoalline_color = (
-            baseline_color[0] * (1 - baseline_color[0]) * config["brighten"] / 100,
-            baseline_color[1] * (1 - baseline_color[1]) * config["brighten"] / 100,
-            baseline_color[2] * (1 - baseline_color[2]) * config["brighten"] / 100,
-            baseline_color[3],
-        )
         twogoalline_width = baseline_width * 0.5
         ax.plot(
             [0, plot_width],
             [two_goals, two_goals],
             lw=twogoalline_width,
-            color=twogoalline_color,
+            color=baseline_color,
             zorder=-1,
         )
         ax.plot(
             [0, plot_width],
             [-two_goals, -two_goals],
             lw=twogoalline_width,
-            color=twogoalline_color,
+            color=baseline_color,
             zorder=-1,
         )
 

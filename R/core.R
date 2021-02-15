@@ -597,26 +597,14 @@ plot <- function(patches,
 
     if (twogoalline) {
         two_goals <- goal_to_height(2)
-        twogoalline_color <- list(
-            red = baseline_color[[1]] +
-                (255 - baseline_color[[1]]) * config[["brighten"]] / 100,
-            green = baseline_color[[2]] +
-                (255 - baseline_color[[2]]) * config[["brighten"]] / 100,
-            blue = baseline_color[[3]] +
-                (255 - baseline_color[[3]]) * config[["brighten"]] / 100,
-            alpha = baseline_color[[4]]
-        )
-        twogoalline_color <- do.call(
-            rgb, append(twogoalline_color, list(maxColorValue = 255))
-        )
         twogoalline_width <- baseline_width * 0.5
 
         ax <- ax + geom_path(
             aes(x = c(0, plot_width), y = c(two_goals, two_goals)),
-            colour = twogoalline_color, size = twogoalline_width
+            colour = baseline_color, size = twogoalline_width
         ) + geom_path(
             aes(x = c(0, plot_width), y = c(-two_goals, -two_goals)),
-            colour = twogoalline_color, size = twogoalline_width
+            colour = baseline_color, size = twogoalline_width
         )
     }
 
