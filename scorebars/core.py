@@ -1,6 +1,7 @@
 from typing import Dict, Union, Tuple, Iterable, List
 from collections import defaultdict
 import math
+import numbers
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -274,9 +275,11 @@ def _is_integerish(val, allow_nan=True):
     if isinstance(val, int):
         return True
     else:
-        if (
-            not hasattr(val, "__iter__") and allow_nan and np.isnan(val)
-        ) or val is None:
+        if allow_nan and (
+            val is None or (
+                isinstance(val, numbers.Number) and math.isnan(val)
+            )
+        ):
             return True
         elif isinstance(val, float) and val.is_integer():
             return True
