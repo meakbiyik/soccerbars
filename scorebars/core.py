@@ -1,4 +1,4 @@
-from typing import Dict, Literal, Union, Tuple, Iterable, List
+from typing import Dict, Union, Tuple, Iterable, List
 from collections import defaultdict
 import math
 import numbers
@@ -258,9 +258,7 @@ def scorebar(
     return axes if len(axes) > 1 else axes[0]
 
 
-def _is_listlike(
-    val, ensure_nonempty=False, ensure_type: Literal["integerish", "bool"] = None
-):
+def _is_listlike(val, ensure_nonempty=False, ensure_type: str = None):
     is_listlike = hasattr(val, "__iter__") and not isinstance(val, str)
     if not is_listlike:
         return False
