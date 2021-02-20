@@ -543,13 +543,9 @@ def _plot(
     ax.set_xlim(0, plot_width)
     ax.set_ylim(-MAX_HEIGHT, MAX_HEIGHT)
 
-    linewidth_factor = (
-        fig.bbox_inches.height
-        * ax.get_position().height
-        * 72
-        / np.diff(ax.get_ylim())[0]
+    baseline_width = (
+        config["thickness"] * config["baseline_factor"] * config["_linewidth_factor"]
     )
-    baseline_width = config["thickness"] * config["baseline_factor"] * linewidth_factor
     baseline_color = config["baseline_color"]
 
     baseline_endpoints = [0] + baseline_jumps + [plot_width]
