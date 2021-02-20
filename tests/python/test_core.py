@@ -10,8 +10,12 @@ from matplotlib import pyplot as plt
 
 from scorebars.core import (
     _colors,
+    _is_listlike,
+    _is_integerish,
     _maybe_convert_dataframe,
+    _maybe_flatten_vectors,
     _check_scores,
+    _check_color,
     _config_factory,
     DEFAULT_CONFIG,
     scorebar,
@@ -100,11 +104,101 @@ test_dataframes = [
     ),
 ]
 
+vector_test_inputs = [
+    (
+        [[1, 2, 3], [4, 5, 6], [True, False, True]],
+        [[1, 4, True], [2, 5, False], [3, 6, True]],
+    ),
+    (
+        [[[1, np.nan], [3, np.nan], [True, False]], [[5, 6], [7, 8], [True, False]]],
+        [[[1, 3, True], [np.nan, np.nan, False]], [[5, 7, True], [6, 8, False]]],
+    ),
+    (
+        [[1, 4, True], [2, 5, False], [3, 6, True]],
+        [[1, 4, True], [2, 5, False], [3, 6, True]],
+    ),
+    (
+        [[[1, 3, True], [2, 4, False]], [[5, 7, True], [6, 8, False]]],
+        [[[1, 3, True], [2, 4, False]], [[5, 7, True], [6, 8, False]]],
+    ),
+]
+
 bad_scores = [
-    (3, TypeError),
-    ([], ValueError),
-    ([(1, "A", False)], TypeError),
-    ([[(1, 2, 3), (1, 2, 3)]], TypeError),
+    (3, TypeError, r"'scores' must be an iterable, not <class 'int'>"),
+    ([], ValueError, r"'scores' cannot be empty"),
+    (
+        [(1, "A", False)],
+        TypeError,
+        r".+? with Tuple\[int, int, bool\], not Tuple\[int, str, bool\]",
+    ),
+    (
+        [[(1, 2, 3), (1, 2, 3)]],
+        TypeError,
+        r".+? with Tuple\[int, int, bool\], not Tuple\[int, int, int\]",
+    ),
+    (
+        [[(1, 2, 3), (1, 2, 3), (1, 2, 3)]],
+        TypeError,
+        r"In columnwise match inputs, .+? away flags column is expected "
+        r"to have type bool, not \['int', 'int', 'int'\]",
+    ),
+    (
+        [("1", "2", "3"), (1, 2, 3), (True, False, True)],
+        TypeError,
+        r"In columnwise match inputs, .+? home scores column is expected "
+        r"to have type int, not \['str', 'str', 'str'\]",
+    ),
+    (
+        [(1, 2, 3), ("1", "2", "3"), (True, False, True)],
+        TypeError,
+        r"In columnwise match inputs, .+? away scores column is expected "
+        r"to have type int, not \['str', 'str', 'str'\]",
+    ),
+    (
+        [(1, 2, 3), (1, 2, 3, 4), (True, False, True)],
+        ValueError,
+        r"In columnwise match inputs, all columns must have equal lengths, "
+        r"but away scores column had length 4 instead of 3",
+    ),
+    (
+        [[(1, 2, 3), (1, 2, 3), (True, False, "True")]],
+        TypeError,
+        r"In columnwise match inputs, all values in the away flags column is expected "
+        r"to have type bool, not \['bool', 'bool', 'str'\]",
+    ),
+    (
+        [[(1, 2, 3), (1, 2, 3), (True, False, True, False)]],
+        ValueError,
+        r"In columnwise match inputs, all columns must have equal lengths, "
+        r"but away flags column had length 4 instead of 3",
+    ),
+]
+
+bad_color_inputs = [
+    (
+        ["r", "r"],
+        [[8, 0, False], [4, 1, True], [4, 4, False]],
+        ValueError,
+        r"Length of matches .+",
+    ),
+    (
+        ["r", "r", "r"],
+        [[[8, 0, False], [4, 1, True]], [[4, 4, False]]],
+        ValueError,
+        r"Length of matches .+",
+    ),
+    (
+        ["i am an invalid color", "r", "r"],
+        [[[8, 0, False], [4, 1, True]], [[4, 4, False]]],
+        ValueError,
+        r"Length of matches .+",
+    ),
+    (
+        ["i am an invalid color", "r", "r"],
+        [[8, 0, False], [4, 1, True], [4, 4, False]],
+        ValueError,
+        r".+?is not a valid matplotlib color.+",
+    ),
 ]
 
 dummy_file_name = Path(".dummy.png")
@@ -253,6 +347,36 @@ test_parameters = [
 ]
 
 
+listlike_test_values = [
+    (1, False, dict()),
+    ("1", False, dict()),
+    ([1], True, dict()),
+    ((1,), True, dict()),
+    ([], False, dict(ensure_nonempty=True)),
+    ([1], False, dict(ensure_type="bool")),
+    ([1.0], True, dict(ensure_type="integerish")),
+    ([1, 1.1], False, dict(ensure_type="integerish")),
+    ([], False, dict(ensure_nonempty=True, ensure_type="integerish")),
+    ([1, 2.0], True, dict(ensure_nonempty=True, ensure_type="integerish")),
+    ([1, 2.1], False, dict(ensure_nonempty=True, ensure_type="integerish")),
+]
+
+
+integerish_test_values = [
+    (1, True),
+    (np.nan, True),
+    (None, True),
+    (1.0, True),
+    (1.1, False),
+    (np.array([1]), False),
+]
+
+
+@pytest.mark.parametrize("input,expected,params", listlike_test_values)
+def test__is_listlike(input, expected, params):
+    assert _is_listlike(input, **params) == expected
+
+
 @pytest.mark.parametrize("input,expected", test_dataframes)
 def test__maybe_convert_dataframe(input, expected):
     output = _maybe_convert_dataframe(input)
@@ -260,15 +384,37 @@ def test__maybe_convert_dataframe(input, expected):
         assert np.array_equal(elem1, elem2, equal_nan=True)
 
 
-@pytest.mark.parametrize("input,expected_error", bad_scores)
-def test__check_scores(input, expected_error):
-    with pytest.raises(expected_error):
+@pytest.mark.parametrize("input,expected", integerish_test_values)
+def test__is_integerish(input, expected):
+    assert _is_integerish(input) == expected
+
+
+@pytest.mark.parametrize("input,expected", vector_test_inputs)
+def test__maybe_flatten_vectors(input, expected):
+    output = _maybe_flatten_vectors(input)
+    for elem1, elem2 in zip(output, expected):
+        assert np.array_equal(elem1, elem2, equal_nan=True)
+
+
+@pytest.mark.parametrize("input,expected_error,match", bad_scores)
+def test__check_scores(input, expected_error, match):
+    with pytest.raises(expected_error, match=match):
         _check_scores(input)
+
+
+@pytest.mark.parametrize("color,scores,expected_error,match", bad_color_inputs)
+def test__check_color(color, scores, expected_error, match):
+    with pytest.raises(expected_error, match=match):
+        _check_color(color, scores)
 
 
 def test__config_factory():
     assert _config_factory(True) == DEFAULT_CONFIG
     assert _config_factory(False)["edge_thickness"] == 0
+    assert (
+        _config_factory(True, edge_thickness=10)["edge_thickness"]
+        == 10 * DEFAULT_CONFIG["thickness"]
+    )
     assert _config_factory(True, slant=20)["slant"] == math.sin(math.radians(20))
     assert (
         _config_factory(True, zerodot=10)["zerodot"] == 10 * DEFAULT_CONFIG["thickness"]
@@ -287,6 +433,7 @@ def test__config_factory():
 
 
 def test__colors():
+    matchcolor = (0.12, 0.24, 0.36, 1)
     bright_away_color = (
         DEFAULT_CONFIG["away_color"][0]
         + (1 - DEFAULT_CONFIG["away_color"][0]) * DEFAULT_CONFIG["brighten"] / 100,
@@ -312,6 +459,23 @@ def test__colors():
     assert _colors(True, True, DEFAULT_CONFIG) == (
         DEFAULT_CONFIG["fill_color"],
         DEFAULT_CONFIG["away_color"],
+    )
+
+    assert _colors(False, False, DEFAULT_CONFIG, matchcolor=matchcolor) == (
+        matchcolor,
+        matchcolor,
+    )
+    assert _colors(True, False, DEFAULT_CONFIG, matchcolor=matchcolor) == (
+        matchcolor,
+        matchcolor,
+    )
+    assert _colors(False, True, DEFAULT_CONFIG, matchcolor=matchcolor) == (
+        matchcolor,
+        matchcolor,
+    )
+    assert _colors(True, True, DEFAULT_CONFIG, matchcolor=matchcolor) == (
+        DEFAULT_CONFIG["fill_color"],
+        matchcolor,
     )
 
 

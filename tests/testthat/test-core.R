@@ -115,6 +115,79 @@ test_dataframes <- list(
     )
 )
 
+vector_test_inputs <- list(
+    list(
+        list(
+            c(1,2,3),
+            c(4,5,6),
+            c(TRUE,FALSE,TRUE)
+        ),
+        list(
+            list(c.1..2..3. = 1, c.4..5..6. = 4, c.TRUE..FALSE..TRUE. = TRUE),
+            list(c.1..2..3. = 2, c.4..5..6. = 5, c.TRUE..FALSE..TRUE. = FALSE),
+            list(c.1..2..3. = 3, c.4..5..6. = 6, c.TRUE..FALSE..TRUE. = TRUE)
+        )
+    ),
+    list(
+        list(
+            list(
+                c(1,NA),
+                c(3,NA),
+                c(TRUE,FALSE)
+            ),
+            list(
+                c(5,6),
+                c(7,8),
+                c(TRUE,FALSE)
+            )
+        ),
+        list(
+            list(
+                list(c.1..NA. = 1, c.3..NA. = 3, c.TRUE..FALSE. = TRUE),
+                list(c.1..NA. = NA_integer_, c.3..NA. = NA_integer_, c.TRUE..FALSE. = FALSE)
+            ),
+            list(
+                list(c.5..6. = 5,c.7..8. = 7, c.TRUE..FALSE. = TRUE),
+                list(c.5..6. = 6,c.7..8. = 8, c.TRUE..FALSE. = FALSE)
+            )
+        )
+    ),
+    list(
+        list(
+            list(1,4,TRUE),
+            list(2,5,FALSE),
+            list(3,6,TRUE)
+        ),
+        list(
+            list(1,4,TRUE),
+            list(2,5,FALSE),
+            list(3,6,TRUE)
+        )
+    ),
+    list(
+        list(
+            list(
+                list(1,3,TRUE),
+                list(NA,NA,FALSE)
+            ),
+            list(
+                list(5,7,TRUE),
+                list(6,8,FALSE)
+            )
+        ),
+        list(
+            list(
+                list(1,3,TRUE),
+                list(NA,NA,FALSE)
+            ),
+            list(
+                list(5,7,TRUE),
+                list(6,8,FALSE)
+            )
+        )
+    )
+)
+
 bad_scores <- list(
     list(3, strwrap("Assertion on 'scores' failed: Must
         be of type 'list', not 'double'.")),
@@ -125,8 +198,23 @@ bad_scores <- list(
     value', not 'character'.", width = 1200)),
     list(list(list(list(1, 2, 3), list(1, 2, 3))), strwrap("Assertion
     on 'Away flag' failed: Must be of type 'logical', not
-    'double'.", width = 1200))
+    'double'.", width = 1200)),
+    list(list(list(list(1, 2, 3), list(1, 2, 3), list(1, 2, 3))),
+    strwrap("Assertion on 'Away flag' failed: Must be of type 'logical',
+    not 'double'.", width = 1200)),
+    list(list(c("1", "2", "3"), c(1, 2, 3), c(TRUE, FALSE, TRUE)),
+    strwrap("Assertion on 'scores' failed: May only contain the following
+    types: \\{list,numeric,logical\\}, but element 1 has type 'character'.",
+    width = 1200)),
+    list(list(list(c(1, 2, 3), c(1, 2, 3, 4), c(TRUE, FALSE, TRUE))),
+    strwrap("Assertion on 'Scores of the away team' failed: Must have
+    length 3, but has length 4.", width = 1200)),
+    list(list(list(c(1, 2, 3), c(1, 2, 3), c(1, 2, 3))),
+    strwrap("Assertion on 'Away flags' failed: Must be of type 'logical',
+    not 'double'.", width = 1200))
 )
+
+dummy_file_name <- ".dummy.png"
 
 test_inputs <- list(
     list(
@@ -192,8 +280,6 @@ test_inputs <- list(
     )
 )
 
-dummy_file_name <- ".dummy.png"
-
 test_parameters <- list(
     list(outlined = FALSE, twogoalline = FALSE,
         zerodots = FALSE, show = FALSE, output_path = NULL),
@@ -244,6 +330,13 @@ outlined_true_default_config[["goalless_edge_thickness"]] <- (
 test_that("scores are lazily converted from data.frame", {
         for (example in test_dataframes) {
             expect_equal(maybe_convert_dataframe(example[[1]]), example[[2]])
+        }
+    }
+)
+
+test_that("vector inputs are lazily coerced to lists", {
+        for (example in vector_test_inputs) {
+            expect_equal(maybe_flatten_vectors(example[[1]]), example[[2]])
         }
     }
 )
