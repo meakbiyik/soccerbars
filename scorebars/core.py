@@ -1,4 +1,4 @@
-from typing import Dict, Union, Tuple, Iterable, List
+from typing import Dict, Literal, Union, Tuple, Iterable, List
 from collections import defaultdict
 import math
 import numbers
@@ -258,12 +258,25 @@ def scorebar(
     return axes if len(axes) > 1 else axes[0]
 
 
+def _is_listlike(val, ensure_nonempty=False, ensure_type: Literal["integerish", "bool"]=None):
+    is_listlike = hasattr(val, "__iter__") and not isinstance(val, str)
+    if not is_listlike:
+        return False
+    elif ensure_nonempty and not val:
+        return False
+    elif ensure_type == "integerish" and not all(_is_integerish(item) for item in val):
+        return False
+    elif ensure_type == "bool" and not all(isinstance(item, bool) for item in val):
+        return False
+    return True
+
+
 def _maybe_convert_dataframe(scores):
 
     if type(scores).__name__ == "DataFrame":
         scores = scores.values.tolist()
 
-    if hasattr(scores, "__iter__"):
+    if _is_listlike(scores):
         for index, item in enumerate(scores):
             if type(item).__name__ == "DataFrame":
                 scores[index] = item.values.tolist()
@@ -289,16 +302,13 @@ def _is_integerish(val, allow_nan=True):
 
 def _maybe_flatten_vectors(scores):
 
-    if hasattr(scores, "__iter__"):
+    if _is_listlike(scores):
 
         if (
             len(scores) == 3
-            and hasattr(scores[0], "__iter__")
-            and all(_is_integerish(item) for item in scores[0])
-            and hasattr(scores[1], "__iter__")
-            and all(_is_integerish(item) for item in scores[1])
-            and hasattr(scores[2], "__iter__")
-            and all(isinstance(item, bool) for item in scores[2])
+            and _is_listlike(scores[0], ensure_nonempty=True, ensure_type="integerish")
+            and _is_listlike(scores[1], ensure_nonempty=True, ensure_type="integerish")
+            and _is_listlike(scores[2], ensure_nonempty=True, ensure_type="bool")
             and len(scores[0]) == len(scores[1]) == len(scores[2])
         ):
             scores = list(zip(*scores))
@@ -306,12 +316,9 @@ def _maybe_flatten_vectors(scores):
             for index, item in enumerate(scores):
                 if (
                     len(item) == 3
-                    and hasattr(item[0], "__iter__")
-                    and all(_is_integerish(elem) for elem in item[0])
-                    and hasattr(item[1], "__iter__")
-                    and all(_is_integerish(elem) for elem in item[1])
-                    and hasattr(item[2], "__iter__")
-                    and all(isinstance(elem, bool) for elem in item[2])
+                    and _is_listlike(item[0], ensure_nonempty=True, ensure_type="integerish")
+                    and _is_listlike(item[1], ensure_nonempty=True, ensure_type="integerish")
+                    and _is_listlike(item[2], ensure_nonempty=True, ensure_type="bool")
                     and len(item[0]) == len(item[1]) == len(item[2])
                 ):
                     scores[index] = list(zip(*item))
@@ -321,15 +328,13 @@ def _maybe_flatten_vectors(scores):
 
 def _check_scores(scores) -> None:
 
-    if not hasattr(scores, "__iter__"):
+    if not _is_listlike(scores):
         raise TypeError(f"'scores' must be an iterable, not {type(scores)}")
 
     if not scores:
         raise ValueError(f"'scores' cannot be empty")
 
-    is_listofmatchlists = hasattr(scores[0], "__iter__") and hasattr(
-        scores[0][0], "__iter__"
-    )
+    is_listofmatchlists = _is_listlike(scores[0], ensure_nonempty=True) and _is_listlike(scores[0][0])
     if not is_listofmatchlists:
         scores = [scores]
 
