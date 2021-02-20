@@ -332,8 +332,8 @@ check_scores <- function(scores) {
         scores, types = c("list", "numeric", "logical"), min.len = 1
     )
 
-    is_listofmatchlists <- checkmate::test_list(
-        scores[[1]], types = c("list")
+    is_listofmatchlists <- (
+        is.list(scores[[1]][[1]]) || length(scores[[1]][[1]]) > 1
     )
 
     if (!is_listofmatchlists) {
@@ -405,6 +405,24 @@ check_color <- function(color, scores) {
         matches <- matchlists[[matches_index]]
         colors <- if (!is.null(color)) matchcolors[[matches_index]] else NULL
         checkmate::assert_vector(colors, len = length(matches))
+        for (color in colors) {
+            tryCatch({
+                col2rgb(color)
+            }, error = function(e) {
+                stop(
+                    sprintf(
+                        strwrap(
+                            "'%s' is not a valid color. Colors need to be
+                            either a color name as listed by colors(), a
+                            hexadecimal string of the form '#rrggbb' or
+                            '#rrggbbaa', or a positive integer i meaning
+                            `palette()[i]`)"
+                        ),
+                        color
+                    )
+                )
+            })
+        }
     }
 }
 

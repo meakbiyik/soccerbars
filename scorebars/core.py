@@ -258,7 +258,9 @@ def scorebar(
     return axes if len(axes) > 1 else axes[0]
 
 
-def _is_listlike(val, ensure_nonempty=False, ensure_type: Literal["integerish", "bool"]=None):
+def _is_listlike(
+    val, ensure_nonempty=False, ensure_type: Literal["integerish", "bool"] = None
+):
     is_listlike = hasattr(val, "__iter__") and not isinstance(val, str)
     if not is_listlike:
         return False
@@ -289,9 +291,7 @@ def _is_integerish(val, allow_nan=True):
         return True
     else:
         if allow_nan and (
-            val is None or (
-                isinstance(val, numbers.Number) and math.isnan(val)
-            )
+            val is None or (isinstance(val, numbers.Number) and math.isnan(val))
         ):
             return True
         elif isinstance(val, float) and val.is_integer():
@@ -316,8 +316,12 @@ def _maybe_flatten_vectors(scores):
             for index, item in enumerate(scores):
                 if (
                     len(item) == 3
-                    and _is_listlike(item[0], ensure_nonempty=True, ensure_type="integerish")
-                    and _is_listlike(item[1], ensure_nonempty=True, ensure_type="integerish")
+                    and _is_listlike(
+                        item[0], ensure_nonempty=True, ensure_type="integerish"
+                    )
+                    and _is_listlike(
+                        item[1], ensure_nonempty=True, ensure_type="integerish"
+                    )
                     and _is_listlike(item[2], ensure_nonempty=True, ensure_type="bool")
                     and len(item[0]) == len(item[1]) == len(item[2])
                 ):
@@ -334,14 +338,16 @@ def _check_scores(scores) -> None:
     if not scores:
         raise ValueError(f"'scores' cannot be empty")
 
-    is_listofmatchlists = _is_listlike(scores[0], ensure_nonempty=True) and _is_listlike(scores[0][0])
+    is_listofmatchlists = _is_listlike(
+        scores[0], ensure_nonempty=True
+    ) and _is_listlike(scores[0][0])
     if not is_listofmatchlists:
         scores = [scores]
 
     for item in scores:
 
         is_possibly_vectorlist = len(item) == 3 and all(
-            len(elem) != 3 or not isinstance(elem[-1], bool) for elem in item
+            len(elem) != 3 or not isinstance(elem[-1], bool) for elem in item[:-1]
         )
 
         if is_possibly_vectorlist:
@@ -402,8 +408,18 @@ def _check_color(color, scores) -> None:
         if len(matches) != len(colors):
             raise ValueError(
                 f"Length of matches {len(matches)} is not consistent with the length "
-                f"of colors {len(colors)}"
+                f"of colors {len(colors)}. Beware that if the scores you have provided are "
+                f"nested (i.e. includes multiple lists of matches), the colors must be nested too."
             )
+        for color in colors:
+            try:
+                to_rgba(color)
+            except ValueError:
+                raise ValueError(
+                    f"'{color}' is not a valid matplotlib color. For more information on "
+                    f"valid matplotlib colors, see "
+                    f"https://matplotlib.org/stable/tutorials/colors/colors.html"
+                )
 
 
 def _config_factory(outlined, **kwargs):
@@ -429,7 +445,7 @@ def _config_factory(outlined, **kwargs):
             config[key] = value * kwargs.get("thickness", config["thickness"])
             continue
 
-        if "edge_thickness" in key and not outlined:
+        if "edge_thickness" in key and outlined:
             config[key] = value * kwargs.get("thickness", config["thickness"])
             continue
 
