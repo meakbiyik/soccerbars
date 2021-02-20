@@ -205,10 +205,7 @@ scorebar <- function(scores,
                     radius = config[["thickness"]],
                     facecolor = facecolor,
                     edgecolor = edgecolor,
-                    linewidth = (
-                        config[["goalless_edge_thickness"]] *
-                        config[["linewidth_factor"]]
-                    )
+                    edgesize = config[["goalless_edge_thickness"]]
                 ))
             }
 
@@ -488,21 +485,6 @@ config_factory <- function(outlined, ...) {
         config[["figure_height"]] * ppi / (2 * max_height)
     )
 
-    # TODO: remove below modification along with baseline_width
-    #       adjustment when outlined=TRUE starts using subgroups
-    #       instead of edges for transparent center.
-    if (outlined) {
-        config[["thickness"]] <- (
-            config[["thickness"]] - config[["edge_thickness"]]
-        )
-        config[["edge_thickness"]] <- (
-            config[["edge_thickness"]] / 2
-        )
-        config[["goalless_edge_thickness"]] <- (
-            config[["goalless_edge_thickness"]] / 2
-        )
-    }
-
     return(config)
 }
 
@@ -547,11 +529,55 @@ get_colors <- function(away_game, outlined, config, matchcolor=NULL) {
 }
 
 line_polygon <- function(start_xy, end_xy, facecolor, edgecolor, config) {
-    clipped <- start_xy[[1]] != end_xy[[1]]
     thickness <- config[["thickness"]]
-    edge_th <- config[["edge_thickness"]] * config[["linewidth_factor"]]
-    half_th <- thickness / 2
+    slanted <- sign(end_xy[[1]] - start_xy[[1]])
+    slant_degree <- slanted * asin(config[["slant"]])
 
+    inner_start_xy <- c(
+        start_xy[[1]] + config[["edge_thickness"]] * sin(slant_degree),
+        start_xy[[2]] + config[["edge_thickness"]] * cos(slant_degree)
+    )
+    inner_end_xy <- c(
+        end_xy[[1]] - config[["edge_thickness"]] * sin(slant_degree),
+        end_xy[[2]] - config[["edge_thickness"]] * cos(slant_degree)
+    )
+
+    main_path <- line_path(start_xy, end_xy, thickness, config)
+    inner_path <- line_path(
+        inner_start_xy,
+        inner_end_xy,
+        thickness - 2 * config[["edge_thickness"]],
+        config
+    )
+    main_path$subid <- 1L
+    inner_path$subid <- 2L
+
+    outer_polygon <- rbind(main_path, inner_path)
+    inner_polygon <- inner_path
+
+    polygon <- list(
+        geom_polygon(
+            aes(
+                x = outer_polygon$x,
+                y = outer_polygon$y,
+                subgroup = outer_polygon$subid
+            ),
+            size = 0, fill = edgecolor
+        ),
+        geom_polygon(
+            aes(
+                x = inner_polygon$x,
+                y = inner_polygon$y
+            ),
+            size = 0, fill = facecolor
+        )
+    )
+    return(polygon)
+}
+
+line_path <- function(start_xy, end_xy, thickness, config) {
+    clipped <- start_xy[[1]] != end_xy[[1]]
+    half_th <- thickness / 2
     if (clipped && config[["clip_slanted_lines"]]) {
         path_data <- data.frame(
             x = c(
@@ -601,26 +627,41 @@ line_polygon <- function(start_xy, end_xy, facecolor, edgecolor, config) {
             bottom_half_circle_path_data
         )
     }
-    polygon <- geom_polygon(
-        aes(
-            x = path_data$x, y = path_data$y,
-        ),
-        fill = facecolor, colour = edgecolor, size = edge_th
-    )
-    return(polygon)
+    return(path_data)
 }
 
-circle_polygon <- function(x, y, radius, facecolor, edgecolor, linewidth = 0) {
-    path_data <- circle(x, y, radius)
-    return(
+circle_polygon <- function(x, y, radius, facecolor, edgecolor, edgesize = 0) {
+
+    main_path <- circle(x, y, radius)
+    inner_path <- circle(x, y, radius - edgesize)
+
+    main_path$subid <- 1L
+    inner_path$subid <- 2L
+
+    outer_polygon <- rbind(main_path, inner_path)
+    inner_polygon <- inner_path
+
+    outer_polygon <- rbind(main_path, inner_path)
+    inner_polygon <- inner_path
+
+    polygon <- list(
         geom_polygon(
             aes(
-                x = x, y = y
+                x = outer_polygon$x,
+                y = outer_polygon$y,
+                subgroup = outer_polygon$subid
             ),
-            data = path_data, fill = facecolor,
-            colour = edgecolor, size = linewidth
+            size = 0, fill = edgecolor
+        ),
+        geom_polygon(
+            aes(
+                x = inner_polygon$x,
+                y = inner_polygon$y
+            ),
+            size = 0, fill = facecolor
         )
     )
+    return(polygon)
 }
 
 circle <- function(x, y, radius = 1, start_rad = 0, end_rad = 2 * pi) {
@@ -646,8 +687,8 @@ plot <- function(patches,
                  output_path = NULL) {
     padding <- config[["padding"]]
     plot_width <- (match_count + 1) * config[["spacing"]] + padding
-    baseline_width <- (config[["thickness"]] + config[["edge_thickness"]]) *
-        config[["baseline_factor"]] * config[["linewidth_factor"]] / 2
+    baseline_width <- config[["thickness"]] * config[["baseline_factor"]] *
+        config[["linewidth_factor"]] / 2
     baseline_color <- config[["baseline_color"]]
 
     background <- if (config[["transparent_background"]]) {

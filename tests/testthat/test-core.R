@@ -118,9 +118,9 @@ test_dataframes <- list(
 vector_test_inputs <- list(
     list(
         list(
-            c(1,2,3),
-            c(4,5,6),
-            c(TRUE,FALSE,TRUE)
+            c(1, 2, 3),
+            c(4, 5, 6),
+            c(TRUE, FALSE, TRUE)
         ),
         list(
             list(c.1..2..3. = 1, c.4..5..6. = 4, c.TRUE..FALSE..TRUE. = TRUE),
@@ -131,58 +131,62 @@ vector_test_inputs <- list(
     list(
         list(
             list(
-                c(1,NA),
-                c(3,NA),
-                c(TRUE,FALSE)
+                c(1, NA),
+                c(3, NA),
+                c(TRUE, FALSE)
             ),
             list(
-                c(5,6),
-                c(7,8),
-                c(TRUE,FALSE)
+                c(5, 6),
+                c(7, 8),
+                c(TRUE, FALSE)
             )
         ),
         list(
             list(
                 list(c.1..NA. = 1, c.3..NA. = 3, c.TRUE..FALSE. = TRUE),
-                list(c.1..NA. = NA_integer_, c.3..NA. = NA_integer_, c.TRUE..FALSE. = FALSE)
+                list(
+                    c.1..NA. = NA_integer_,
+                    c.3..NA. = NA_integer_,
+                    c.TRUE..FALSE. = FALSE
+                )
             ),
             list(
-                list(c.5..6. = 5,c.7..8. = 7, c.TRUE..FALSE. = TRUE),
-                list(c.5..6. = 6,c.7..8. = 8, c.TRUE..FALSE. = FALSE)
+                list(c.5..6. = 5, c.7..8. = 7, c.TRUE..FALSE. = TRUE),
+                list(c.5..6. = 6, c.7..8. = 8, c.TRUE..FALSE. = FALSE)
             )
         )
     ),
     list(
         list(
-            list(1,4,TRUE),
-            list(2,5,FALSE),
-            list(3,6,TRUE)
+            list(1, 4, TRUE),
+            list(2, 5, FALSE),
+            list(3, 6, TRUE)
         ),
         list(
-            list(1,4,TRUE),
-            list(2,5,FALSE),
-            list(3,6,TRUE)
+            list(1, 4, TRUE),
+            list(2, 5, FALSE),
+            list(3, 6, TRUE)
         )
     ),
     list(
         list(
             list(
-                list(1,3,TRUE),
-                list(NA,NA,FALSE)
+                list(1, 3, TRUE),
+                list(NA, NA, FALSE)
             ),
             list(
-                list(5,7,TRUE),
-                list(6,8,FALSE)
+                list(5, 7, TRUE),
+                list(6, 8, FALSE)
             )
         ),
         list(
             list(
-                list(1,3,TRUE),
-                list(NA,NA,FALSE)
+                list(1, 3, TRUE),
+                list(NA, NA, FALSE)
             ),
             list(
-                list(5,7,TRUE),
-                list(6,8,FALSE)
+                list(5, 7, TRUE),
+                list(6, 8, FALSE)
             )
         )
     )
@@ -315,18 +319,6 @@ test_parameters <- list(
         zerodots = TRUE, show = TRUE, output_path = dummy_file_name)
 )
 
-outlined_true_default_config <- default_config
-outlined_true_default_config[["thickness"]] <- (
-    outlined_true_default_config[["thickness"]] -
-    outlined_true_default_config[["edge_thickness"]]
-)
-outlined_true_default_config[["edge_thickness"]] <- (
-    outlined_true_default_config[["edge_thickness"]] / 2
-)
-outlined_true_default_config[["goalless_edge_thickness"]] <- (
-    outlined_true_default_config[["goalless_edge_thickness"]] / 2
-)
-
 test_that("scores are lazily converted from data.frame", {
         for (example in test_dataframes) {
             expect_equal(maybe_convert_dataframe(example[[1]]), example[[2]])
@@ -349,7 +341,7 @@ test_that("bad inputs are correctly identified", {
 )
 
 test_that("config factory produces correct configuration lists", {
-        expect_equal(config_factory(TRUE), outlined_true_default_config)
+        expect_equal(config_factory(TRUE), default_config)
         expect_equal(config_factory(FALSE)[["edge_thickness"]], 0)
         expect_equal(config_factory(TRUE, slant = 20)[["slant"]],
             sin(20 * pi / 180))
