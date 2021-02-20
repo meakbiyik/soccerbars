@@ -2,6 +2,8 @@
 \.vscode
 latex
 .*?\.png
+.*?\.jpg
+.*?\.txt
 scorebars
 tests/python
 poetry.*?$
