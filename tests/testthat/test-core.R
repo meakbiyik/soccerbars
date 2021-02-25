@@ -218,6 +218,49 @@ bad_scores <- list(
     not 'double'.", width = 1200))
 )
 
+bad_color_inputs <- list(
+    list(
+        c("red", "red"),
+        list(list(8, 0, FALSE), list(4, 1, TRUE), list(4, 4, FALSE)),
+        strwrap("Assertion on 'colors' failed: Must have length 3,
+        but has length 2.")
+    ),
+    list(
+        c("red", "red", "red"),
+        list(list(list(8, 0, FALSE), list(4, 1, TRUE), list(4, 4, FALSE))),
+        strwrap("Must be of type 'list', not 'character': if multiple lists
+        of scores are given, 'colors' argument must also have the same
+        structure, with same-length lists of color vectors.",
+        prefix = " ", width = 1200)
+    ),
+    list(
+        c("rod", "red", "red"),
+        list(list(list(8, 0, FALSE), list(4, 1, TRUE), list(4, 4, FALSE))),
+        strwrap("Must be of type 'list', not 'character': if multiple lists
+        of scores are given, 'colors' argument must also have the same
+        structure, with same-length lists of color vectors.",
+        prefix = " ", width = 1200)
+    ),
+    list(
+        c("re", "red", "red"),
+        list(list(8, 0, FALSE), list(4, 1, TRUE), list(4, 4, FALSE)),
+        strwrap("'re' is not a valid color. Colors need to be
+        either a color name as listed by colors\\(\\), a
+        hexadecimal string of the form '#rrggbb' or
+        '#rrggbbaa', or a positive integer i meaning
+        `palette\\(\\)\\[i\\]`", prefix = " ", width = 1200)
+    ),
+    list(
+        list(c("re", "red", "red")),
+        list(list(list(8, 0, FALSE), list(4, 1, TRUE), list(4, 4, FALSE))),
+        strwrap("'re' is not a valid color. Colors need to be
+        either a color name as listed by colors\\(\\), a
+        hexadecimal string of the form '#rrggbb' or
+        '#rrggbbaa', or a positive integer i meaning
+        `palette\\(\\)\\[i\\]`", prefix = " ", width = 1200)
+    )
+)
+
 dummy_file_name <- ".dummy.png"
 
 test_inputs <- list(
@@ -301,7 +344,7 @@ test_parameters <- list(
         zerodots = TRUE, show = FALSE, output_path = NULL),
     list(outlined = FALSE, twogoalline = TRUE,
         zerodots = TRUE, show = TRUE, output_path = NULL),
-    list(outlined = TRUE, twogoalline = FALSE,
+    list(outlined = TRUE, twogoalline = FALSE, transparent_background = TRUE,
         zerodots = FALSE, show = FALSE, output_path = dummy_file_name),
     list(outlined = TRUE, twogoalline = FALSE,
         zerodots = FALSE, show = TRUE, output_path = dummy_file_name),
@@ -340,9 +383,22 @@ test_that("bad inputs are correctly identified", {
     }
 )
 
+test_that("bad color configurations are correctly identified", {
+        for (example in bad_color_inputs) {
+            expect_error(check_color(example[[1]], example[[2]]), example[[3]])
+        }
+    }
+)
+
 test_that("config factory produces correct configuration lists", {
         expect_equal(config_factory(TRUE), default_config)
         expect_equal(config_factory(FALSE)[["edge_thickness"]], 0)
+        expect_equal(config_factory(TRUE,
+            edge_thickness = 10)[["edge_thickness"]],
+            10 * default_config[["thickness"]])
+        expect_equal(config_factory(TRUE,
+            edge_thickness = 10, thickness = 3)[["edge_thickness"]],
+            10 * 3)
         expect_equal(config_factory(TRUE, slant = 20)[["slant"]],
             sin(20 * pi / 180))
         expect_equal(config_factory(TRUE, zerodot = 10)[["zerodot"]],
@@ -365,6 +421,7 @@ test_that("config factory produces correct configuration lists", {
 )
 
 test_that("colors are consistent with the match and config", {
+        matchcolor <- "#2BAC3648"
         home_color <- do.call(
             rgb, append(default_config[["home_color"]],
             list(maxColorValue = 255))
@@ -391,6 +448,7 @@ test_that("colors are consistent with the match and config", {
             rgb, append(default_config[["fill_color"]],
             list(maxColorValue = 255))
         )
+
         expect_equal(
             get_colors(FALSE, FALSE, default_config),
             list(home_color, home_color)
@@ -403,6 +461,25 @@ test_that("colors are consistent with the match and config", {
         )
         expect_equal(
             get_colors(TRUE, TRUE, default_config), list(fill_color, away_color)
+        )
+
+        expect_equal(
+            get_colors(FALSE, FALSE, default_config, matchcolor = matchcolor),
+            list(matchcolor, matchcolor)
+        )
+        expect_equal(
+            get_colors(
+                TRUE, FALSE, default_config,
+                matchcolor = matchcolor
+            ),
+            list(matchcolor, matchcolor))
+        expect_equal(
+            get_colors(FALSE, TRUE, default_config, matchcolor = matchcolor),
+            list(matchcolor, matchcolor)
+        )
+        expect_equal(
+            get_colors(TRUE, TRUE, default_config, matchcolor = matchcolor),
+            list(fill_color, matchcolor)
         )
     }
 )

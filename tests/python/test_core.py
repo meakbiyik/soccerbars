@@ -199,6 +199,12 @@ bad_color_inputs = [
         ValueError,
         r".+?is not a valid matplotlib color.+",
     ),
+    (
+        [["i am an invalid color", "r", "r"]],
+        [[[8, 0, False], [4, 1, True], [4, 4, False]]],
+        ValueError,
+        r".+?is not a valid matplotlib color.+",
+    ),
 ]
 
 dummy_file_name = Path(".dummy.png")
