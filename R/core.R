@@ -392,6 +392,20 @@ check_color <- function(color, scores) {
     }
 
     if (is.list(scores[[1]][[1]]) || length(scores[[1]][[1]]) > 1) {
+        islist_or_error <- checkmate::check_list(color, len = length(scores))
+        if (!is.logical(islist_or_error)) {
+            stop(
+                sprintf(
+                    strwrap(
+                        "%s: if multiple lists of scores are given,
+                        'colors' argument must also have the same structure,
+                        with same-length lists of color vectors.",
+                        prefix = " ", width = 1200
+                    ),
+                    islist_or_error
+                )
+            )
+        }
         matchlists <- scores
         matchcolors <- color
     } else {
@@ -413,7 +427,7 @@ check_color <- function(color, scores) {
                             either a color name as listed by colors(), a
                             hexadecimal string of the form '#rrggbb' or
                             '#rrggbbaa', or a positive integer i meaning
-                            `palette()[i]`)"
+                            `palette()[i]`", prefix = " ", width = 1200
                         ),
                         color
                     )
@@ -441,8 +455,7 @@ config_factory <- function(outlined, ...) {
                     strwrap(
                         "Keyword argument '%s' is not a valid configuration
                         parameter. Available configuration parameters
-                        are (%s)",
-                        width = 1200
+                        are (%s)", prefix = " "
                     ),
                     key, paste(names(config), collapse = ", ")
                 )
