@@ -23,10 +23,12 @@ of two alternative forms: three vectors of format
 or lists of three length-one elements with these datatypes. If the matches
 are given as data.frames, then each column is expected to have the same
 structure and data types as these alternatives. Some valid examples:
-list(c(1,2,3), c(4,5,6), c(T,F,T))
-list(list(1,4,T), list(2,5,F), list(3,6,T))
-data.frame(list(home=c(1,2,3), away=c(4,5,6), flag=c(T,F,T)))
-list(list(c(1,2), c(3,4), c(T,F)), list(c(5,6), c(7,8), c(T,F)))}
+\itemize{
+\item list(c(1,2,3), c(4,5,6), c(T,F,T))
+\item list(list(1,4,T), list(2,5,F), list(3,6,T))
+\item data.frame(list(home=c(1,2,3), away=c(4,5,6), flag=c(T,F,T)))
+\item list(list(c(1,2), c(3,4), c(T,F)), list(c(5,6), c(7,8), c(T,F)))
+}}
 
 \item{twogoalline}{A logical, draws lines for two-goal levels,
 by default FALSE.}
