@@ -477,7 +477,7 @@ config_factory <- function(outlined, ...) {
             next
         }
 
-        if (grepl("edge_thickness", key, fixed = TRUE) && !outlined) {
+        if (grepl("edge_thickness", key, fixed = TRUE) && outlined) {
             if (!is.null(kwargs[["thickness"]])) {
                 config[[key]] <- value * kwargs[["thickness"]]
             } else {
