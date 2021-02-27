@@ -59,8 +59,6 @@ of elements with the number of score sets.}
 visualization. Not necessarily consistent with its latex counterpart,
 but mostly a superset of it.
 \itemize{
-\item figure_height: Figure height in inches, by default 4
-\item figure_width_per_match: Figure width per match in inches, by default 0.5
 \item dpi: Dots per inch resolution, by default 300
 \item thickness: Line thickness in cartesian coordinates, by default 0.18
 \item edge_thickness: Edge thickness for outlined patches (when outlined=True)

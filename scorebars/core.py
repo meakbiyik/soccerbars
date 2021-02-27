@@ -23,8 +23,6 @@ GOAL_TO_HEIGHT: Dict[int, float] = defaultdict(
 )
 
 DEFAULT_CONFIG = {
-    "figure_height": 4,
-    "figure_width_per_match": 0.5,
     "dpi": 300,
     "thickness": 0.36,
     "edge_thickness": 0.35 * 2 * 0.36,
@@ -41,7 +39,6 @@ DEFAULT_CONFIG = {
     "baseline_color": (0, 0, 0, 1),
     "fill_color": (0, 0, 0, 0),
     "clip_slanted_lines": True,
-    "_linewidth_factor": 4 * PPI / (2 * MAX_HEIGHT),
 }
 
 
@@ -96,8 +93,6 @@ def scorebar(
     **plot_kwargs
         Additional configuration keywords for the visualization. Not necessarily
         consistent with its latex counterpart, but mostly a superset of it.
-            - figure_height: Figure height in inches, by default 4
-            - figure_width_per_match: Figure width per match in inches, by default 0.5
             - dpi: Dots per inch resolution, by default 300
             - thickness: Line thickness in cartesian coordinates, by default 0.18
             - edge_thickness: Edge thickness for outlined patches (when outlined=True) as the ratio to the
@@ -211,23 +206,22 @@ def scorebar(
                         radius=config["thickness"],
                         facecolor=facecolor,
                         edgecolor=edgecolor,
-                        linewidth=config["goalless_edge_thickness"]
-                        * config["_linewidth_factor"],
+                        linewidth=config["goalless_edge_thickness"] * PPI,
                     )
                 )
 
             if scores[0] and scores[1]:
                 baseline_jumps.extend(
                     [
-                        match_index - config["thickness"] * 0.98 / 2,
-                        match_index + config["thickness"] * 0.98 / 2,
+                        match_index - config["thickness"] * 0.95 / 2,
+                        match_index + config["thickness"] * 0.95 / 2,
                     ]
                 )
             elif not (scores[0] or scores[1]):
                 baseline_jumps.extend(
                     [
-                        match_index - config["thickness"] * 0.98,
-                        match_index + config["thickness"] * 0.98,
+                        match_index - config["thickness"] * 0.95,
+                        match_index + config["thickness"] * 0.95,
                     ]
                 )
 
@@ -485,8 +479,6 @@ def _config_factory(outlined, **kwargs):
 
         config[key] = value
 
-    config["_linewidth_factor"] = config["figure_height"] * PPI / (2 * MAX_HEIGHT)
-
     return config
 
 
@@ -515,7 +507,7 @@ def _line(start_xy, end_xy, facecolor, edgecolor, config):
 
     clipped = start_xy[0] != end_xy[0]
     thickness = config["thickness"]
-    edge_thickness = config["edge_thickness"] * config["_linewidth_factor"]
+    edge_thickness = config["edge_thickness"] * PPI
     half_th = thickness / 2
 
     if clipped and config["clip_slanted_lines"]:
@@ -560,8 +552,8 @@ def _plot(
 
     fig = plt.figure(
         figsize=(
-            config["figure_width_per_match"] * match_count,
-            config["figure_height"],
+            plot_width,
+            2 * MAX_HEIGHT,
         ),
         dpi=config["dpi"],
     )
@@ -575,15 +567,20 @@ def _plot(
     ax.set_xlim(0, plot_width)
     ax.set_ylim(-MAX_HEIGHT, MAX_HEIGHT)
 
-    baseline_width = (
-        config["thickness"] * config["baseline_factor"] * config["_linewidth_factor"]
-    )
+    baseline_width = config["thickness"] * config["baseline_factor"] * PPI
     baseline_color = config["baseline_color"]
 
     baseline_endpoints = [0] + baseline_jumps + [plot_width]
     baseline_segments = zip(baseline_endpoints[::2], baseline_endpoints[1::2])
     for x1, x2 in baseline_segments:
-        ax.plot([x1, x2], [0, 0], lw=baseline_width, color=baseline_color, zorder=-1)
+        ax.plot(
+            [x1, x2],
+            [0, 0],
+            lw=baseline_width,
+            color=baseline_color,
+            zorder=-1,
+            solid_capstyle="butt",
+        )
 
     if twogoalline:
         two_goals = GOAL_TO_HEIGHT[2]

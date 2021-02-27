@@ -9,8 +9,6 @@ goal_to_height <- function(x) {
 }
 
 default_config <- list(
-    figure_height = 4,
-    figure_width_per_match = 0.5,
     dpi = 300,
     thickness = 0.36,
     edge_thickness = 0.35 * 0.36,
@@ -26,8 +24,7 @@ default_config <- list(
     away_color = col2rgb("black", alpha = TRUE),
     baseline_color = col2rgb("black", alpha = TRUE),
     fill_color = col2rgb(NA, alpha = TRUE),
-    clip_slanted_lines = TRUE,
-    linewidth_factor = 4 * ppi / (2 * max_height)
+    clip_slanted_lines = TRUE
 )
 
 #' Plot Multivariate Sparklines
@@ -68,8 +65,6 @@ default_config <- list(
 #' @param ... A named list, additional configuration keywords for the
 #' visualization. Not necessarily consistent with its latex counterpart,
 #' but mostly a superset of it.
-#'  - figure_height: Figure height in inches, by default 4
-#'  - figure_width_per_match: Figure width per match in inches, by default 0.5
 #'  - dpi: Dots per inch resolution, by default 300
 #'  - thickness: Line thickness in cartesian coordinates, by default 0.18
 #'  - edge_thickness: Edge thickness for outlined patches (when outlined=True)
@@ -220,16 +215,16 @@ scorebar <- function(scores,
                 baseline_jumps <- c(
                     baseline_jumps,
                     c(
-                        match_index - config[["thickness"]] * 0.98 / 2,
-                        match_index + config[["thickness"]] * 0.98 / 2
+                        match_index - config[["thickness"]] * 0.95 / 2,
+                        match_index + config[["thickness"]] * 0.95 / 2
                     )
                 )
             } else if (scores[[1]] == 0 && scores[[2]] == 0) {
                 baseline_jumps <- c(
                     baseline_jumps,
                     c(
-                        match_index - config[["thickness"]] * 0.98,
-                        match_index + config[["thickness"]] * 0.98
+                        match_index - config[["thickness"]] * 0.95,
+                        match_index + config[["thickness"]] * 0.95
                     )
                 )
             }
@@ -526,10 +521,6 @@ config_factory <- function(outlined, ...) {
         config[[key]] <- value
     }
 
-    config[["linewidth_factor"]] <- (
-        config[["figure_height"]] * ppi / (2 * max_height)
-    )
-
     return(config)
 }
 
@@ -733,7 +724,7 @@ plot <- function(patches,
     padding <- config[["padding"]]
     plot_width <- (match_count + 1) * config[["spacing"]] + padding
     baseline_width <- config[["thickness"]] * config[["baseline_factor"]] *
-        config[["linewidth_factor"]] / 2
+        ppi / 2
     baseline_color <- config[["baseline_color"]]
 
     background <- if (config[["transparent_background"]]) {
@@ -743,12 +734,11 @@ plot <- function(patches,
     }
 
     ax <- ggplot(dpi = config[["dpi"]]) +
-        coord_cartesian(
+        coord_fixed(
             xlim = c(0, plot_width),
-            ylim = c(-max_height, max_height), expand = FALSE, default = TRUE
+            ylim = c(-max_height, max_height), expand = FALSE
         ) +
-        coord_fixed() +
-        labs(x = NULL, y = NULL)
+        labs(x = NULL, y = NULL, title = NULL)
 
     baseline_endpoints <- c(0, baseline_jumps, plot_width)
     baseline_seg_count <- length(baseline_endpoints)
@@ -760,7 +750,7 @@ plot <- function(patches,
         colour = do.call(
             rgb, append(baseline_color, list(maxColorValue = 255))
         ),
-        size = baseline_width,
+        size = baseline_width
     )
 
     if (twogoalline) {
@@ -786,16 +776,20 @@ plot <- function(patches,
             legend.position = "none",
             panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(),
+            panel.spacing = unit(0, "mm"),
+            plot.margin = unit(c(0, 0, 0, 0), "mm"),
             panel.background = element_rect(fill = background, colour = NA),
             plot.background = element_rect(fill = background, colour = NA)
         )
 
     if (!is.null(output_path)) {
-        ggsave(output_path,
+        ggsave(
+            output_path,
             plot = ax,
-            height = config[["figure_height"]],
-            width = config[["figure_width_per_match"]] * match_count,
-            type = "cairo", bg = background
+            height = 2 * max_height,
+            width = plot_width,
+            bg = background,
+            dpi = config[["dpi"]]
         )
     }
     if (show) {
