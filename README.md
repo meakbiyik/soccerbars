@@ -113,5 +113,5 @@ pip install git+https://github.com/snlab-eakbiyik/scorebars.git
 3. Clone this repository to your local, navigate into the folder and run
 
     ```bash
-    poetry install
+    poetry install --no-dev --extras cli
     ```
