@@ -56,10 +56,15 @@ default_config <- list(
 #' scorebar. This option is provided to be consistent with LaTeX package API
 #' and allows high configurability, but `home_color`, `away_color` and
 #' `fill_color` options should already be sufficient for most of the use cases,
-#' by default NULL.
+#' by default NULL. This parameter is expected to be structurally identical
+#' with the `scores`: if a list of match score lists is given, then `color`
+#' must also be a list of vectors.
 #' @param show A logical, prints the plot, by default TRUE.
-#' @param output_path A string, Path to save the plot at (image type
-#' is inferred from the path), by default NULL.
+#' @param output_path A string or a vector of strings, path to save the plot
+#' at (image type is inferred from the path), by default NULL. This parameter
+#' is expected to be structurally identical with the `scores`: if a list of
+#' match score lists is given, then `output_path` must have the same number
+#' of elements with the number of score sets.
 #' @param ... A named list, additional configuration keywords for the
 #' visualization. Not necessarily consistent with its latex counterpart,
 #' but mostly a superset of it.
@@ -129,7 +134,7 @@ scorebar <- function(scores,
     scores <- maybe_flatten_vectors(scores)
 
     check_scores(scores)
-    check_color(color, scores)
+    check_color_and_output_path(color, output_path, scores)
 
     config <- config_factory(outlined, ...)
 
@@ -147,6 +152,8 @@ scorebar <- function(scores,
         baseline_jumps <- c()
         matches <- matchlists[[matches_index]]
         colors <- if (!is.null(color)) matchcolors[[matches_index]] else NULL
+        outpath <- if (!is.null(output_path)) output_path[[matches_index]]
+            else NULL
         match_count <- length(matches)
 
         for (index in seq_along(matches)) {
@@ -256,7 +263,7 @@ scorebar <- function(scores,
                 config,
                 show = show,
                 twogoalline = twogoalline,
-                output_path = output_path
+                output_path = outpath
             )
         )
     }
@@ -386,32 +393,57 @@ check_scores <- function(scores) {
     }
 }
 
-check_color <- function(color, scores) {
-    if (is.null(color)) {
-        return(NULL)
-    }
+check_color_and_output_path <- function(color, output_path, scores) {
 
     if (is.list(scores[[1]][[1]]) || length(scores[[1]][[1]]) > 1) {
-        islist_or_error <- checkmate::check_list(color, len = length(scores))
-        if (!is.logical(islist_or_error)) {
-            stop(
-                sprintf(
-                    strwrap(
-                        "%s: if multiple lists of scores are given,
-                        'colors' argument must also have the same structure,
-                        with same-length lists of color vectors.",
-                        prefix = " ", width = 1200
-                    ),
-                    islist_or_error
-                )
-            )
-        }
         matchlists <- scores
         matchcolors <- color
     } else {
         matchlists <- list(scores)
         matchcolors <- list(color)
     }
+
+    if (!is.null(output_path)) {
+        outpaths_ischarvector_or_error <- checkmate::check_character(
+            output_path, len = length(matchlists)
+        )
+        if (!is.logical(outpaths_ischarvector_or_error)) {
+            stop(
+                sprintf(
+                    strwrap(
+                        "%s: output_path is expected to be structurally
+                        identical with the `scores`. If a list of match
+                        score lists is given, then `output_path` must
+                        also be a vector of strings.",
+                        prefix = " ", width = 1200
+                    ),
+                    outpaths_ischarvector_or_error
+                )
+            )
+        }
+    }
+
+    if (is.null(color)) {
+        return(NULL)
+    }
+
+    colors_islist_or_error <- checkmate::check_list(
+        matchcolors, len = length(matchlists)
+    )
+    if (!is.logical(colors_islist_or_error)) {
+        stop(
+            sprintf(
+                strwrap(
+                    "%s: if multiple lists of scores are given,
+                    'colors' argument must also have the same structure,
+                    with same-length lists of color vectors.",
+                    prefix = " ", width = 1200
+                ),
+                colors_islist_or_error
+            )
+        )
+    }
+
     for (matches_index in seq_along(matchlists)) {
         matches <- matchlists[[matches_index]]
         colors <- if (!is.null(color)) matchcolors[[matches_index]] else NULL

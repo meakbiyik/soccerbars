@@ -221,43 +221,51 @@ bad_scores <- list(
 bad_color_inputs <- list(
     list(
         c("red", "red"),
+        NULL,
         list(list(8, 0, FALSE), list(4, 1, TRUE), list(4, 4, FALSE)),
-        strwrap("Assertion on 'colors' failed: Must have length 3,
-        but has length 2.")
+        ".+? length 3, but has length 2."
     ),
     list(
         c("red", "red", "red"),
+        NULL,
         list(list(list(8, 0, FALSE), list(4, 1, TRUE), list(4, 4, FALSE))),
-        strwrap("Must be of type 'list', not 'character': if multiple lists
-        of scores are given, 'colors' argument must also have the same
-        structure, with same-length lists of color vectors.",
-        prefix = " ", width = 1200)
+        ".+? type 'list', not 'character'.+?"
     ),
     list(
         c("rod", "red", "red"),
+        NULL,
         list(list(list(8, 0, FALSE), list(4, 1, TRUE), list(4, 4, FALSE))),
-        strwrap("Must be of type 'list', not 'character': if multiple lists
-        of scores are given, 'colors' argument must also have the same
-        structure, with same-length lists of color vectors.",
-        prefix = " ", width = 1200)
+        ".+? 'list', not 'character'.+?"
     ),
     list(
         c("re", "red", "red"),
+        NULL,
         list(list(8, 0, FALSE), list(4, 1, TRUE), list(4, 4, FALSE)),
-        strwrap("'re' is not a valid color. Colors need to be
-        either a color name as listed by colors\\(\\), a
-        hexadecimal string of the form '#rrggbb' or
-        '#rrggbbaa', or a positive integer i meaning
-        `palette\\(\\)\\[i\\]`", prefix = " ", width = 1200)
+        "'re' is not a valid color.+?"
     ),
     list(
         list(c("re", "red", "red")),
+        NULL,
         list(list(list(8, 0, FALSE), list(4, 1, TRUE), list(4, 4, FALSE))),
-        strwrap("'re' is not a valid color. Colors need to be
-        either a color name as listed by colors\\(\\), a
-        hexadecimal string of the form '#rrggbb' or
-        '#rrggbbaa', or a positive integer i meaning
-        `palette\\(\\)\\[i\\]`", prefix = " ", width = 1200)
+        "'re' is not a valid color.+?"
+    ),
+    list(
+        c("red", "red"),
+        c("img.png", "img2.png"),
+        list(list(8, 0, FALSE), list(4, 1, TRUE), list(4, 4, FALSE)),
+        ".+? length 1, but has length 2.+?"
+    ),
+    list(
+        c("re", "red", "red"),
+        1234,
+        list(list(8, 0, FALSE), list(4, 1, TRUE), list(4, 4, FALSE)),
+        ".+? type 'character', not 'double'.+?"
+    ),
+    list(
+        list(c("re", "red", "red")),
+        c("img.png", "img2.png"),
+        list(list(list(8, 0, FALSE), list(4, 1, TRUE), list(4, 4, FALSE))),
+        ".+? length 1, but has length 2.+?"
     )
 )
 
@@ -383,9 +391,15 @@ test_that("bad inputs are correctly identified", {
     }
 )
 
-test_that("bad color configurations are correctly identified", {
+test_that("bad color and output path configs are correctly identified", {
         for (example in bad_color_inputs) {
-            expect_error(check_color(example[[1]], example[[2]]), example[[3]])
+            expect_error(
+                check_color_and_output_path(
+                    example[[1]],
+                    example[[2]],
+                    example[[3]]
+                ), example[[4]]
+            )
         }
     }
 )
@@ -487,6 +501,15 @@ test_that("colors are consistent with the match and config", {
 test_that("scorebar run without any errors, warnings or prints", {
         for (example in test_inputs) {
             for (parameters in test_parameters) {
+                if (
+                    is.list(example[[1]][[1]]) &&
+                    !is.null(parameters[["output_path"]])
+                ) {
+                    parameters[["output_path"]] <- c(
+                        parameters[["output_path"]],
+                        parameters[["output_path"]]
+                    )
+                }
                 expect_silent(
                     do.call(scorebar, append(list(example), parameters))
                 )

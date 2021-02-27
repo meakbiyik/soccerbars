@@ -15,7 +15,7 @@ from scorebars.core import (
     _maybe_convert_dataframe,
     _maybe_flatten_vectors,
     _check_scores,
-    _check_color,
+    _check_color_and_output_path,
     _config_factory,
     DEFAULT_CONFIG,
     scorebar,
@@ -174,36 +174,76 @@ bad_scores = [
     ),
 ]
 
-bad_color_inputs = [
+bad_color_path_inputs = [
     (
         ["r", "r"],
+        None,
         [[8, 0, False], [4, 1, True], [4, 4, False]],
         ValueError,
         r"Length of matches .+",
     ),
     (
         ["r", "r", "r"],
+        None,
         [[[8, 0, False], [4, 1, True]], [[4, 4, False]]],
         ValueError,
         r"Length of matches .+",
     ),
     (
         ["i am an invalid color", "r", "r"],
+        None,
         [[[8, 0, False], [4, 1, True]], [[4, 4, False]]],
         ValueError,
         r"Length of matches .+",
     ),
     (
         ["i am an invalid color", "r", "r"],
+        None,
         [[8, 0, False], [4, 1, True], [4, 4, False]],
         ValueError,
         r".+?is not a valid matplotlib color.+",
     ),
     (
         [["i am an invalid color", "r", "r"]],
+        None,
         [[[8, 0, False], [4, 1, True], [4, 4, False]]],
         ValueError,
         r".+?is not a valid matplotlib color.+",
+    ),
+    (
+        ["r", "r"],
+        ["path.png"],
+        [[8, 0, False], [4, 1, True], [4, 4, False]],
+        TypeError,
+        r".+? not \[<class 'list'>\].",
+    ),
+    (
+        ["r", "r"],
+        "path.png",
+        [[[8, 0, False], [4, 1, True], [4, 4, False]]],
+        ValueError,
+        r".+? iterable of paths, not <class 'str'>.",
+    ),
+    (
+        ["r", "r"],
+        ["path.png", "path.png"],
+        [[[8, 0, False], [4, 1, True], [4, 4, False]]],
+        ValueError,
+        r".+? 2 output paths.+? 1 set\(s\) of.+",
+    ),
+    (
+        None,
+        [1234],
+        [[[8, 0, False], [4, 1, True], [4, 4, False]]],
+        TypeError,
+        r".+? not \[<class 'int'>\].",
+    ),
+    (
+        ["r", "r"],
+        1234,
+        [[8, 0, False], [4, 1, True], [4, 4, False]],
+        TypeError,
+        r".+? not \[<class 'int'>\].",
     ),
 ]
 
@@ -408,10 +448,14 @@ def test__check_scores(input, expected_error, match):
         _check_scores(input)
 
 
-@pytest.mark.parametrize("color,scores,expected_error,match", bad_color_inputs)
-def test__check_color(color, scores, expected_error, match):
+@pytest.mark.parametrize(
+    "color,output_path,scores,expected_error,match", bad_color_path_inputs
+)
+def test__check_color_and_output_path(
+    color, output_path, scores, expected_error, match
+):
     with pytest.raises(expected_error, match=match):
-        _check_color(color, scores)
+        _check_color_and_output_path(color, output_path, scores)
 
 
 def test__config_factory():
@@ -491,6 +535,8 @@ def test__colors():
 )
 @patch("matplotlib.pyplot.show")
 def test_scorebar(_, input, params, capsys):
+    if not _is_integerish(input[0][0]) and params["output_path"] is not None:
+        params["output_path"] = [params["output_path"]] * 2
     scorebar(input, **params)
     outputs = capsys.readouterr()
     assert not outputs.out

@@ -2,6 +2,7 @@ from typing import Dict, Union, Tuple, Iterable, List
 from collections import defaultdict
 import math
 import numbers
+import pathlib
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -51,7 +52,7 @@ def scorebar(
     outlined: bool = False,
     color: list = None,
     show: bool = True,
-    output_path: str = None,
+    output_path: Union[str, List[str]] = None,
     **plot_kwargs,
 ) -> Union[Axes, List[Axes]]:
     """Plot Multivariate Sparklines
@@ -84,10 +85,14 @@ def scorebar(
         scorebar. This option is provided to be consistent with LaTeX package API
         and allows high configurability, but `home_color`, `away_color` and `fill_color`
         options should already be sufficient for most of the use cases, by default None.
+        This argument is expected to be structurally identical with the `scores`: if a list of
+        match score lists is given, then `color` must also be a list of color lists.
     show : bool, optional
         Show the plot with pyplot.show, by default True
-    output_path : str, optional
-        Path to save the plot at (image type is inferred from the path), by default None
+    output_path : Union[str, List[str]], optional
+        Path to save the plot at (image type is inferred from the path), by default None.
+        This argument is expected to be structurally identical with the `scores`: if a list of
+        match score lists is given, then `output_path` must also be a list of strings.
     **plot_kwargs
         Additional configuration keywords for the visualization. Not necessarily
         consistent with its latex counterpart, but mostly a superset of it.
@@ -135,16 +140,18 @@ def scorebar(
     scores = _maybe_flatten_vectors(scores)
 
     _check_scores(scores)
-    _check_color(color, scores)
+    _check_color_and_output_path(color, output_path, scores)
 
     config = _config_factory(outlined, **plot_kwargs)
 
-    if _is_integerish(scores[0][0]):
-        matchlists = [scores]
-        matchcolors = [color]
-    else:
+    if _is_listlike(scores[0][0]):
         matchlists = scores
         matchcolors = color
+        outpaths = output_path
+    else:
+        matchlists = [scores]
+        matchcolors = [color]
+        outpaths = [output_path]
 
     axes: List[Axes] = []
     for matches_index, matches in enumerate(matchlists):
@@ -152,6 +159,7 @@ def scorebar(
         patches = []
         baseline_jumps = []
         colors = matchcolors[matches_index] if color is not None else None
+        outpath = outpaths[matches_index] if output_path is not None else None
         match_count = len(matches)
 
         for index, match in enumerate(matches):
@@ -251,7 +259,7 @@ def scorebar(
                 config,
                 show=show,
                 twogoalline=twogoalline,
-                output_path=output_path,
+                output_path=outpath,
             )
         )
 
@@ -391,17 +399,41 @@ def _check_scores(scores) -> None:
                 )
 
 
-def _check_color(color, scores) -> None:
+def _check_color_and_output_path(color, output_path, scores) -> None:
+
+    if _is_listlike(scores[0][0]):
+        matchlists = scores
+        matchcolors = color
+        outpaths = output_path
+    else:
+        matchlists = [scores]
+        matchcolors = [color]
+        outpaths = [output_path]
+
+    if output_path is not None:
+        if not _is_listlike(outpaths):
+            raise ValueError(
+                f"Output paths need to have the same structure with the scores. "
+                f"If a list of score sets are given, the paths also must be an "
+                f"iterable of paths, not {type(outpaths)}."
+            )
+        if len(outpaths) != len(matchlists):
+            raise ValueError(
+                f"One output path needs to be specified per match score set. "
+                f"Currently {len(outpaths)} output paths are specified while "
+                f"there are {len(matchlists)} set(s) of match scores."
+            )
+        if not all(
+            (isinstance(p, str) or isinstance(p, pathlib.Path)) for p in outpaths
+        ):
+            raise TypeError(
+                f"Output paths need to be string or of type pathlib.Path, not "
+                f"{[type(p) for p in outpaths]}."
+            )
 
     if color is None:
         return
 
-    if _is_integerish(scores[0][0]):
-        matchlists = [scores]
-        matchcolors = [color]
-    else:
-        matchlists = scores
-        matchcolors = color
     for matches, colors in zip(matchlists, matchcolors):
         if len(matches) != len(colors):
             raise ValueError(

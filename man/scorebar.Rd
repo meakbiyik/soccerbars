@@ -43,12 +43,17 @@ by default FALSE.}
 scorebar. This option is provided to be consistent with LaTeX package API
 and allows high configurability, but \code{home_color}, \code{away_color} and
 \code{fill_color} options should already be sufficient for most of the use cases,
-by default NULL.}
+by default NULL. This parameter is expected to be structurally identical
+with the \code{scores}: if a list of match score lists is given, then \code{color}
+must also be a list of vectors.}
 
 \item{show}{A logical, prints the plot, by default TRUE.}
 
-\item{output_path}{A string, Path to save the plot at (image type
-is inferred from the path), by default NULL.}
+\item{output_path}{A string or a vector of strings, path to save the plot
+at (image type is inferred from the path), by default NULL. This parameter
+is expected to be structurally identical with the \code{scores}: if a list of
+match score lists is given, then \code{output_path} must have the same number
+of elements with the number of score sets.}
 
 \item{...}{A named list, additional configuration keywords for the
 visualization. Not necessarily consistent with its latex counterpart,
