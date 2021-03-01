@@ -74,9 +74,9 @@ default_config <- list(
 #'  - zerodot: Zero-dot radius ratio to thickness (when zerodots = True),
 #'      by default 0.4
 #'  - slant: Slope for unbalanced scores in degrees, by default 14
-#'  - spacing: Spacing between matches in cartesian coordinates, by default 0.9
+#'  - spacing: Spacing between matches in cartesian coordinates, by default 0.8
 #'  - padding: Padding before and after the matches in cartesian coordinates,
-#'      by default 0.9
+#'      by default 0.25
 #'  - baseline_factor: Thickness of baseline with respect to line thickness,
 #'      by default 0.2
 #'  - brighten: Brightness percentage of the two-goal lines (when
