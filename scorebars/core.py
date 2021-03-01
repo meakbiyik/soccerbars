@@ -104,8 +104,7 @@ def scorebar(
             - spacing: Spacing between matches in cartesian coordinates, by default 0.8
             - padding: Padding before and after the matches in cartesian coordinates, by default 0.25
             - baseline_factor: Thickness of baseline with respect to line thickness, by default 0.2
-            - brighten: Brightness percentage of the two-goal lines (when twogoalline=True)
-                and away games (when outlined=False), by default 33
+            - brighten: Brightness percentage of the away games (when outlined=False), by default 33
             - transparent_background: Set the background transparent instead of white, by default False
             - home_color: Color of home match lines in matplotlib-acceptable formats, by default rgba(0,0,0,1)
             - away_color: Color of away match lines in matplotlib-acceptable formats, by default rgba(0,0,0,1)
@@ -138,8 +137,9 @@ def scorebar(
     _check_color_and_output_path(color, output_path, scores)
 
     config = _config_factory(outlined, **plot_kwargs)
+    is_multiple = _is_listlike(scores[0][0])
 
-    if _is_listlike(scores[0][0]):
+    if is_multiple:
         matchlists = scores
         matchcolors = color
         outpaths = output_path
@@ -257,7 +257,7 @@ def scorebar(
             )
         )
 
-    return axes if len(axes) > 1 else axes[0]
+    return axes if is_multiple else axes[0]
 
 
 def _is_listlike(val, ensure_nonempty=False, ensure_type: str = None):

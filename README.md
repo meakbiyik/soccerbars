@@ -77,8 +77,8 @@ scorebar(list(
     list(c(1, 3), c(2, 4), c(TRUE, FALSE)), 
     list(c(5, 7), c(6, 8), c(TRUE, FALSE))
     ),
-    color=list(c("red", "blue"), c("green", "yellow")),
-    output_path=c("league1.png", "league2.png")
+    color = list(c("red", "blue"), c("green", "yellow")),
+    output_path = c("league1.png", "league2.png")
 )
 # Input as data.frame object
 scorebar(data.frame(
@@ -127,7 +127,7 @@ These parameters can be used to customize the output images in all components.
 | spacing | Spacing between matches in cartesian coordinates | 0.8 |
 | padding | Padding before and after the matches in cartesian coordinates | 0.25 |
 | baseline_factor | Thickness of baseline with respect to line thickness | 0.2 |
-| brighten | Brightness percentage of the two-goal lines (when twogoalline = True) and away games (when outlined = False) | 33 |
+| brighten | Brightness percentage of the away games (when outlined = False) | 33 |
 | transparent_background | Set the background transparent instead of white | False |
 | home_color | Color of home match lines (in Python: matplotlib-acceptable formats, in R: any of the three kinds of R color specifications; either a color name as listed by colors(), a hexadecimal string of the form "#rrggbb" or "#rrggbbaa", or a positive integer i meaning `palette()[i]`) | #000000FF |
 | away_color | Color of away match lines | #000000FF |

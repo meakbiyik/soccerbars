@@ -67,11 +67,11 @@ default_config <- list(
 #' but mostly a superset of it.
 #'  - dpi: Dots per inch resolution, by default 300
 #'  - thickness: Line thickness in cartesian coordinates, by default 0.18
-#'  - edge_thickness: Edge thickness for outlined patches (when outlined=True)
+#'  - edge_thickness: Edge thickness for outlined patches (when outlined=TRUE)
 #'      as the ratio to the line thickness, by default 0.35
 #'  - goalless_edge_thickness: Edge thickness for outlined no-goal patches
-#'      (when outlined=True) as the ratio to the line thickness, by default 0.5
-#'  - zerodot: Zero-dot radius ratio to thickness (when zerodots = True),
+#'      (when outlined=TRUE) as the ratio to the line thickness, by default 0.5
+#'  - zerodot: Zero-dot radius ratio to thickness (when zerodots=TRUE),
 #'      by default 0.4
 #'  - slant: Slope for unbalanced scores in degrees, by default 14
 #'  - spacing: Spacing between matches in cartesian coordinates, by default 0.8
@@ -79,11 +79,10 @@ default_config <- list(
 #'      by default 0.25
 #'  - baseline_factor: Thickness of baseline with respect to line thickness,
 #'      by default 0.2
-#'  - brighten: Brightness percentage of the two-goal lines (when
-#'      twogoalline = True) and away games (when outlined = False),
+#'  - brighten: Brightness percentage of the away games (when outlined=FALSE),
 #'      by default 33
 #'  - transparent_background: Set the background transparent instead of white,
-#'      by default False
+#'      by default FALSE
 #'  - home_color: Color of home match lines in any of the three kinds of R
 #'      color specifications (i.e. either a color name as listed by colors(),
 #'      a hexadecimal string of the form "#rrggbb" or "#rrggbbaa",
@@ -132,8 +131,9 @@ scorebar <- function(scores,
     check_color_and_output_path(color, output_path, scores)
 
     config <- config_factory(outlined, ...)
+    is_multiple <- is.list(scores[[1]][[1]]) || length(scores[[1]][[1]]) > 1
 
-    if (is.list(scores[[1]][[1]]) || length(scores[[1]][[1]]) > 1) {
+    if (is_multiple) {
         matchlists <- scores
         matchcolors <- color
     } else {
@@ -263,7 +263,7 @@ scorebar <- function(scores,
         )
     }
 
-    return(if (length(axes) > 1) axes else axes[[1]])
+    return(if (is_multiple) axes else axes[[1]])
 }
 
 maybe_convert_dataframe <- function(scores) {
