@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 import re
 from ast import literal_eval
@@ -24,18 +25,20 @@ except:
 from scorebars import scorebar
 
 
-DESCRIPTION = """Multivariate sparklines making use of Gestalt theory (gestaltlines) for sequences of sports results.
+DESCRIPTION = """Multivariate sparklines making use of Gestalt theory (gestaltlines) 
+for sequences of sports results.
 
-Matches can either follow the LaTeX format, e.g. "(1-2) (3-4)*", or can be a glob pattern that matches with valid .csv files.
-Output file type can be changed by specifying it in the output path as the extension.
+Matches can either follow the LaTeX format, e.g. "(1-2) (3-4)*", or can be a file name 
+or a glob pattern that matches with valid .csv files. Output file type can be changed 
+by specifying it in the output path as the extension.
 
 \b
 Examples:
     poetry run scorebars "(1-2) (3-1)* (2-2)"
-    poetry run scorebars -o "out.tiff" "(1-2) (3-1)* (2-2)"
-    poetry run scorebars matches.csv -o "matches.pdf"
+    poetry run scorebars -o out.tiff "(1-2) (3-1)* (2-2)"
+    poetry run scorebars matches.csv -o matches.pdf
     poetry run scorebars *.csv -o ".\output-dir"
-    poetry run scorebars -z -ol -p fill_color:"(1,1,1,1)" -p home_color:red -o .\out *.csv
+    poetry run scorebars -z -ol -p fill_color:"(1,1,1,1)" -p home_color:red *.csv
 """
 MATCH_REGEX = re.compile(r"\((\d+)?[,-](\d+)?\)(\*)?")
 
@@ -73,11 +76,11 @@ MATCH_REGEX = re.compile(r"\((\d+)?[,-](\d+)?\)(\*)?")
     "--output-path",
     default=None,
     help="Output path of the image. If the input is a glob "
-    "pattern that matches with multiple .csv files, this parameter "
-    "can be given as a directory path to save the output images, with the "
-    "names identical to the input .csv files. Default behavior is to "
-    "save text inputs into 'output.png' and csv inputs to the same path "
-    "with the extension '.png'.",
+    "pattern, this parameter is interpreted as a directory path to "
+    "save the output images, with the names identical to the input "
+    ".csv files. Default behavior is to save text and file path inputs "
+    "into 'output.png' at the working directory, and glob patterns "
+    "under the directory '.\out' with the extension '.png'.",
     type=click.Path(),
 )
 @click.option(
@@ -111,25 +114,25 @@ def cli(
     ]
 
     if not match_scores:
-        filepaths = glob.glob(matches)
-        match_scores = [pd.read_csv(filepath) for filepath in filepaths]
-        if len(match_scores) > 1:
+        if os.path.exists(matches):
+            match_scores = pd.read_csv(Path(matches))
+            if not output_path:
+                output_path = Path(os.getcwd()).joinpath("output.png")
+        else:
+            filepaths = glob.glob(matches)
+            match_scores = [pd.read_csv(filepath) for filepath in filepaths]
             if output_path:
-                Path(output_path).mkdir(exist_ok=True)
-                output_path = [
-                    Path(output_path).joinpath(Path(path).with_suffix(".png").name)
-                    for path in filepaths
-                ]
+                output_dir = Path(output_path)
             else:
-                output_path = [
-                    Path(".").joinpath(Path(path).with_suffix(".png").name)
-                    for path in filepaths
-                ]
-        elif output_path:
-            output_path = [output_path]
+                output_dir = Path(os.getcwd()).joinpath("out")
+            output_dir.mkdir(exist_ok=True)
+            output_path = [
+                output_dir.joinpath(Path(path).with_suffix(".png").name)
+                for path in filepaths
+            ]
     else:
         if not output_path:
-            output_path = "output.png"
+            output_path = Path(os.getcwd()).joinpath("output.png")
 
     plot_kwargs = dict(arg.split(":") for arg in plot_kwargs)
     for k, v in plot_kwargs.items():
