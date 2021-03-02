@@ -1,5 +1,6 @@
 latex/
 *.png
+!resources/example.png
 *.jpg
 *.txt
 

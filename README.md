@@ -1,4 +1,5 @@
-# scorebars
+
+# scorebars <img width="90em" height="24em" src="resources/example.png">
 
 <!-- badges: start -->
 [![R CMD check](https://github.com/snlab-eakbiyik/scorebars/workflows/R%20CMD%20check/badge.svg)](https://github.com/snlab-eakbiyik/scorebars/actions)
@@ -120,8 +121,8 @@ These parameters can be used to customize the output images in all components.
 |-|-|-|
 | dpi | Dots per inch resolution | 300 |
 | thickness | Line thickness in cartesian coordinates | 0.18 |
-| edge_thickness:  | Edge thickness for outlined patches (when outlined=True) as the ratio to the line thickness | 0.35 |
-| goalless_edge_thickness:  | Edge thickness for outlined no-goal patches (when outlined=True) as the ratio to the line thickness | 0.5 |
+| edge_thickness  | Edge thickness for outlined patches (when outlined=True) as the ratio to the line thickness | 0.35 |
+| goalless_edge_thickness  | Edge thickness for outlined no-goal patches (when outlined=True) as the ratio to the line thickness | 0.5 |
 | zerodot | Zero-dot radius ratio to thickness (when zerodots=True) | 0.4 |
 | slant | Slope for unbalanced scores in degrees | 14 |
 | spacing | Spacing between matches in cartesian coordinates | 0.8 |
