@@ -50,7 +50,7 @@ default_config <- list(
 #' @param outlined A logical, only plots the outlines of the sparklines,
 #' by default FALSE.
 #' @param color A vector or a list of vectors, specifying the color of each
-#' scorebar. This option is provided to be consistent with LaTeX package API
+#' soccerbar. This option is provided to be consistent with LaTeX package API
 #' and allows high configurability, but `home_color`, `away_color` and
 #' `fill_color` options should already be sufficient for most of the use cases,
 #' by default NULL. This parameter is expected to be structurally identical
@@ -99,23 +99,23 @@ default_config <- list(
 #' each match score list.
 #' @examples
 #' \dontrun{
-#' scorebar(list(
+#' soccerbar(list(
 #'     list(1, 2, TRUE), list(3, 3, FALSE), list(0, 2, TRUE),
 #'     list(0, 0, FALSE), list(6, 6, TRUE)
 #' ))
-#' scorebar(list(
+#' soccerbar(list(
 #'     list(1, 2, TRUE), list(3, 3, FALSE), list(0, 2, TRUE), list(0, 0, FALSE),
 #'     list(6, 6, TRUE), list(0, 2, FALSE), list(0, 0, FALSE), list(6, 6, TRUE),
 #'     list(6, 3, TRUE)
 #' ), outlined = TRUE, output_path = "out.png")
-#' scorebar(list(
+#' soccerbar(list(
 #'     list(8, 0, FALSE), list(4, 1, TRUE), list(4, 4, FALSE), list(1, 4, TRUE),
 #'     list(5, 0, FALSE), list(0, 0, TRUE), list(1, 1, FALSE), list(2, 3, TRUE),
 #'     list(NA, NA, FALSE), list(NA, NA, TRUE), list(NA, NA, FALSE)
 #' ), home_color = "red")
 #' }
 #' @export
-scorebar <- function(scores,
+soccerbar <- function(scores,
                      twogoalline = FALSE,
                      zerodots = FALSE,
                      outlined = FALSE,

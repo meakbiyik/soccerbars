@@ -1,4 +1,4 @@
 library(testthat)
-library(scorebars)
+library(soccerbars)
 
-test_check("scorebars")
+test_check("soccerbars")

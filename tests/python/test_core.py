@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
-from scorebars.core import (
+from soccerbars.core import (
     _colors,
     _is_listlike,
     _is_integerish,
@@ -18,7 +18,7 @@ from scorebars.core import (
     _check_color_and_output_path,
     _config_factory,
     DEFAULT_CONFIG,
-    scorebar,
+    soccerbar,
 )
 
 # TODO: Check out pytest-mpl for image comparison tests.
@@ -534,10 +534,10 @@ def test__colors():
     "input,params", itertools.product(test_inputs, test_parameters)
 )
 @patch("matplotlib.pyplot.show")
-def test_scorebar(_, input, params, capsys):
+def test_soccerbar(_, input, params, capsys):
     if not _is_integerish(input[0][0]) and params["output_path"] is not None:
         params["output_path"] = [params["output_path"]] * 2
-    scorebar(input, **params)
+    soccerbar(input, **params)
     outputs = capsys.readouterr()
     assert not outputs.out
     assert not outputs.err

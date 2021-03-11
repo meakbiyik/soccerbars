@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "scorebars"
+name = "soccerbars"
 version = "0.1.0"
 description = "Multivariate sparklines making use of Gestalt theory (gestaltlines) for sequences of sports results."
 authors = ["M. Eren Akbiyik <erenakbiyik@gmail.com>"]
@@ -27,7 +27,7 @@ mock = "^4.0.3"
 cli = ["click", "colorama", "click-help-colors", "pandas"]
 
 [tool.poetry.scripts]
-scorebars = "scorebars.__main__:cli"
+soccerbars = "soccerbars.__main__:cli"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

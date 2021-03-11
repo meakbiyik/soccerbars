@@ -1,5 +1,5 @@
 library(testthat)
-library(scorebars)
+library(soccerbars)
 
 pdf(NULL)
 
@@ -498,7 +498,7 @@ test_that("colors are consistent with the match and config", {
     }
 )
 
-test_that("scorebar run without any errors, warnings or prints", {
+test_that("soccerbar run without any errors, warnings or prints", {
         for (example in test_inputs) {
             for (parameters in test_parameters) {
                 if (
@@ -511,7 +511,7 @@ test_that("scorebar run without any errors, warnings or prints", {
                     )
                 }
                 expect_silent(
-                    do.call(scorebar, append(list(example), parameters))
+                    do.call(soccerbar, append(list(example), parameters))
                 )
             }
         }

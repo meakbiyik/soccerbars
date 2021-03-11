@@ -42,7 +42,7 @@ DEFAULT_CONFIG = {
 }
 
 
-def scorebar(
+def soccerbar(
     scores: Union[Matches, Iterable[Matches], ScoreLists, Iterable[ScoreLists]],
     twogoalline: bool = False,
     zerodots: bool = False,
@@ -79,7 +79,7 @@ def scorebar(
         Only plot the outlines of the away games, by default False
     color : list, optional
         A list or a list of lists of valid matplotlib colors, specifying the color of each
-        scorebar. This option is provided to be consistent with LaTeX package API
+        soccerbar. This option is provided to be consistent with LaTeX package API
         and allows high configurability, but `home_color`, `away_color` and `fill_color`
         options should already be sufficient for most of the use cases, by default None.
         This argument is expected to be structurally identical with the `scores`: if a list of
@@ -120,10 +120,10 @@ def scorebar(
 
     Examples
     --------
-    >>> scorebar([
+    >>> soccerbar([
             (1,2,True), (3,3,False), (0,2,True), (0,0,False), (6,6,True)
         ])
-    >>> scorebar([
+    >>> soccerbar([
             (1,2,True), (3,3,False), (0,2,True), (0,0,False), (6,6,True),
             (0,2,False), (0,0,False), (6,6,True), (6,3,True)
         ], outlined=True, output_path = "out.png")

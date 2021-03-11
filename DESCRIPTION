@@ -1,4 +1,4 @@
-Package: scorebars
+Package: soccerbars
 Title: Multivariate Sparklines for Sports Results
 Version: 0.0.1
 Authors@R: 
@@ -25,6 +25,6 @@ Imports:
     ggplot2,
     checkmate,
     grDevices
-URL: https://github.com/snlab-eakbiyik/scorebars
-BugReports: https://github.com/snlab-eakbiyik/scorebars/issues
+URL: https://github.com/snlab-eakbiyik/soccerbars
+BugReports: https://github.com/snlab-eakbiyik/soccerbars/issues
 Language: en-US

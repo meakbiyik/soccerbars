@@ -4,7 +4,7 @@ latex
 .*?\.png
 .*?\.jpg
 .*?\.txt
-scorebars
+soccerbars
 tests/python
 poetry.*?$
 pyproject\.toml

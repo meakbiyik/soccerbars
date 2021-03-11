@@ -1,11 +1,11 @@
 
-# scorebars <img width="90em" height="24em" src="resources/example.png">
+# soccerbars <img width="90em" height="24em" src="resources/example.png">
 
 <!-- badges: start -->
-[![R CMD check](https://github.com/snlab-eakbiyik/scorebars/workflows/R%20CMD%20check/badge.svg)](https://github.com/snlab-eakbiyik/scorebars/actions)
-[![Python package](https://github.com/snlab-eakbiyik/scorebars/workflows/Python%20package/badge.svg)](https://github.com/snlab-eakbiyik/scorebars/actions)
+[![R CMD check](https://github.com/snlab-eakbiyik/soccerbars/workflows/R%20CMD%20check/badge.svg)](https://github.com/snlab-eakbiyik/soccerbars/actions)
+[![Python package](https://github.com/snlab-eakbiyik/soccerbars/workflows/Python%20package/badge.svg)](https://github.com/snlab-eakbiyik/soccerbars/actions)
 <!-- To include when the repo becomes public.
-[![Codecov test coverage](https://codecov.io/gh/snlab-eakbiyik/scorebars/branch/master/graph/badge.svg)](https://codecov.io/gh/snlab-eakbiyik/scorebars?branch=master)
+[![Codecov test coverage](https://codecov.io/gh/snlab-eakbiyik/soccerbars/branch/master/graph/badge.svg)](https://codecov.io/gh/snlab-eakbiyik/soccerbars?branch=master)
 -->
 <!-- badges: end -->
 
@@ -15,7 +15,7 @@ This repository contains a Python package, an R package, and a cmd tool based on
 
 ## Usage
 
-The signature of the main function `scorebar` is identical in both Python and R implementations. The input (`scores` argument) can be either a list of matches in the form ```(home_team_score: integer, away_team_score: integer, away_game: boolean)```, a list of three same-length score lists with the same types as the previous scheme, or common data frame objects of each language (`pandas.DataFrame` in Python and `data.frame` in R). A list of these entities can also be given as input if multiple leagues/tournaments are wanted to be plotted.
+The signature of the main function `soccerbar` is identical in both Python and R implementations. The input (`scores` argument) can be either a list of matches in the form ```(home_team_score: integer, away_team_score: integer, away_game: boolean)```, a list of three same-length score lists with the same types as the previous scheme, or common data frame objects of each language (`pandas.DataFrame` in Python and `data.frame` in R). A list of these entities can also be given as input if multiple leagues/tournaments are wanted to be plotted.
 
 Both languages preserve the flags and the `color` arguments from the LaTeX package, and also expose a series of common parameters as keyword arguments. `output_path` and `show` arguments can be used to determine whether the call is to save the resulting image to the given path(s), or just to show it via the available graphical interface (not possible in Python if the function is called from the command line). In both cases, the functions return the plotted objects (`matplotlib.Axes` object(s) in Python and `ggplot` object(s) in R).
 
@@ -23,24 +23,24 @@ For `color` and `output_path` arguments, the function expects the structure of t
 
 ### in Python
 
-Give the matches to the ```scorebar``` function as an iterable of matches in row-wise, column-wise or DataFrame format. A list of values following these formats (e.g. in the context of multiple leagues) are also accepted without mixing.
+Give the matches to the ```soccerbar``` function as an iterable of matches in row-wise, column-wise or DataFrame format. A list of values following these formats (e.g. in the context of multiple leagues) are also accepted without mixing.
 
 ```python
-from scorebars import scorebar
+from soccerbars import soccerbar
 
 # Row-wise format
-scorebar([
+soccerbar([
     (1, 2, True), (3, 4, False), (5, 6, True), (7, 8, False)
 ])
 # Column-wise format
-scorebar([
+soccerbar([
     (1, 3, 5, 7), 
     (2, 4, 6, 8), 
     (True, False, True, False)
 ], outlined=True, output_path="matches.png")
 # List of row-wise inputs: observe that both color and output_path
 # parameters match with the scores
-scorebar([
+soccerbar([
     [(1, 2, True), (3, 4, False)], 
     [(5, 6, True), (7, 8, False)]
     ],
@@ -50,31 +50,31 @@ scorebar([
 # Input as pandas DataFrame
 import pandas as pd
 
-scorebar(pd.DataFrame([
+soccerbar(pd.DataFrame([
     (1, 2, True), (3, 4, False), (5, 6, True), (7, 8, False)
 ]), home_color="red")
 ```
 
 ### in R
 
-Similarly with its Python counterpart, ```scorebar``` admits both list of match score lists, and a list of three vectors, along with `data.frame` objects. A list of these (e.g. in the context of multiple leagues) are also allowed.
+Similarly with its Python counterpart, ```soccerbar``` admits both list of match score lists, and a list of three vectors, along with `data.frame` objects. A list of these (e.g. in the context of multiple leagues) are also allowed.
 
 ```R
-library(scorebars)
+library(soccerbars)
 
 # Row-wise format
-scorebar(list(
+soccerbar(list(
     list(1, 2, TRUE), list(3, 4, FALSE), list(5, 6, TRUE), list(7, 8, FALSE)
 ))
 # Column-wise (vector) format
-scorebar(list(
+soccerbar(list(
     c(1, 3, 5, 7),
     c(2, 4, 6, 8),
     c(TRUE, FALSE, TRUE, FALSE)
 ), outlined = TRUE, output_path = "matches.png")
 # List of column-wise inputs: observe that both color and output_path
 # parameters match with the scores
-scorebar(list(
+soccerbar(list(
     list(c(1, 3), c(2, 4), c(TRUE, FALSE)), 
     list(c(5, 7), c(6, 8), c(TRUE, FALSE))
     ),
@@ -82,7 +82,7 @@ scorebar(list(
     output_path = c("league1.png", "league2.png")
 )
 # Input as data.frame object
-scorebar(data.frame(
+soccerbar(data.frame(
     c(1, 3, 5, 7),
     c(2, 4, 6, 8),
     c(TRUE, FALSE, TRUE, FALSE)
@@ -94,23 +94,23 @@ scorebar(data.frame(
 After installing the package (see the instructions [below](#as-a-command-line-tool)), navigate into the folder and run
 
 ```bash
-poetry run scorebars --help
+poetry run soccerbars --help
 ```
 
 to see the available options. The CLI is a thin wrapper around the Python API, and writes the output image to the specified location with the `--output-path` argument. Input syntax is identical with the LaTeX package. In addition to the capabilities of the Python core, CLI can also admit a glob pattern to match with `.csv` files.
 
 ```bash
 # Vanilla usage
-poetry run scorebars "(1-2) (3-1)* (2-2)"
+poetry run soccerbars "(1-2) (3-1)* (2-2)"
 # Specifying the output path (default is "output.png")
-poetry run scorebars -o out.tiff "(1-2) (3-1)* (2-2)"
+poetry run soccerbars -o out.tiff "(1-2) (3-1)* (2-2)"
 # Reading from a .csv file and specifying an output file
-poetry run scorebars matches.csv -o matches.pdf
+poetry run soccerbars matches.csv -o matches.pdf
 # Reading from a glob of csv files and saving the output images to a directory
-poetry run scorebars *.csv -o ".\output-dir"
+poetry run soccerbars *.csv -o ".\output-dir"
 # `-t`, `-z`, `-ol` flags stand for twogoalline, zerodots and outlined options
 # `-p` option can be used to specify additional parameters with syntax key:value
-poetry run scorebars -z -ol -p fill_color:"(1,1,1,1)" -p home_color:red *.csv
+poetry run soccerbars -z -ol -p fill_color:"(1,1,1,1)" -p home_color:red *.csv
 ```
 
 ### Parameters
@@ -143,13 +143,13 @@ This package is not published in PyPI or CRAN yet, so you can use the git-compat
 ### As a Python package
 
 ```bash
-pip install git+https://github.com/snlab-eakbiyik/scorebars.git 
+pip install git+https://github.com/snlab-eakbiyik/soccerbars.git 
 ```
 
 ### As an R package
 
 ```R
-devtools::install_github("snlab-eakbiyik/scorebars")
+devtools::install_github("snlab-eakbiyik/soccerbars")
 ```
 
 ### As a command line tool

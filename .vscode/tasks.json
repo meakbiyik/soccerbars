@@ -22,7 +22,7 @@
         {
             "label": "Run Python Tests with coverage",
             "type": "shell",
-            "command": "poetry run coverage run --include scorebars/**  -m pytest && poetry run coverage xml --include scorebars/**",
+            "command": "poetry run coverage run --include soccerbars/**  -m pytest && poetry run coverage xml --include soccerbars/**",
             "options": {
 				"cwd": "${workspaceFolder}"
             },

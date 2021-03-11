@@ -15,14 +15,14 @@ except:
         raise ImportError(
             "Some of the optional dependencies for the cli module are not installed. "
             "Please install them either via `poetry install --no-dev -E cli` if you "
-            "are working with the cloned repository, or via `pip install scorebars[cli]` "
+            "are working with the cloned repository, or via `pip install soccerbars[cli]` "
             "with pip."
         )
     else:
         click = Mock()
         HelpColorsCommand = Mock()
 
-from scorebars import scorebar
+from soccerbars import soccerbar
 
 
 DESCRIPTION = """Multivariate sparklines making use of Gestalt theory (gestaltlines) 
@@ -34,11 +34,11 @@ by specifying it in the output path as the extension.
 
 \b
 Examples:
-    poetry run scorebars "(1-2) (3-1)* (2-2)"
-    poetry run scorebars -o out.tiff "(1-2) (3-1)* (2-2)"
-    poetry run scorebars matches.csv -o matches.pdf
-    poetry run scorebars *.csv -o ".\output-dir"
-    poetry run scorebars -z -ol -p fill_color:"(1,1,1,1)" -p home_color:red *.csv
+    poetry run soccerbars "(1-2) (3-1)* (2-2)"
+    poetry run soccerbars -o out.tiff "(1-2) (3-1)* (2-2)"
+    poetry run soccerbars matches.csv -o matches.pdf
+    poetry run soccerbars *.csv -o ".\output-dir"
+    poetry run soccerbars -z -ol -p fill_color:"(1,1,1,1)" -p home_color:red *.csv
 """
 MATCH_REGEX = re.compile(r"\((\d+)?[,-](\d+)?\)(\*)?")
 
@@ -89,7 +89,7 @@ MATCH_REGEX = re.compile(r"\((\d+)?[,-](\d+)?\)(\*)?")
     multiple=True,
     type=click.STRING,
     help="Key value tuple (without spaces) in the form key:value to modify "
-    "the visualization. See https://github.com/snlab-eakbiyik/scorebars or "
+    "the visualization. See https://github.com/snlab-eakbiyik/soccerbars or "
     "the Python function docstring for the available parameters.",
 )
 def cli(
@@ -141,7 +141,7 @@ def cli(
         except ValueError:
             pass
 
-    scorebar(
+    soccerbar(
         match_scores,
         show=False,
         twogoalline=twogoalline,
