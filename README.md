@@ -126,7 +126,7 @@ These parameters can be used to customize the output images in all components.
 | zerodot | Zero-dot radius ratio to thickness (when zerodots=True) | 0.4 |
 | slant | Slope for unbalanced scores in degrees | 14 |
 | spacing | Spacing between matches in cartesian coordinates | 0.8 |
-| padding | Padding before and after the matches in cartesian coordinates | 0.25 |
+| padding | Padding before and after the matches in cartesian coordinates | 0.2 |
 | baseline_factor | Thickness of baseline with respect to line thickness | 0.2 |
 | brighten | Brightness percentage of the away games (when outlined = False) | 33 |
 | transparent_background | Set the background transparent instead of white | False |

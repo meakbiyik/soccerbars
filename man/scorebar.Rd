@@ -70,7 +70,7 @@ by default 0.4
 \item slant: Slope for unbalanced scores in degrees, by default 14
 \item spacing: Spacing between matches in cartesian coordinates, by default 0.8
 \item padding: Padding before and after the matches in cartesian coordinates,
-by default 0.25
+by default 0.2
 \item baseline_factor: Thickness of baseline with respect to line thickness,
 by default 0.2
 \item brighten: Brightness percentage of the away games (when outlined=FALSE),

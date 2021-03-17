@@ -30,7 +30,7 @@ DEFAULT_CONFIG = {
     "zerodot": 0.4 * 0.36,
     "slant": math.sin(math.radians(14)),
     "spacing": 0.8,
-    "padding": 0.25,
+    "padding": 0.2,
     "baseline_factor": 0.2,
     "brighten": 33,
     "transparent_background": False,
@@ -102,7 +102,7 @@ def soccerbar(
             - zerodot: Zero-dot radius ratio to thickness (when zerodots=True), by default 0.4
             - slant: Slope for unbalanced scores in degrees, by default 14
             - spacing: Spacing between matches in cartesian coordinates, by default 0.8
-            - padding: Padding before and after the matches in cartesian coordinates, by default 0.25
+            - padding: Padding before and after the matches in cartesian coordinates, by default 0.2
             - baseline_factor: Thickness of baseline with respect to line thickness, by default 0.2
             - brighten: Brightness percentage of the away games (when outlined=False), by default 33
             - transparent_background: Set the background transparent instead of white, by default False

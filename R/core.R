@@ -16,7 +16,7 @@ default_config <- list(
     zerodot = 0.4 * 0.36,
     slant = sin(14 * pi / 180),
     spacing = 0.8,
-    padding = 0.25,
+    padding = 0.2,
     baseline_factor = 0.2,
     brighten = 33,
     transparent_background = FALSE,
@@ -76,7 +76,7 @@ default_config <- list(
 #'  - slant: Slope for unbalanced scores in degrees, by default 14
 #'  - spacing: Spacing between matches in cartesian coordinates, by default 0.8
 #'  - padding: Padding before and after the matches in cartesian coordinates,
-#'      by default 0.25
+#'      by default 0.2
 #'  - baseline_factor: Thickness of baseline with respect to line thickness,
 #'      by default 0.2
 #'  - brighten: Brightness percentage of the away games (when outlined=FALSE),
