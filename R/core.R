@@ -713,7 +713,7 @@ plot <- function(patches,
                  twogoalline = FALSE,
                  output_path = NULL) {
     padding <- config[["padding"]]
-    plot_width <- (match_count + 1) * config[["spacing"]] + padding
+    plot_width <- padding + (match_count + 1) * config[["spacing"]] + padding
     baseline_width <- config[["thickness"]] * config[["baseline_factor"]] *
         ppi / 2
     baseline_color <- config[["baseline_color"]]
@@ -726,12 +726,12 @@ plot <- function(patches,
 
     ax <- ggplot(dpi = config[["dpi"]]) +
         coord_fixed(
-            xlim = c(0, plot_width),
+            xlim = c(-padding, plot_width - padding),
             ylim = c(-max_height, max_height), expand = FALSE
         ) +
         labs(x = NULL, y = NULL, title = NULL)
 
-    baseline_endpoints <- c(0, baseline_jumps, plot_width)
+    baseline_endpoints <- c(-padding, baseline_jumps, plot_width - padding)
     baseline_seg_count <- length(baseline_endpoints)
     ax <- ax + geom_path(
         aes(x = baseline_endpoints,
@@ -749,12 +749,18 @@ plot <- function(patches,
         twogoalline_width <- baseline_width * 0.5
 
         ax <- ax + geom_path(
-            aes(x = c(0, plot_width), y = c(two_goals, two_goals)),
+            aes(
+                x = c(-padding, plot_width - padding),
+                y = c(two_goals, two_goals)
+            ),
             colour = do.call(
                 rgb, append(baseline_color, list(maxColorValue = 255))
             ), size = twogoalline_width
         ) + geom_path(
-            aes(x = c(0, plot_width), y = c(-two_goals, -two_goals)),
+            aes(
+                x = c(-padding, plot_width - padding),
+                y = c(-two_goals, -two_goals)
+            ),
             colour = do.call(
                 rgb, append(baseline_color, list(maxColorValue = 255))
             ), size = twogoalline_width

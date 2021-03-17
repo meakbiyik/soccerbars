@@ -540,7 +540,7 @@ def _plot(
 ) -> Axes:
 
     padding = config["padding"]
-    plot_width = (match_count + 1) * config["spacing"] + padding
+    plot_width = padding + (match_count + 1) * config["spacing"] + padding
 
     fig = plt.figure(
         figsize=(
@@ -556,13 +556,13 @@ def _plot(
     ax.get_yaxis().set_visible(False)
     ax.set_aspect("equal")
     ax.autoscale(tight=True)
-    ax.set_xlim(0, plot_width)
+    ax.set_xlim(-padding, plot_width - padding)
     ax.set_ylim(-MAX_HEIGHT, MAX_HEIGHT)
 
     baseline_width = config["thickness"] * config["baseline_factor"] * PPI
     baseline_color = config["baseline_color"]
 
-    baseline_endpoints = [0] + baseline_jumps + [plot_width]
+    baseline_endpoints = [-padding] + baseline_jumps + [plot_width - padding]
     baseline_segments = zip(baseline_endpoints[::2], baseline_endpoints[1::2])
     for x1, x2 in baseline_segments:
         ax.plot(
@@ -578,14 +578,14 @@ def _plot(
         two_goals = GOAL_TO_HEIGHT[2]
         twogoalline_width = baseline_width * 0.5
         ax.plot(
-            [0, plot_width],
+            [-padding, plot_width - padding],
             [two_goals, two_goals],
             lw=twogoalline_width,
             color=baseline_color,
             zorder=-1,
         )
         ax.plot(
-            [0, plot_width],
+            [-padding, plot_width - padding],
             [-two_goals, -two_goals],
             lw=twogoalline_width,
             color=baseline_color,
