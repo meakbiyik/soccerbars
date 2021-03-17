@@ -123,7 +123,7 @@ These parameters can be used to customize the output images in all components.
 | thickness | Line thickness in cartesian coordinates | 0.18 |
 | edge_thickness  | Edge thickness for outlined patches (when outlined=True) as the ratio to the line thickness | 0.35 |
 | goalless_edge_thickness  | Edge thickness for outlined no-goal patches (when outlined=True) as the ratio to the line thickness | 0.5 |
-| zerodot | Zero-dot radius ratio to thickness (when zerodots=True) | 0.4 |
+| zerodot | Zero-dot diameter ratio to thickness (when zerodots=True) | 0.6 |
 | slant | Slope for unbalanced scores in degrees | 14 |
 | spacing | Spacing between matches in cartesian coordinates | 0.8 |
 | padding | Padding before and after the matches in cartesian coordinates | 0.2 |

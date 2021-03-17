@@ -13,7 +13,7 @@ default_config <- list(
     thickness = 0.36,
     edge_thickness = 0.35 * 0.36,
     goalless_edge_thickness = 0.5 * 0.36,
-    zerodot = 0.4 * 0.36,
+    zerodot = 0.6 / 2 * 0.36,
     slant = sin(14 * pi / 180),
     spacing = 0.8,
     padding = 0.2,
@@ -71,8 +71,8 @@ default_config <- list(
 #'      as the ratio to the line thickness, by default 0.35
 #'  - goalless_edge_thickness: Edge thickness for outlined no-goal patches
 #'      (when outlined=TRUE) as the ratio to the line thickness, by default 0.5
-#'  - zerodot: Zero-dot radius ratio to thickness (when zerodots=TRUE),
-#'      by default 0.4
+#'  - zerodot: Zero-dot diameter ratio to thickness (when zerodots=TRUE),
+#'      by default 0.6
 #'  - slant: Slope for unbalanced scores in degrees, by default 14
 #'  - spacing: Spacing between matches in cartesian coordinates, by default 0.8
 #'  - padding: Padding before and after the matches in cartesian coordinates,
@@ -500,7 +500,7 @@ config_factory <- function(outlined, ...) {
             } else {
                 thickness <- config[["thickness"]]
             }
-            config[[key]] <- value * thickness
+            config[[key]] <- value / 2 * thickness
             next
         }
 

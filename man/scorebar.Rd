@@ -65,8 +65,8 @@ but mostly a superset of it.
 as the ratio to the line thickness, by default 0.35
 \item goalless_edge_thickness: Edge thickness for outlined no-goal patches
 (when outlined=TRUE) as the ratio to the line thickness, by default 0.5
-\item zerodot: Zero-dot radius ratio to thickness (when zerodots=TRUE),
-by default 0.4
+\item zerodot: Zero-dot diameter ratio to thickness (when zerodots=TRUE),
+by default 0.6
 \item slant: Slope for unbalanced scores in degrees, by default 14
 \item spacing: Spacing between matches in cartesian coordinates, by default 0.8
 \item padding: Padding before and after the matches in cartesian coordinates,
