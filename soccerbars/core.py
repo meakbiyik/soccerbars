@@ -168,15 +168,7 @@ def soccerbar(
             if scores[0] is None or np.isnan(scores[0]):
                 patches.append(
                     Circle(
-                        (match_index, 1 - config["zerodot"]),
-                        radius=config["zerodot"],
-                        facecolor=edgecolor,
-                        edgecolor=edgecolor,
-                    )
-                )
-                patches.append(
-                    Circle(
-                        (match_index, -1 + config["zerodot"]),
+                        (match_index, 0),
                         radius=config["zerodot"],
                         facecolor=edgecolor,
                         edgecolor=edgecolor,

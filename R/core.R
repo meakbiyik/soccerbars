@@ -167,16 +167,7 @@ soccerbar <- function(scores,
                 patches <- append(
                     patches,
                     circle_polygon(
-                        match_index, 1 - config[["zerodot"]],
-                        radius = config[["zerodot"]],
-                        facecolor = edgecolor,
-                        edgecolor = edgecolor
-                    )
-                )
-                patches <- append(
-                    patches,
-                    circle_polygon(
-                        match_index, -1 + config[["zerodot"]],
+                        match_index, 0,
                         radius = config[["zerodot"]],
                         facecolor = edgecolor,
                         edgecolor = edgecolor
