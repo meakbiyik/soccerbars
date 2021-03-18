@@ -416,9 +416,9 @@ test_that("config factory produces correct configuration lists", {
         expect_equal(config_factory(TRUE, slant = 20)[["slant"]],
             sin(20 * pi / 180))
         expect_equal(config_factory(TRUE, zerodot = 10)[["zerodot"]],
-            10 * default_config[["thickness"]])
+            10 / 2 * default_config[["thickness"]])
         expect_equal(config_factory(TRUE, zerodot = 10,
-            thickness = 5)[["zerodot"]], 10 * 5)
+            thickness = 5)[["zerodot"]], 10 / 2 * 5)
         expect_equal(config_factory(TRUE, fill_color = "red")[["fill_color"]],
             col2rgb("red", alpha = TRUE))
         expect_equal(
@@ -429,8 +429,14 @@ test_that("config factory produces correct configuration lists", {
             col2rgb("red", alpha = TRUE))
         expect_equal(config_factory(TRUE,
             clip_slanted_lines = FALSE)[["clip_slanted_lines"]], FALSE)
+        expect_equal(config_factory(TRUE,
+            away_darker = TRUE)[["away_brighter"]], FALSE)
         expect_error(config_factory(TRUE, fake_argument = FALSE),
             ".+?is not a valid configuration parameter.+")
+        expect_error(
+            config_factory(TRUE, away_brighter = TRUE, away_darker = TRUE),
+            ".+?cannot be set to TRUE simultaneously.+"
+        )
     }
 )
 
@@ -446,18 +452,24 @@ test_that("colors are consistent with the match and config", {
         )
         bright_away_color <- do.call(
             rgb, append(list(
-                red = default_config[["away_color"]][[1]] +
-                    (255 - default_config[["away_color"]][[1]]) *
-                    default_config[["brighten"]] / 100,
-                green = default_config[["away_color"]][[2]] +
-                    (255 - default_config[["away_color"]][[2]]) *
-                    default_config[["brighten"]] / 100,
-                blue = default_config[["away_color"]][[3]] +
-                    (255 - default_config[["away_color"]][[3]]) *
-                    default_config[["brighten"]] / 100,
+                red = default_config[["away_color"]][[1]] * 66 / 100 +
+                    255 * 34 / 100,
+                green = default_config[["away_color"]][[2]] * 66 / 100 +
+                    255 * 34 / 100,
+                blue = default_config[["away_color"]][[3]] * 66 / 100 +
+                    255 * 34 / 100,
                 alpha = default_config[["away_color"]][[4]]
             ), list(maxColorValue = 255))
         )
+        bright_away_matchcolor <- do.call(
+            rgb, append(list(
+                red = 43 * 66 / 100 + 255 * 34 / 100,
+                green = 172 * 66 / 100 + 255 * 34 / 100,
+                blue = 54 * 66 / 100 + 255 * 34 / 100,
+                alpha = 72
+            ), list(maxColorValue = 255))
+        )
+
         fill_color <- do.call(
             rgb, append(default_config[["fill_color"]],
             list(maxColorValue = 255))
@@ -486,7 +498,7 @@ test_that("colors are consistent with the match and config", {
                 TRUE, FALSE, default_config,
                 matchcolor = matchcolor
             ),
-            list(matchcolor, matchcolor))
+            list(bright_away_matchcolor, bright_away_matchcolor))
         expect_equal(
             get_colors(FALSE, TRUE, default_config, matchcolor = matchcolor),
             list(matchcolor, matchcolor)
@@ -494,6 +506,45 @@ test_that("colors are consistent with the match and config", {
         expect_equal(
             get_colors(TRUE, TRUE, default_config, matchcolor = matchcolor),
             list(fill_color, matchcolor)
+        )
+    }
+)
+
+test_that("color brightness is adjusted accurately", {
+        matchcolor <- c(12, 24, 36, 48)
+        bright_away_matchcolor <- list(
+                red = matchcolor[[1]] * 66 / 100 + 255 * 34 / 100,
+                green = matchcolor[[2]] * 66 / 100 + 255 * 34 / 100,
+                blue = matchcolor[[3]] * 66 / 100 + 255 * 34 / 100,
+                alpha = matchcolor[[4]]
+        )
+        dark_away_matchcolor <- list(
+                red = matchcolor[[1]] * 66 / 100,
+                green = matchcolor[[2]] * 66 / 100,
+                blue = matchcolor[[3]] * 66 / 100,
+                alpha = matchcolor[[4]]
+        )
+
+        expect_equal(
+            adjust_away_brightness(
+                matchcolor,
+                list(away_brighter = TRUE, away_darker = FALSE)
+            ),
+            bright_away_matchcolor
+        )
+        expect_equal(
+            adjust_away_brightness(
+                matchcolor,
+                list(away_brighter = FALSE, away_darker = TRUE)
+            ),
+            dark_away_matchcolor
+        )
+        expect_equal(
+            adjust_away_brightness(
+                matchcolor,
+                list(away_brighter = FALSE, away_darker = FALSE)
+            ),
+            matchcolor
         )
     }
 )

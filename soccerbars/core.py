@@ -32,7 +32,8 @@ DEFAULT_CONFIG = {
     "spacing": 0.8,
     "padding": 0.2,
     "baseline_factor": 0.2,
-    "brighten": 33,
+    "away_brighter": True,
+    "away_darker": False,
     "transparent_background": False,
     "home_color": (0, 0, 0, 1),
     "away_color": (0, 0, 0, 1),
@@ -104,7 +105,9 @@ def soccerbar(
             - spacing: Spacing between matches in cartesian coordinates, by default 0.8
             - padding: Padding before and after the matches in cartesian coordinates, by default 0.2
             - baseline_factor: Thickness of baseline with respect to line thickness, by default 0.2
-            - brighten: Brightness percentage of the away games (when outlined=False), by default 33
+            - away_brighter: Set away game colors 33% brighter (when outlined=False), by default True
+            - away_darker: Set away game colors 33% darker (when outlined=False), by default False (Setting
+            this flag will turn "away_brighter" off)
             - transparent_background: Set the background transparent instead of white, by default False
             - home_color: Color of home match lines in matplotlib-acceptable formats, by default rgba(0,0,0,1)
             - away_color: Color of away match lines in matplotlib-acceptable formats, by default rgba(0,0,0,1)
@@ -446,11 +449,19 @@ def _config_factory(outlined, **kwargs):
         config["edge_thickness"] = 0
         config["goalless_edge_thickness"] = 0
 
+    if kwargs.get("away_brighter", None) and kwargs.get("away_darker", None):
+        raise KeyError(
+            "'away_brighter' and 'away_darker' flags cannot be set to True simultaneously. "
+            "Setting 'away_darker' to True will turn off 'away_brighter', and setting 'away_brighter' "
+            "to False will disable the brightness adjustment."
+        )
+
     for key, value in kwargs.items():
 
         if key not in config:
             raise KeyError(
-                f"Keyword argument '{key}' is not a valid configuration parameter. Available configuration parameters are {list(config.keys())}"
+                f"Keyword argument '{key}' is not a valid configuration parameter. "
+                f"Available configuration parameters are {list(config.keys())}"
             )
 
         if key == "slant":
@@ -469,6 +480,9 @@ def _config_factory(outlined, **kwargs):
             config[key] = to_rgba(value)
             continue
 
+        if key == "away_darker" and value:
+            config["away_brighter"] = False
+
         config[key] = value
 
     return config
@@ -481,18 +495,33 @@ def _colors(away_game, outlined, config, matchcolor=None):
     else:
         main_color = config["away_color"] if away_game else config["home_color"]
 
-        if away_game and config["brighten"] != 0 and not outlined:
-            main_color = (
-                main_color[0] + (1 - main_color[0]) * config["brighten"] / 100,
-                main_color[1] + (1 - main_color[1]) * config["brighten"] / 100,
-                main_color[2] + (1 - main_color[2]) * config["brighten"] / 100,
-                main_color[3],
-            )
+    if away_game and not outlined:
+        main_color = _adjust_away_brightness(main_color, config)
 
     facecolor = config["fill_color"] if away_game and outlined else main_color
     edgecolor = main_color
 
     return facecolor, edgecolor
+
+
+def _adjust_away_brightness(color, config):
+
+    if config["away_brighter"]:
+        color = (
+            color[0] * 66 / 100 + 34 / 100,
+            color[1] * 66 / 100 + 34 / 100,
+            color[2] * 66 / 100 + 34 / 100,
+            color[3],
+        )
+    elif config["away_darker"]:
+        color = (
+            color[0] * 66 / 100,
+            color[1] * 66 / 100,
+            color[2] * 66 / 100,
+            color[3],
+        )
+
+    return color
 
 
 def _line(start_xy, end_xy, facecolor, edgecolor, config):

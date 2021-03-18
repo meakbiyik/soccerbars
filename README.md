@@ -128,7 +128,8 @@ These parameters can be used to customize the output images in all components.
 | spacing | Spacing between matches in cartesian coordinates | 0.8 |
 | padding | Padding before and after the matches in cartesian coordinates | 0.2 |
 | baseline_factor | Thickness of baseline with respect to line thickness | 0.2 |
-| brighten | Brightness percentage of the away games (when outlined = False) | 33 |
+| away_brighter | Set away game colors 33% brighter (when outlined=False) | True |
+| away_darker | Set away game colors 33% darker (when outlined=False, setting this flag will turn "away_brighter" off) | False |
 | transparent_background | Set the background transparent instead of white | False |
 | home_color | Color of home match lines (in Python: matplotlib-acceptable formats, in R: any of the three kinds of R color specifications; either a color name as listed by colors(), a hexadecimal string of the form "#rrggbb" or "#rrggbbaa", or a positive integer i meaning `palette()[i]`) | #000000FF |
 | away_color | Color of away match lines | #000000FF |

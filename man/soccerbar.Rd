@@ -73,8 +73,10 @@ by default 0.6
 by default 0.2
 \item baseline_factor: Thickness of baseline with respect to line thickness,
 by default 0.2
-\item brighten: Brightness percentage of the away games (when outlined=FALSE),
-by default 33
+\item away_brighter: Set away game colors 33\% brighter (when outlined=FALSE),
+by default TRUE
+\item away_darker: Set away game colors 33\% darker (when outlined=FALSE),
+by default FALSE (Setting this flag will turn "away_brighter" off)
 \item transparent_background: Set the background transparent instead of white,
 by default FALSE
 \item home_color: Color of home match lines in any of the three kinds of R

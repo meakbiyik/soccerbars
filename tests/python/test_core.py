@@ -10,6 +10,7 @@ from matplotlib import pyplot as plt
 
 from soccerbars.core import (
     _colors,
+    _adjust_away_brightness,
     _is_listlike,
     _is_integerish,
     _maybe_convert_dataframe,
@@ -467,9 +468,10 @@ def test__config_factory():
     )
     assert _config_factory(True, slant=20)["slant"] == math.sin(math.radians(20))
     assert (
-        _config_factory(True, zerodot=10)["zerodot"] == 10 * DEFAULT_CONFIG["thickness"]
+        _config_factory(True, zerodot=10)["zerodot"]
+        == 10 / 2 * DEFAULT_CONFIG["thickness"]
     )
-    assert _config_factory(True, zerodot=10, thickness=5)["zerodot"] == 10 * 5
+    assert _config_factory(True, zerodot=10, thickness=5)["zerodot"] == 10 / 2 * 5
     assert _config_factory(True, fill_color="red")["fill_color"] == (1, 0, 0, 1)
     assert _config_factory(True, fill_color=(1, 0, 0, 1))["fill_color"] == (1, 0, 0, 1)
     assert _config_factory(True, fill_color=(1, 0, 0))["fill_color"] == (1, 0, 0, 1)
@@ -478,20 +480,26 @@ def test__config_factory():
     assert (
         _config_factory(True, clip_slanted_lines=False)["clip_slanted_lines"] == False
     )
+    assert _config_factory(True, away_darker=True)["away_brighter"] == False
     with pytest.raises(KeyError):
         _config_factory(True, fake_argument=False)
+    with pytest.raises(KeyError):
+        _config_factory(True, away_brighter=True, away_darker=True)
 
 
 def test__colors():
     matchcolor = (0.12, 0.24, 0.36, 1)
     bright_away_color = (
-        DEFAULT_CONFIG["away_color"][0]
-        + (1 - DEFAULT_CONFIG["away_color"][0]) * DEFAULT_CONFIG["brighten"] / 100,
-        DEFAULT_CONFIG["away_color"][1]
-        + (1 - DEFAULT_CONFIG["away_color"][1]) * DEFAULT_CONFIG["brighten"] / 100,
-        DEFAULT_CONFIG["away_color"][2]
-        + (1 - DEFAULT_CONFIG["away_color"][2]) * DEFAULT_CONFIG["brighten"] / 100,
+        DEFAULT_CONFIG["away_color"][0] * 66 / 100 + 34 / 100,
+        DEFAULT_CONFIG["away_color"][1] * 66 / 100 + 34 / 100,
+        DEFAULT_CONFIG["away_color"][2] * 66 / 100 + 34 / 100,
         DEFAULT_CONFIG["away_color"][3],
+    )
+    bright_away_matchcolor = (
+        matchcolor[0] * 66 / 100 + 34 / 100,
+        matchcolor[1] * 66 / 100 + 34 / 100,
+        matchcolor[2] * 66 / 100 + 34 / 100,
+        matchcolor[3],
     )
 
     assert _colors(False, False, DEFAULT_CONFIG) == (
@@ -516,8 +524,8 @@ def test__colors():
         matchcolor,
     )
     assert _colors(True, False, DEFAULT_CONFIG, matchcolor=matchcolor) == (
-        matchcolor,
-        matchcolor,
+        bright_away_matchcolor,
+        bright_away_matchcolor,
     )
     assert _colors(False, True, DEFAULT_CONFIG, matchcolor=matchcolor) == (
         matchcolor,
@@ -526,6 +534,41 @@ def test__colors():
     assert _colors(True, True, DEFAULT_CONFIG, matchcolor=matchcolor) == (
         DEFAULT_CONFIG["fill_color"],
         matchcolor,
+    )
+
+
+def test__adjust_away_brightness():
+    matchcolor = (0.12, 0.24, 0.36, 1)
+    bright_away_matchcolor = (
+        matchcolor[0] * 66 / 100 + 34 / 100,
+        matchcolor[1] * 66 / 100 + 34 / 100,
+        matchcolor[2] * 66 / 100 + 34 / 100,
+        matchcolor[3],
+    )
+    dark_away_matchcolor = (
+        matchcolor[0] * 66 / 100,
+        matchcolor[1] * 66 / 100,
+        matchcolor[2] * 66 / 100,
+        matchcolor[3],
+    )
+
+    assert (
+        _adjust_away_brightness(
+            matchcolor, {"away_brighter": True, "away_darker": False}
+        )
+        == bright_away_matchcolor
+    )
+    assert (
+        _adjust_away_brightness(
+            matchcolor, {"away_brighter": False, "away_darker": True}
+        )
+        == dark_away_matchcolor
+    )
+    assert (
+        _adjust_away_brightness(
+            matchcolor, {"away_brighter": False, "away_darker": False}
+        )
+        == matchcolor
     )
 
 

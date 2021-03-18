@@ -18,7 +18,8 @@ default_config <- list(
     spacing = 0.8,
     padding = 0.2,
     baseline_factor = 0.2,
-    brighten = 33,
+    away_brighter = TRUE,
+    away_darker = FALSE,
     transparent_background = FALSE,
     home_color = col2rgb("black", alpha = TRUE),
     away_color = col2rgb("black", alpha = TRUE),
@@ -79,8 +80,10 @@ default_config <- list(
 #'      by default 0.2
 #'  - baseline_factor: Thickness of baseline with respect to line thickness,
 #'      by default 0.2
-#'  - brighten: Brightness percentage of the away games (when outlined=FALSE),
-#'      by default 33
+#'  - away_brighter: Set away game colors 33% brighter (when outlined=FALSE),
+#'      by default TRUE
+#'  - away_darker: Set away game colors 33% darker (when outlined=FALSE),
+#'      by default FALSE (Setting this flag will turn "away_brighter" off)
 #'  - transparent_background: Set the background transparent instead of white,
 #'      by default FALSE
 #'  - home_color: Color of home match lines in any of the three kinds of R
@@ -464,6 +467,20 @@ config_factory <- function(outlined, ...) {
         config[["goalless_edge_thickness"]] <- 0
     }
 
+    if (
+        identical(kwargs[["away_brighter"]], TRUE) &&
+        identical(kwargs[["away_darker"]], TRUE)
+    ) {
+        stop(
+            strwrap(
+                "'away_brighter' and 'away_darker' flags cannot be set to
+                TRUE simultaneously. Setting 'away_darker' to TRUE will
+                turn off 'away_brighter', and setting 'away_brighter'
+                to FALSE will disable the brightness adjustment.", prefix = " "
+            )
+        )
+    }
+
     for (key in names(kwargs)) {
         value <- kwargs[[key]]
 
@@ -509,6 +526,10 @@ config_factory <- function(outlined, ...) {
             next
         }
 
+        if (key == "away_darker" && value) {
+            config[["away_brighter"]] <- FALSE
+        }
+
         config[[key]] <- value
     }
 
@@ -525,18 +546,10 @@ get_colors <- function(away_game, outlined, config, matchcolor=NULL) {
         } else {
             main_color <- config[["home_color"]]
         }
+    }
 
-        if (away_game && config[["brighten"]] != 0 && !outlined) {
-            main_color <- list(
-                red = main_color[[1]] +
-                    (255 - main_color[[1]]) * config[["brighten"]] / 100,
-                green = main_color[[2]] +
-                    (255 - main_color[[2]]) * config[["brighten"]] / 100,
-                blue = main_color[[3]] +
-                    (255 - main_color[[3]]) * config[["brighten"]] / 100,
-                alpha = main_color[[4]]
-            )
-        }
+    if (away_game && !outlined) {
+        main_color <- adjust_away_brightness(main_color, config)
     }
 
     if (away_game && outlined) {
@@ -553,6 +566,27 @@ get_colors <- function(away_game, outlined, config, matchcolor=NULL) {
     )
 
     return(list(facecolor, edgecolor))
+}
+
+adjust_away_brightness <- function(color, config) {
+
+    if (config[["away_brighter"]]) {
+        color <- list(
+            red = color[[1]] * 66 / 100 + 255 * 34 / 100,
+            green = color[[2]] * 66 / 100 + 255 * 34 / 100,
+            blue = color[[3]] * 66 / 100 + 255 * 34 / 100,
+            alpha = color[[4]]
+        )
+    } else if (config[["away_darker"]]) {
+        color <- list(
+            red = color[[1]] * 66 / 100,
+            green = color[[2]] * 66 / 100,
+            blue = color[[3]] * 66 / 100,
+            alpha = color[[4]]
+        )
+    }
+
+    return(color)
 }
 
 line_polygon <- function(start_xy, end_xy, facecolor, edgecolor, config) {
