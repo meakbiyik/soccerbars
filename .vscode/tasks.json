@@ -58,5 +58,22 @@
                 "clear": false
             }
         },
+        {
+            "label": "Run R CMD check",
+            "type": "shell",
+            "command": "Rscript",
+            "args":[
+                "-e",
+                "'devtools::check()'"
+            ],
+            "options": {
+				"cwd": "${workspaceFolder}"
+            },
+            "presentation": {
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            }
+        },
     ]
 }
