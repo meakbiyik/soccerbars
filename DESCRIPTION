@@ -25,6 +25,6 @@ Imports:
     ggplot2,
     checkmate,
     grDevices
-URL: https://github.com/snlab-eakbiyik/soccerbars
-BugReports: https://github.com/snlab-eakbiyik/soccerbars/issues
+URL: https://github.com/meakbiyik/soccerbars
+BugReports: https://github.com/meakbiyik/soccerbars/issues
 Language: en-US

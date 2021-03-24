@@ -89,7 +89,7 @@ MATCH_REGEX = re.compile(r"\((\d+)?[,-](\d+)?\)(\*)?")
     multiple=True,
     type=click.STRING,
     help="Key value tuple (without spaces) in the form key:value to modify "
-    "the visualization. See https://github.com/snlab-eakbiyik/soccerbars or "
+    "the visualization. See https://github.com/meakbiyik/soccerbars or "
     "the Python function docstring for the available parameters.",
 )
 def cli(

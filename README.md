@@ -2,16 +2,18 @@
 # soccerbars <img width="90em" height="24em" src="resources/example.png">
 
 <!-- badges: start -->
-[![R CMD check](https://github.com/snlab-eakbiyik/soccerbars/workflows/R%20CMD%20check/badge.svg)](https://github.com/snlab-eakbiyik/soccerbars/actions)
-[![Python package](https://github.com/snlab-eakbiyik/soccerbars/workflows/Python%20package/badge.svg)](https://github.com/snlab-eakbiyik/soccerbars/actions)
+[![R CMD check](https://github.com/meakbiyik/soccerbars/workflows/R%20CMD%20check/badge.svg)](https://github.com/meakbiyik/soccerbars/actions)
+[![Python package](https://github.com/meakbiyik/soccerbars/workflows/Python%20package/badge.svg)](https://github.com/meakbiyik/soccerbars/actions)
 <!-- To include when the repo becomes public.
-[![Codecov test coverage](https://codecov.io/gh/snlab-eakbiyik/soccerbars/branch/master/graph/badge.svg)](https://codecov.io/gh/snlab-eakbiyik/soccerbars?branch=master)
+[![Codecov test coverage](https://codecov.io/gh/meakbiyik/soccerbars/branch/master/graph/badge.svg)](https://codecov.io/gh/meakbiyik/soccerbars?branch=master)
 -->
 <!-- badges: end -->
 
 Multivariate sparklines making use of Gestalt theory (gestaltlines) for sequences of sports results.
 
 This repository contains a Python package, an R package, and a cmd tool based on Python.
+
+Soccerbars is created by Prof. Dr. Ulrik Brandes of ETH Zürich and this repository is a port of his [LaTeX package](https://github.com/ubrandes-ethz/soccerbars). An introduction to the theory behind this work can be found [here](https://sn.ethz.ch/research/soccerbars.html).
 
 ## Usage
 
@@ -144,13 +146,13 @@ This package is not published in PyPI or CRAN yet, so you can use the git-compat
 ### As a Python package
 
 ```bash
-pip install git+https://github.com/snlab-eakbiyik/soccerbars.git 
+pip install git+https://github.com/meakbiyik/soccerbars.git 
 ```
 
 ### As an R package
 
 ```R
-devtools::install_github("snlab-eakbiyik/soccerbars")
+devtools::install_github("meakbiyik/soccerbars")
 ```
 
 ### As a command line tool
