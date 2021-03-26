@@ -15,7 +15,7 @@ default_config <- list(
     goalless_edge_thickness = 0.5 * 0.36,
     zerodot = 0.6 / 2 * 0.36,
     slant = sin(14 * pi / 180),
-    spacing = 0.8,
+    spacing = 0.9,
     padding = 0.2,
     baseline_factor = 0.2,
     away_brighter = TRUE,
@@ -75,7 +75,7 @@ default_config <- list(
 #'  - zerodot: Zero-dot diameter ratio to thickness (when zerodots=TRUE),
 #'      by default 0.6
 #'  - slant: Slope for unbalanced scores in degrees, by default 14
-#'  - spacing: Spacing between matches in cartesian coordinates, by default 0.8
+#'  - spacing: Spacing between matches in cartesian coordinates, by default 0.9
 #'  - padding: Padding before and after the matches in cartesian coordinates,
 #'      by default 0.2
 #'  - baseline_factor: Thickness of baseline with respect to line thickness,

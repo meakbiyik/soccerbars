@@ -29,7 +29,7 @@ DEFAULT_CONFIG = {
     "goalless_edge_thickness": 0.5 * 2 * 0.36,
     "zerodot": 0.6 / 2 * 0.36,
     "slant": math.sin(math.radians(14)),
-    "spacing": 0.8,
+    "spacing": 0.9,
     "padding": 0.2,
     "baseline_factor": 0.2,
     "away_brighter": True,
@@ -102,7 +102,7 @@ def soccerbar(
             the ratio to the line thickness, by default 0.5
             - zerodot: Zero-dot diameter ratio to thickness (when zerodots=True), by default 0.6
             - slant: Slope for unbalanced scores in degrees, by default 14
-            - spacing: Spacing between matches in cartesian coordinates, by default 0.8
+            - spacing: Spacing between matches in cartesian coordinates, by default 0.9
             - padding: Padding before and after the matches in cartesian coordinates, by default 0.2
             - baseline_factor: Thickness of baseline with respect to line thickness, by default 0.2
             - away_brighter: Set away game colors 33% brighter (when outlined=False), by default True

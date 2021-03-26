@@ -127,7 +127,7 @@ These parameters can be used to customize the output images in all components.
 | goalless_edge_thickness  | Edge thickness for outlined no-goal patches (when outlined=True) as the ratio to the line thickness | 0.5 |
 | zerodot | Zero-dot diameter ratio to thickness (when zerodots=True) | 0.6 |
 | slant | Slope for unbalanced scores in degrees | 14 |
-| spacing | Spacing between matches in cartesian coordinates | 0.8 |
+| spacing | Spacing between matches in cartesian coordinates | 0.9 |
 | padding | Padding before and after the matches in cartesian coordinates | 0.2 |
 | baseline_factor | Thickness of baseline with respect to line thickness | 0.2 |
 | away_brighter | Set away game colors 33% brighter (when outlined=False) | True |

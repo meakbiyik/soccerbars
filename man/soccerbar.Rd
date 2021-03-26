@@ -68,7 +68,7 @@ as the ratio to the line thickness, by default 0.35
 \item zerodot: Zero-dot diameter ratio to thickness (when zerodots=TRUE),
 by default 0.6
 \item slant: Slope for unbalanced scores in degrees, by default 14
-\item spacing: Spacing between matches in cartesian coordinates, by default 0.8
+\item spacing: Spacing between matches in cartesian coordinates, by default 0.9
 \item padding: Padding before and after the matches in cartesian coordinates,
 by default 0.2
 \item baseline_factor: Thickness of baseline with respect to line thickness,
