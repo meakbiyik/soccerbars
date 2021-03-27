@@ -10,6 +10,7 @@ from matplotlib.patches import Circle, Patch, PathPatch
 from matplotlib.path import Path
 from matplotlib.axes import Axes
 from matplotlib.colors import to_rgba
+from matplotlib.collections import PatchCollection
 
 MatchScore = Tuple[int, int, bool]
 Matches = Iterable[MatchScore]
@@ -185,7 +186,7 @@ def soccerbar(
                 offset1 = match_index - slope * GOAL_TO_HEIGHT[scores[1]]
                 height0 = GOAL_TO_HEIGHT[scores[0]]
                 height1 = -GOAL_TO_HEIGHT[scores[1]]
-                patches.append(
+                patches.extend(
                     _line(
                         (offset1, height1),
                         (offset0, height0),
@@ -526,11 +527,39 @@ def _adjust_away_brightness(color, config):
 
 def _line(start_xy, end_xy, facecolor, edgecolor, config):
 
-    clipped = start_xy[0] != end_xy[0]
     thickness = config["thickness"]
-    edge_thickness = config["edge_thickness"] * PPI
-    half_th = thickness / 2
+    edge_thickness = config["edge_thickness"]
 
+    slanted = np.sign(end_xy[0] - start_xy[0])
+    slant_degree = slanted * math.asin(config["slant"])
+    inner_start_xy = [
+        start_xy[0] + edge_thickness * math.sin(slant_degree),
+        start_xy[1] + edge_thickness * math.cos(slant_degree),
+    ]
+    inner_end_xy = [
+        end_xy[0] - edge_thickness * math.sin(slant_degree),
+        end_xy[1] - edge_thickness * math.cos(slant_degree),
+    ]
+    inner_thickness = thickness - 2 * edge_thickness
+
+    main_path_data = _line_path(start_xy, end_xy, thickness, config)
+    inner_path_data = _line_path(inner_start_xy, inner_end_xy, inner_thickness, config)
+    main_path_data += inner_path_data
+
+    codes, verts = zip(*main_path_data)
+    main_path = Path(verts, codes)
+    outer_patch = PathPatch(main_path, facecolor=edgecolor, linewidth=0)
+
+    codes, verts = zip(*inner_path_data)
+    inner_path = Path(verts, codes)
+    inner_patch = PathPatch(inner_path, facecolor=facecolor, edgecolor=facecolor)
+
+    return [outer_patch, inner_patch]
+
+
+def _line_path(start_xy, end_xy, thickness, config):
+    clipped = start_xy[0] != end_xy[0]
+    half_th = thickness / 2
     if clipped and config["clip_slanted_lines"]:
         path_data = [
             (Path.MOVETO, (start_xy[0] - half_th, start_xy[1])),
@@ -551,11 +580,7 @@ def _line(start_xy, end_xy, facecolor, edgecolor, config):
             (Path.CURVE4, (end_xy[0] - half_th, end_xy[1] - half_th)),
             (Path.CLOSEPOLY, (None, None)),
         ]
-    codes, verts = zip(*path_data)
-    path = Path(verts, codes)
-    return PathPatch(
-        path, facecolor=facecolor, edgecolor=edgecolor, linewidth=edge_thickness
-    )
+    return path_data
 
 
 def _plot(
@@ -621,9 +646,8 @@ def _plot(
             zorder=-1,
         )
 
-    for patch in patches:
-        ax.add_patch(patch)
-        patch.set_clip_path(patch)
+    patch_collection = PatchCollection(patches, match_original=True)
+    ax.add_collection(patch_collection)
 
     if output_path:
         plt.savefig(
