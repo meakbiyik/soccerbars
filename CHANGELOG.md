@@ -6,8 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased] - XX.XX.XXXX
+### Added
+- When outlined=True and twogoalline=True, twogoallines now also jump across the bars (as baseline already did) to make real transparency possible
+
 ### Changed
 - Default spacing from 0.8 to 0.9.
+- Tip thicknesses in outlined cases are now equal to the baseline width (except when twogoalline=True, at which point if score is 2, thickness is halved to remove visual artifacts).
+
+### Fixed
+- Default documented thickness being inconsistent with the effective value
 
 ## [0.1.0] - 24.03.2021
 ### Added

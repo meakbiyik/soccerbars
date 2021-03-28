@@ -413,7 +413,7 @@ test_that("config factory produces correct configuration lists", {
             edge_thickness = 10, thickness = 3)[["edge_thickness"]],
             10 * 3)
         expect_equal(config_factory(TRUE, slant = 20)[["slant"]],
-            sin(20 * pi / 180))
+            20 * pi / 180)
         expect_equal(config_factory(TRUE, zerodot = 10)[["zerodot"]],
             10 / 2 * default_config[["thickness"]])
         expect_equal(config_factory(TRUE, zerodot = 10,

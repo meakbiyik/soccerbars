@@ -465,7 +465,7 @@ def test__config_factory():
         _config_factory(True, edge_thickness=10)["edge_thickness"]
         == 10 * DEFAULT_CONFIG["thickness"]
     )
-    assert _config_factory(True, slant=20)["slant"] == math.sin(math.radians(20))
+    assert _config_factory(True, slant=20)["slant"] == math.radians(20)
     assert (
         _config_factory(True, zerodot=10)["zerodot"]
         == 10 / 2 * DEFAULT_CONFIG["thickness"]

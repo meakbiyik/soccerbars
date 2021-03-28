@@ -29,7 +29,7 @@ DEFAULT_CONFIG = {
     "edge_thickness": 0.35 * 0.36,
     "goalless_edge_thickness": 0.5 * 0.36,
     "zerodot": 0.6 / 2 * 0.36,
-    "slant": math.sin(math.radians(14)),
+    "slant": math.radians(14),
     "spacing": 0.9,
     "padding": 0.2,
     "baseline_factor": 0.2,
@@ -157,6 +157,8 @@ def soccerbar(
 
         patches = []
         baseline_jumps = []
+        upper_twogoalline_jumps = []
+        lower_twogoalline_jumps = []
         colors = matchcolors[matches_index] if color is not None else None
         outpath = outpaths[matches_index] if output_path is not None else None
         match_count = len(matches)
@@ -182,7 +184,7 @@ def soccerbar(
                 continue
 
             if scores[0] or scores[1]:
-                slope = config["slant"] * np.sign(scores[0] - scores[1])
+                slope = math.sin(config["slant"]) * np.sign(scores[0] - scores[1])
                 offset0 = match_index + slope * GOAL_TO_HEIGHT[scores[0]]
                 offset1 = match_index - slope * GOAL_TO_HEIGHT[scores[1]]
                 height0 = GOAL_TO_HEIGHT[scores[0]]
@@ -211,15 +213,46 @@ def soccerbar(
             if scores[0] and scores[1]:
                 baseline_jumps.extend(
                     [
-                        match_index - config["thickness"] * 0.95 / 2,
-                        match_index + config["thickness"] * 0.95 / 2,
+                        match_index - config["thickness"] * 0.9 / 2,
+                        match_index + config["thickness"] * 0.9 / 2,
                     ]
                 )
             elif not (scores[0] or scores[1]):
                 baseline_jumps.extend(
                     [
-                        match_index - config["thickness"] * 0.95,
-                        match_index + config["thickness"] * 0.95,
+                        match_index - config["thickness"] * 0.9,
+                        match_index + config["thickness"] * 0.9,
+                    ]
+                )
+
+            if scores[0] > 2:
+                upper_twogoalline_jumps.extend(
+                    [
+                        match_index
+                        - config["thickness"] * 0.9 / 2
+                        + GOAL_TO_HEIGHT[2]
+                        * math.tan(config["slant"])
+                        * np.sign(scores[0] - scores[1]),
+                        match_index
+                        + config["thickness"] * 0.9 / 2
+                        + GOAL_TO_HEIGHT[2]
+                        * math.tan(config["slant"])
+                        * np.sign(scores[0] - scores[1]),
+                    ]
+                )
+            if scores[1] > 2:
+                lower_twogoalline_jumps.extend(
+                    [
+                        match_index
+                        - config["thickness"] * 0.9 / 2
+                        - GOAL_TO_HEIGHT[2]
+                        * math.tan(config["slant"])
+                        * np.sign(scores[0] - scores[1]),
+                        match_index
+                        + config["thickness"] * 0.9 / 2
+                        - GOAL_TO_HEIGHT[2]
+                        * math.tan(config["slant"])
+                        * np.sign(scores[0] - scores[1]),
                     ]
                 )
 
@@ -249,6 +282,8 @@ def soccerbar(
             _plot(
                 patches,
                 baseline_jumps,
+                upper_twogoalline_jumps,
+                lower_twogoalline_jumps,
                 match_count,
                 config,
                 show=show,
@@ -466,7 +501,7 @@ def _config_factory(outlined, **kwargs):
             )
 
         if key == "slant":
-            config[key] = math.sin(math.radians(value))
+            config[key] = math.radians(value)
             continue
 
         if key == "zerodot":
@@ -558,7 +593,7 @@ def _line(twogoalline, start_xy, end_xy, facecolor, edgecolor, config):
     end_xy = (end_xy[0], 0.5 * baseline_width) if end_xy[1] == 0 else end_xy
 
     slanted = np.sign(end_xy[0] - start_xy[0])
-    slant_degree = slanted * math.asin(config["slant"])
+    slant_degree = slanted * config["slant"]
 
     if slanted:
         lower_tip_thickness = (
@@ -651,6 +686,8 @@ def _line_path(start_xy, end_xy, thickness, config, clockwise):
 def _plot(
     patches: List[Patch],
     baseline_jumps: List[float],
+    upper_twogoalline_jumps: List[float],
+    lower_twogoalline_jumps: List[float],
     match_count,
     config,
     show=True,
@@ -678,7 +715,7 @@ def _plot(
     ax.set_xlim(-padding, plot_width - padding)
     ax.set_ylim(-MAX_HEIGHT, MAX_HEIGHT)
 
-    baseline_width = config["thickness"] * config["baseline_factor"] * PPI
+    baseline_width = config["thickness"] * config["baseline_factor"]
     baseline_color = config["baseline_color"]
 
     baseline_endpoints = [-padding] + baseline_jumps + [plot_width - padding]
@@ -687,7 +724,7 @@ def _plot(
         ax.plot(
             [x1, x2],
             [0, 0],
-            lw=baseline_width,
+            lw=baseline_width * PPI,
             color=baseline_color,
             zorder=-1,
             solid_capstyle="butt",
@@ -696,20 +733,41 @@ def _plot(
     if twogoalline:
         two_goals = GOAL_TO_HEIGHT[2]
         twogoalline_width = baseline_width * 0.5
-        ax.plot(
-            [-padding, plot_width - padding],
-            [two_goals, two_goals],
-            lw=twogoalline_width,
-            color=baseline_color,
-            zorder=-1,
+
+        upper_twogoalline_endpoints = (
+            [-padding] + upper_twogoalline_jumps + [plot_width - padding]
         )
-        ax.plot(
-            [-padding, plot_width - padding],
-            [-two_goals, -two_goals],
-            lw=twogoalline_width,
-            color=baseline_color,
-            zorder=-1,
+        upper_twogoalline_segments = zip(
+            upper_twogoalline_endpoints[::2], upper_twogoalline_endpoints[1::2]
         )
+        for x1, x2 in upper_twogoalline_segments:
+            ax.plot(
+                [x1, x2],
+                [two_goals - twogoalline_width / 2, two_goals - twogoalline_width / 2],
+                lw=twogoalline_width * PPI,
+                color=baseline_color,
+                zorder=-1,
+                solid_capstyle="butt",
+            )
+
+        lower_twogoalline_endpoints = (
+            [-padding] + lower_twogoalline_jumps + [plot_width - padding]
+        )
+        lower_twogoalline_segments = zip(
+            lower_twogoalline_endpoints[::2], lower_twogoalline_endpoints[1::2]
+        )
+        for x1, x2 in lower_twogoalline_segments:
+            ax.plot(
+                [x1, x2],
+                [
+                    -two_goals + twogoalline_width / 2,
+                    -two_goals + twogoalline_width / 2,
+                ],
+                lw=twogoalline_width * PPI,
+                color=baseline_color,
+                zorder=-1,
+                solid_capstyle="butt",
+            )
 
     patch_collection = PatchCollection(patches, match_original=True)
     ax.add_collection(patch_collection)

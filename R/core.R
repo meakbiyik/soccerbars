@@ -14,7 +14,7 @@ default_config <- list(
     edge_thickness = 0.35 * 0.36,
     goalless_edge_thickness = 0.5 * 0.36,
     zerodot = 0.6 / 2 * 0.36,
-    slant = sin(14 * pi / 180),
+    slant = 14 * pi / 180,
     spacing = 0.9,
     padding = 0.2,
     baseline_factor = 0.2,
@@ -148,6 +148,8 @@ soccerbar <- function(scores,
     for (matches_index in seq_along(matchlists)) {
         patches <- list()
         baseline_jumps <- c()
+        upper_twogoalline_jumps <- c()
+        lower_twogoalline_jumps <- c()
         matches <- matchlists[[matches_index]]
         colors <- if (!is.null(color)) matchcolors[[matches_index]] else NULL
         outpath <- if (!is.null(output_path)) output_path[[matches_index]]
@@ -180,7 +182,8 @@ soccerbar <- function(scores,
             }
 
             if (scores[[1]] > 0 || scores[[2]] > 0) {
-                slope <- config[["slant"]] * sign(scores[[1]] - scores[[2]])
+                slope <- sin(config[["slant"]]) *
+                    sign(scores[[1]] - scores[[2]])
                 offset0 <- match_index + slope * goal_to_height(scores[[1]])
                 offset1 <- match_index - slope * goal_to_height(scores[[2]])
                 height0 <- goal_to_height(scores[[1]])
@@ -210,16 +213,51 @@ soccerbar <- function(scores,
                 baseline_jumps <- c(
                     baseline_jumps,
                     c(
-                        match_index - config[["thickness"]] * 0.95 / 2,
-                        match_index + config[["thickness"]] * 0.95 / 2
+                        match_index - config[["thickness"]] * 0.9 / 2,
+                        match_index + config[["thickness"]] * 0.9 / 2
                     )
                 )
             } else if (scores[[1]] == 0 && scores[[2]] == 0) {
                 baseline_jumps <- c(
                     baseline_jumps,
                     c(
-                        match_index - config[["thickness"]] * 0.95,
-                        match_index + config[["thickness"]] * 0.95
+                        match_index - config[["thickness"]] * 0.9,
+                        match_index + config[["thickness"]] * 0.9
+                    )
+                )
+            }
+
+            if (scores[[1]] > 2) {
+                upper_twogoalline_jumps <- c(
+                    upper_twogoalline_jumps,
+                    c(
+                        match_index
+                        - config[["thickness"]] * 0.9 / 2
+                        + goal_to_height(2)
+                        * tan(config[["slant"]])
+                        * sign(scores[[1]] - scores[[2]]),
+                        match_index
+                        + config[["thickness"]] * 0.9 / 2
+                        + goal_to_height(2)
+                        * tan(config[["slant"]])
+                        * sign(scores[[1]] - scores[[2]])
+                    )
+                )
+            }
+            if (scores[[2]] > 2) {
+                lower_twogoalline_jumps <- c(
+                    lower_twogoalline_jumps,
+                    c(
+                        match_index
+                        - config[["thickness"]] * 0.9 / 2
+                        - goal_to_height(2)
+                        * tan(config[["slant"]])
+                        * sign(scores[[1]] - scores[[2]]),
+                        match_index
+                        + config[["thickness"]] * 0.9 / 2
+                        - goal_to_height(2)
+                        * tan(config[["slant"]])
+                        * sign(scores[[1]] - scores[[2]])
                     )
                 )
             }
@@ -249,6 +287,8 @@ soccerbar <- function(scores,
             plot(
                 patches,
                 baseline_jumps,
+                upper_twogoalline_jumps,
+                lower_twogoalline_jumps,
                 match_count,
                 config,
                 show = show,
@@ -494,7 +534,7 @@ config_factory <- function(outlined, ...) {
         }
 
         if (key == "slant") {
-            config[[key]] <- sin(value * pi / 180)
+            config[[key]] <- value * pi / 180
             next
         }
 
@@ -593,14 +633,14 @@ line_polygon <- function(twogoalline,
                          config) {
     thickness <- config[["thickness"]]
     edge_thickness <- config[["edge_thickness"]]
-    baseline_width <- thickness * config[["baseline_factor"]]
+    baseline_width <- thickness * config[["baseline_factor"]] / 2
     upper_tip_thickness <- lower_tip_thickness <- edge_thickness
 
     start_xy[2] <- if (start_xy[2] == 0) -0.5 * baseline_width else start_xy[2]
     end_xy[2] <- if (end_xy[2] == 0) 0.5 * baseline_width else end_xy[2]
 
     slanted <- sign(end_xy[[1]] - start_xy[[1]])
-    slant_degree <- slanted * asin(config[["slant"]])
+    slant_degree <- slanted * config[["slant"]]
 
     if (slanted) {
         lower_tip_thickness <- if (
@@ -759,6 +799,8 @@ circle <- function(x, y, radius = 1, start_rad = 0, end_rad = 2 * pi) {
 
 plot <- function(patches,
                  baseline_jumps,
+                 upper_twogoalline_jumps,
+                 lower_twogoalline_jumps,
                  match_count,
                  config,
                  show,
@@ -799,24 +841,40 @@ plot <- function(patches,
         two_goals <- goal_to_height(2)
         twogoalline_width <- baseline_width * 0.5
 
+        upper_twogoalline_endpoints <- c(
+            -padding,
+            upper_twogoalline_jumps,
+            plot_width - padding
+        )
+        upper_twogoalline_seg_count <- length(upper_twogoalline_endpoints)
+
+        lower_twogoalline_endpoints <- c(
+            -padding,
+            lower_twogoalline_jumps,
+            plot_width - padding
+        )
+        lower_twogoalline_seg_count <- length(lower_twogoalline_endpoints)
+
         ax <- ax + geom_path(
             aes(
-                x = c(-padding, plot_width - padding),
-                y = c(
+                x = upper_twogoalline_endpoints,
+                y = rep(
                     two_goals - twogoalline_width / 2,
-                    two_goals - twogoalline_width / 2
-                )
+                    each = upper_twogoalline_seg_count
+                ),
+                group = rep(1:(upper_twogoalline_seg_count / 2), each = 2)
             ),
             colour = do.call(
                 rgb, append(baseline_color, list(maxColorValue = 255))
             ), size = twogoalline_width * ppi
         ) + geom_path(
             aes(
-                x = c(-padding, plot_width - padding),
-                y = c(
+                x = lower_twogoalline_endpoints,
+                y = rep(
                     -two_goals + twogoalline_width / 2,
-                    -two_goals + twogoalline_width / 2
-                )
+                    each = lower_twogoalline_seg_count
+                ),
+                group = rep(1:(lower_twogoalline_seg_count / 2), each = 2)
             ),
             colour = do.call(
                 rgb, append(baseline_color, list(maxColorValue = 255))
