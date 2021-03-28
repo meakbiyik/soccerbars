@@ -9,6 +9,7 @@ tests/python
 poetry.*?$
 pyproject\.toml
 README\.md
+CHANGELOG\.md
 
 # ----------------------------------------------------
 # ---------------  Python gitignore  -----------------
