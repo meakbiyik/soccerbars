@@ -461,7 +461,6 @@ def test__check_color_and_output_path(
 
 def test__config_factory():
     assert _config_factory(True) == DEFAULT_CONFIG
-    assert _config_factory(False)["edge_thickness"] == 0
     assert (
         _config_factory(True, edge_thickness=10)["edge_thickness"]
         == 10 * DEFAULT_CONFIG["thickness"]

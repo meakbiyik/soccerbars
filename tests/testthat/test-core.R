@@ -406,7 +406,6 @@ test_that("bad color and output path configs are correctly identified", {
 
 test_that("config factory produces correct configuration lists", {
         expect_equal(config_factory(TRUE), default_config)
-        expect_equal(config_factory(FALSE)[["edge_thickness"]], 0)
         expect_equal(config_factory(TRUE,
             edge_thickness = 10)[["edge_thickness"]],
             10 * default_config[["thickness"]])

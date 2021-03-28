@@ -6,7 +6,7 @@ import pathlib
 
 import numpy as np
 from matplotlib import pyplot as plt
-from matplotlib.patches import Circle, Patch, PathPatch
+from matplotlib.patches import Patch, PathPatch
 from matplotlib.path import Path
 from matplotlib.axes import Axes
 from matplotlib.colors import to_rgba
@@ -26,8 +26,8 @@ GOAL_TO_HEIGHT: Dict[int, float] = defaultdict(
 DEFAULT_CONFIG = {
     "dpi": 300,
     "thickness": 0.36,
-    "edge_thickness": 0.35 * 2 * 0.36,
-    "goalless_edge_thickness": 0.5 * 2 * 0.36,
+    "edge_thickness": 0.35 * 0.36,
+    "goalless_edge_thickness": 0.5 * 0.36,
     "zerodot": 0.6 / 2 * 0.36,
     "slant": math.sin(math.radians(14)),
     "spacing": 0.9,
@@ -96,7 +96,7 @@ def soccerbar(
         Additional configuration keywords for the visualization. Not necessarily
         consistent with its latex counterpart, but mostly a superset of it.
             - dpi: Dots per inch resolution, by default 300
-            - thickness: Line thickness in cartesian coordinates, by default 0.18
+            - thickness: Line thickness in cartesian coordinates, by default 0.36
             - edge_thickness: Edge thickness for outlined patches (when outlined=True) as the ratio to the
             line thickness, by default 0.35
             - goalless_edge_thickness: Edge thickness for outlined no-goal patches (when outlined=True) as
@@ -170,12 +170,13 @@ def soccerbar(
             facecolor, edgecolor = _colors(away_game, outlined, config, matchcolor)
 
             if scores[0] is None or np.isnan(scores[0]):
-                patches.append(
-                    Circle(
+                patches.extend(
+                    _circle(
                         (match_index, 0),
-                        radius=config["zerodot"],
-                        facecolor=edgecolor,
-                        edgecolor=edgecolor,
+                        config["zerodot"],
+                        edgecolor,
+                        edgecolor,
+                        config,
                     )
                 )
                 continue
@@ -188,6 +189,7 @@ def soccerbar(
                 height1 = -GOAL_TO_HEIGHT[scores[1]]
                 patches.extend(
                     _line(
+                        twogoalline,
                         (offset1, height1),
                         (offset0, height0),
                         facecolor,
@@ -196,13 +198,13 @@ def soccerbar(
                     )
                 )
             else:
-                patches.append(
-                    Circle(
+                patches.extend(
+                    _circle(
                         (match_index, 0),
-                        radius=config["thickness"],
-                        facecolor=facecolor,
-                        edgecolor=edgecolor,
-                        linewidth=config["goalless_edge_thickness"] * PPI,
+                        config["thickness"],
+                        facecolor,
+                        edgecolor,
+                        config,
                     )
                 )
 
@@ -223,21 +225,23 @@ def soccerbar(
 
             if zerodots:
                 if not scores[0]:
-                    patches.append(
-                        Circle(
+                    patches.extend(
+                        _circle(
                             (match_index, 1 - config["zerodot"]),
-                            radius=config["zerodot"],
-                            facecolor=edgecolor,
-                            edgecolor=edgecolor,
+                            config["zerodot"],
+                            edgecolor,
+                            edgecolor,
+                            config,
                         )
                     )
                 if not scores[1]:
-                    patches.append(
-                        Circle(
+                    patches.extend(
+                        _circle(
                             (match_index, -1 + config["zerodot"]),
-                            radius=config["zerodot"],
-                            facecolor=edgecolor,
-                            edgecolor=edgecolor,
+                            config["zerodot"],
+                            edgecolor,
+                            edgecolor,
+                            config,
                         )
                     )
 
@@ -446,10 +450,6 @@ def _config_factory(outlined, **kwargs):
 
     config = DEFAULT_CONFIG.copy()
 
-    if not outlined:
-        config["edge_thickness"] = 0
-        config["goalless_edge_thickness"] = 0
-
     if kwargs.get("away_brighter", None) and kwargs.get("away_darker", None):
         raise KeyError(
             "'away_brighter' and 'away_darker' flags cannot be set to True simultaneously. "
@@ -525,25 +525,67 @@ def _adjust_away_brightness(color, config):
     return color
 
 
-def _line(start_xy, end_xy, facecolor, edgecolor, config):
+def _circle(xy, radius, facecolor, edgecolor, config):
+
+    main_path = Path.circle(xy, radius)
+    inner_path = Path.circle(xy, radius - config["goalless_edge_thickness"])
+
+    main_path_data = list(zip(main_path.codes, main_path.vertices))
+    inner_path_data = list(zip(inner_path.codes, inner_path.vertices))
+    main_path_data += (
+        [inner_path_data[0]] + inner_path_data[1:-2][::-1] + inner_path_data[-2:]
+    )
+
+    codes, verts = zip(*main_path_data)
+    main_path = Path(verts, codes)
+    outer_patch = PathPatch(main_path, facecolor=edgecolor, linewidth=0)
+
+    codes, verts = zip(*inner_path_data)
+    inner_path = Path(verts, codes)
+    inner_patch = PathPatch(inner_path, facecolor=facecolor, edgecolor=facecolor)
+
+    return [outer_patch, inner_patch]
+
+
+def _line(twogoalline, start_xy, end_xy, facecolor, edgecolor, config):
 
     thickness = config["thickness"]
     edge_thickness = config["edge_thickness"]
+    baseline_width = thickness * config["baseline_factor"]
+    upper_tip_thickness = lower_tip_thickness = edge_thickness
+
+    start_xy = (start_xy[0], -0.5 * baseline_width) if start_xy[1] == 0 else start_xy
+    end_xy = (end_xy[0], 0.5 * baseline_width) if end_xy[1] == 0 else end_xy
 
     slanted = np.sign(end_xy[0] - start_xy[0])
     slant_degree = slanted * math.asin(config["slant"])
+
+    if slanted:
+        lower_tip_thickness = (
+            baseline_width * 0.5
+            if (twogoalline and start_xy[1] == -GOAL_TO_HEIGHT[2])
+            else baseline_width
+        )
+        upper_tip_thickness = (
+            baseline_width * 0.5
+            if (twogoalline and end_xy[1] == GOAL_TO_HEIGHT[2])
+            else baseline_width
+        )
+
     inner_start_xy = [
-        start_xy[0] + edge_thickness * math.sin(slant_degree),
-        start_xy[1] + edge_thickness * math.cos(slant_degree),
+        start_xy[0] + lower_tip_thickness * math.sin(slant_degree),
+        start_xy[1] + lower_tip_thickness * math.cos(slant_degree),
     ]
     inner_end_xy = [
-        end_xy[0] - edge_thickness * math.sin(slant_degree),
-        end_xy[1] - edge_thickness * math.cos(slant_degree),
+        end_xy[0] - upper_tip_thickness * math.sin(slant_degree),
+        end_xy[1] - upper_tip_thickness * math.cos(slant_degree),
     ]
     inner_thickness = thickness - 2 * edge_thickness
 
-    main_path_data = _line_path(start_xy, end_xy, thickness, config)
-    inner_path_data = _line_path(inner_start_xy, inner_end_xy, inner_thickness, config)
+    main_path_data = _line_path(start_xy, end_xy, thickness, config, clockwise=True)
+    inner_path_data = _line_path(
+        inner_start_xy, inner_end_xy, inner_thickness, config, clockwise=False
+    )
     main_path_data += inner_path_data
 
     codes, verts = zip(*main_path_data)
@@ -557,29 +599,52 @@ def _line(start_xy, end_xy, facecolor, edgecolor, config):
     return [outer_patch, inner_patch]
 
 
-def _line_path(start_xy, end_xy, thickness, config):
+def _line_path(start_xy, end_xy, thickness, config, clockwise):
     clipped = start_xy[0] != end_xy[0]
     half_th = thickness / 2
     if clipped and config["clip_slanted_lines"]:
-        path_data = [
-            (Path.MOVETO, (start_xy[0] - half_th, start_xy[1])),
-            (Path.LINETO, (start_xy[0] + half_th, start_xy[1])),
-            (Path.LINETO, (end_xy[0] + half_th, end_xy[1])),
-            (Path.LINETO, (end_xy[0] - half_th, end_xy[1])),
-            (Path.CLOSEPOLY, (None, None)),
-        ]
+        if clockwise:
+            path_data = [
+                (Path.MOVETO, (start_xy[0] - half_th, start_xy[1])),
+                (Path.LINETO, (end_xy[0] - half_th, end_xy[1])),
+                (Path.LINETO, (end_xy[0] + half_th, end_xy[1])),
+                (Path.LINETO, (start_xy[0] + half_th, start_xy[1])),
+                (Path.CLOSEPOLY, (None, None)),
+            ]
+        else:
+            path_data = [
+                (Path.MOVETO, (start_xy[0] - half_th, start_xy[1])),
+                (Path.LINETO, (start_xy[0] + half_th, start_xy[1])),
+                (Path.LINETO, (end_xy[0] + half_th, end_xy[1])),
+                (Path.LINETO, (end_xy[0] - half_th, end_xy[1])),
+                (Path.CLOSEPOLY, (None, None)),
+            ]
     else:
-        path_data = [
-            (Path.MOVETO, (start_xy[0] - half_th, start_xy[1] + half_th)),
-            (Path.CURVE4, (start_xy[0] - half_th, start_xy[1] - 3 / 8 * half_th)),
-            (Path.CURVE4, (start_xy[0] + half_th, start_xy[1] - 3 / 8 * half_th)),
-            (Path.CURVE4, (start_xy[0] + half_th, start_xy[1] + half_th)),
-            (Path.LINETO, (end_xy[0] + half_th, end_xy[1] - half_th)),
-            (Path.CURVE4, (end_xy[0] + half_th, end_xy[1] + 3 / 8 * half_th)),
-            (Path.CURVE4, (end_xy[0] - half_th, end_xy[1] + 3 / 8 * half_th)),
-            (Path.CURVE4, (end_xy[0] - half_th, end_xy[1] - half_th)),
-            (Path.CLOSEPOLY, (None, None)),
-        ]
+        if clockwise:
+            path_data = [
+                (Path.MOVETO, (start_xy[0] - half_th, start_xy[1] + half_th)),
+                (Path.LINETO, (end_xy[0] - half_th, end_xy[1] - half_th)),
+                (Path.CURVE4, (end_xy[0] - half_th, end_xy[1] + 5 / 16 * half_th)),
+                (Path.CURVE4, (end_xy[0] + half_th, end_xy[1] + 5 / 16 * half_th)),
+                (Path.CURVE4, (end_xy[0] + half_th, end_xy[1] - half_th)),
+                (Path.LINETO, (start_xy[0] + half_th, start_xy[1] + half_th)),
+                (Path.CURVE4, (start_xy[0] + half_th, start_xy[1] - 5 / 16 * half_th)),
+                (Path.CURVE4, (start_xy[0] - half_th, start_xy[1] - 5 / 16 * half_th)),
+                (Path.CURVE4, (start_xy[0] - half_th, start_xy[1] + half_th)),
+                (Path.CLOSEPOLY, (None, None)),
+            ]
+        else:
+            path_data = [
+                (Path.MOVETO, (start_xy[0] - half_th, start_xy[1] + half_th)),
+                (Path.CURVE4, (start_xy[0] - half_th, start_xy[1] - 5 / 16 * half_th)),
+                (Path.CURVE4, (start_xy[0] + half_th, start_xy[1] - 5 / 16 * half_th)),
+                (Path.CURVE4, (start_xy[0] + half_th, start_xy[1] + half_th)),
+                (Path.LINETO, (end_xy[0] + half_th, end_xy[1] - half_th)),
+                (Path.CURVE4, (end_xy[0] + half_th, end_xy[1] + 5 / 16 * half_th)),
+                (Path.CURVE4, (end_xy[0] - half_th, end_xy[1] + 5 / 16 * half_th)),
+                (Path.CURVE4, (end_xy[0] - half_th, end_xy[1] - half_th)),
+                (Path.CLOSEPOLY, (None, None)),
+            ]
     return path_data
 
 

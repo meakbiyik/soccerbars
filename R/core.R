@@ -67,7 +67,7 @@ default_config <- list(
 #' visualization. Not necessarily consistent with its latex counterpart,
 #' but mostly a superset of it.
 #'  - dpi: Dots per inch resolution, by default 300
-#'  - thickness: Line thickness in cartesian coordinates, by default 0.18
+#'  - thickness: Line thickness in cartesian coordinates, by default 0.36
 #'  - edge_thickness: Edge thickness for outlined patches (when outlined=TRUE)
 #'      as the ratio to the line thickness, by default 0.35
 #'  - goalless_edge_thickness: Edge thickness for outlined no-goal patches
@@ -188,6 +188,7 @@ soccerbar <- function(scores,
                 patches <- append(
                     patches,
                     line_polygon(
+                        twogoalline,
                         c(offset1, height1),
                         c(offset0, height0),
                         facecolor,
@@ -462,11 +463,6 @@ config_factory <- function(outlined, ...) {
     kwargs <- list(...)
     config <- default_config
 
-    if (!outlined) {
-        config[["edge_thickness"]] <- 0
-        config[["goalless_edge_thickness"]] <- 0
-    }
-
     if (
         identical(kwargs[["away_brighter"]], TRUE) &&
         identical(kwargs[["away_darker"]], TRUE)
@@ -589,25 +585,47 @@ adjust_away_brightness <- function(color, config) {
     return(color)
 }
 
-line_polygon <- function(start_xy, end_xy, facecolor, edgecolor, config) {
+line_polygon <- function(twogoalline,
+                         start_xy,
+                         end_xy,
+                         facecolor,
+                         edgecolor,
+                         config) {
     thickness <- config[["thickness"]]
+    edge_thickness <- config[["edge_thickness"]]
+    baseline_width <- thickness * config[["baseline_factor"]]
+    upper_tip_thickness <- lower_tip_thickness <- edge_thickness
+
+    start_xy[2] <- if (start_xy[2] == 0) -0.5 * baseline_width else start_xy[2]
+    end_xy[2] <- if (end_xy[2] == 0) 0.5 * baseline_width else end_xy[2]
+
     slanted <- sign(end_xy[[1]] - start_xy[[1]])
     slant_degree <- slanted * asin(config[["slant"]])
 
+    if (slanted) {
+        lower_tip_thickness <- if (
+            twogoalline && start_xy[2] == -goal_to_height(2)
+        ) baseline_width * 0.5 else baseline_width
+        upper_tip_thickness <- if (
+            twogoalline && end_xy[2] == goal_to_height(2)
+        ) baseline_width * 0.5 else baseline_width
+    }
+
     inner_start_xy <- c(
-        start_xy[[1]] + config[["edge_thickness"]] * sin(slant_degree),
-        start_xy[[2]] + config[["edge_thickness"]] * cos(slant_degree)
+        start_xy[[1]] + lower_tip_thickness * sin(slant_degree),
+        start_xy[[2]] + lower_tip_thickness * cos(slant_degree)
     )
     inner_end_xy <- c(
-        end_xy[[1]] - config[["edge_thickness"]] * sin(slant_degree),
-        end_xy[[2]] - config[["edge_thickness"]] * cos(slant_degree)
+        end_xy[[1]] - upper_tip_thickness * sin(slant_degree),
+        end_xy[[2]] - upper_tip_thickness * cos(slant_degree)
     )
+    inner_thickness <- thickness - 2 * edge_thickness
 
     main_path <- line_path(start_xy, end_xy, thickness, config)
     inner_path <- line_path(
         inner_start_xy,
         inner_end_xy,
-        thickness - 2 * config[["edge_thickness"]],
+        inner_thickness,
         config
     )
     main_path$subid <- 1L
@@ -748,8 +766,7 @@ plot <- function(patches,
                  output_path = NULL) {
     padding <- config[["padding"]]
     plot_width <- padding + (match_count + 1) * config[["spacing"]] + padding
-    baseline_width <- config[["thickness"]] * config[["baseline_factor"]] *
-        ppi / 2
+    baseline_width <- config[["thickness"]] * config[["baseline_factor"]] / 2
     baseline_color <- config[["baseline_color"]]
 
     background <- if (config[["transparent_background"]]) {
@@ -775,7 +792,7 @@ plot <- function(patches,
         colour = do.call(
             rgb, append(baseline_color, list(maxColorValue = 255))
         ),
-        size = baseline_width
+        size = baseline_width * ppi
     )
 
     if (twogoalline) {
@@ -785,19 +802,25 @@ plot <- function(patches,
         ax <- ax + geom_path(
             aes(
                 x = c(-padding, plot_width - padding),
-                y = c(two_goals, two_goals)
+                y = c(
+                    two_goals - twogoalline_width / 2,
+                    two_goals - twogoalline_width / 2
+                )
             ),
             colour = do.call(
                 rgb, append(baseline_color, list(maxColorValue = 255))
-            ), size = twogoalline_width
+            ), size = twogoalline_width * ppi
         ) + geom_path(
             aes(
                 x = c(-padding, plot_width - padding),
-                y = c(-two_goals, -two_goals)
+                y = c(
+                    -two_goals + twogoalline_width / 2,
+                    -two_goals + twogoalline_width / 2
+                )
             ),
             colour = do.call(
                 rgb, append(baseline_color, list(maxColorValue = 255))
-            ), size = twogoalline_width
+            ), size = twogoalline_width * ppi
         )
     }
 

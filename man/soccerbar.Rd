@@ -60,7 +60,7 @@ visualization. Not necessarily consistent with its latex counterpart,
 but mostly a superset of it.
 \itemize{
 \item dpi: Dots per inch resolution, by default 300
-\item thickness: Line thickness in cartesian coordinates, by default 0.18
+\item thickness: Line thickness in cartesian coordinates, by default 0.36
 \item edge_thickness: Edge thickness for outlined patches (when outlined=TRUE)
 as the ratio to the line thickness, by default 0.35
 \item goalless_edge_thickness: Edge thickness for outlined no-goal patches

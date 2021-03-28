@@ -1,4 +1,5 @@
 
+<!-- markdownlint-disable MD033 -->
 # soccerbars <img width="90em" height="24em" src="resources/example.png">
 
 <!-- badges: start -->
@@ -122,7 +123,7 @@ These parameters can be used to customize the output images in all components.
 | Parameter | Description | Default |
 |-|-|-|
 | dpi | Dots per inch resolution | 300 |
-| thickness | Line thickness in cartesian coordinates | 0.18 |
+| thickness | Line thickness in cartesian coordinates | 0.36 |
 | edge_thickness  | Edge thickness for outlined patches (when outlined=True) as the ratio to the line thickness | 0.35 |
 | goalless_edge_thickness  | Edge thickness for outlined no-goal patches (when outlined=True) as the ratio to the line thickness | 0.5 |
 | zerodot | Zero-dot diameter ratio to thickness (when zerodots=True) | 0.6 |
