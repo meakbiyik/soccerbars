@@ -232,12 +232,12 @@ soccerbar <- function(scores,
                     upper_twogoalline_jumps,
                     c(
                         match_index
-                        - config[["thickness"]] * 0.9 / 2
+                        - config[["thickness"]] * 0.8 / 2
                         + goal_to_height(2)
                         * tan(config[["slant"]])
                         * sign(scores[[1]] - scores[[2]]),
                         match_index
-                        + config[["thickness"]] * 0.9 / 2
+                        + config[["thickness"]] * 0.8 / 2
                         + goal_to_height(2)
                         * tan(config[["slant"]])
                         * sign(scores[[1]] - scores[[2]])
@@ -249,12 +249,12 @@ soccerbar <- function(scores,
                     lower_twogoalline_jumps,
                     c(
                         match_index
-                        - config[["thickness"]] * 0.9 / 2
+                        - config[["thickness"]] * 0.8 / 2
                         - goal_to_height(2)
                         * tan(config[["slant"]])
                         * sign(scores[[1]] - scores[[2]]),
                         match_index
-                        + config[["thickness"]] * 0.9 / 2
+                        + config[["thickness"]] * 0.8 / 2
                         - goal_to_height(2)
                         * tan(config[["slant"]])
                         * sign(scores[[1]] - scores[[2]])
@@ -633,7 +633,7 @@ line_polygon <- function(twogoalline,
                          config) {
     thickness <- config[["thickness"]]
     edge_thickness <- config[["edge_thickness"]]
-    baseline_width <- thickness * config[["baseline_factor"]] / 2
+    baseline_width <- thickness * config[["baseline_factor"]]
     upper_tip_thickness <- lower_tip_thickness <- edge_thickness
 
     start_xy[2] <- if (start_xy[2] == 0) -0.5 * baseline_width else start_xy[2]
@@ -645,10 +645,10 @@ line_polygon <- function(twogoalline,
     if (slanted) {
         lower_tip_thickness <- if (
             twogoalline && start_xy[2] == -goal_to_height(2)
-        ) baseline_width * 0.5 else baseline_width
+        ) baseline_width * 0.4 else baseline_width
         upper_tip_thickness <- if (
             twogoalline && end_xy[2] == goal_to_height(2)
-        ) baseline_width * 0.5 else baseline_width
+        ) baseline_width * 0.4 else baseline_width
     }
 
     inner_start_xy <- c(

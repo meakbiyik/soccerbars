@@ -229,12 +229,12 @@ def soccerbar(
                 upper_twogoalline_jumps.extend(
                     [
                         match_index
-                        - config["thickness"] * 0.9 / 2
+                        - config["thickness"] * 0.8 / 2
                         + GOAL_TO_HEIGHT[2]
                         * math.tan(config["slant"])
                         * np.sign(scores[0] - scores[1]),
                         match_index
-                        + config["thickness"] * 0.9 / 2
+                        + config["thickness"] * 0.8 / 2
                         + GOAL_TO_HEIGHT[2]
                         * math.tan(config["slant"])
                         * np.sign(scores[0] - scores[1]),
@@ -244,12 +244,12 @@ def soccerbar(
                 lower_twogoalline_jumps.extend(
                     [
                         match_index
-                        - config["thickness"] * 0.9 / 2
+                        - config["thickness"] * 0.8 / 2
                         - GOAL_TO_HEIGHT[2]
                         * math.tan(config["slant"])
                         * np.sign(scores[0] - scores[1]),
                         match_index
-                        + config["thickness"] * 0.9 / 2
+                        + config["thickness"] * 0.8 / 2
                         - GOAL_TO_HEIGHT[2]
                         * math.tan(config["slant"])
                         * np.sign(scores[0] - scores[1]),
@@ -597,12 +597,12 @@ def _line(twogoalline, start_xy, end_xy, facecolor, edgecolor, config):
 
     if slanted:
         lower_tip_thickness = (
-            baseline_width * 0.5
+            baseline_width * 0.4
             if (twogoalline and start_xy[1] == -GOAL_TO_HEIGHT[2])
             else baseline_width
         )
         upper_tip_thickness = (
-            baseline_width * 0.5
+            baseline_width * 0.4
             if (twogoalline and end_xy[1] == GOAL_TO_HEIGHT[2])
             else baseline_width
         )
