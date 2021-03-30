@@ -20,5 +20,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial release of the soccerbars package.
 
-[Unreleased]: https://github.com/meakbiyik/vscode-r-test-adapter/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/meakbiyik/soccerbars/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/meakbiyik/soccerbars/releases/tag/v0.1.0
