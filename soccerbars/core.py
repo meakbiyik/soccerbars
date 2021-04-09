@@ -296,7 +296,9 @@ def soccerbar(
 
 
 def _is_listlike(val, ensure_nonempty=False, ensure_type: str = None):
+
     is_listlike = hasattr(val, "__iter__") and not isinstance(val, str)
+
     if not is_listlike:
         return False
     elif ensure_nonempty and not val:
@@ -305,6 +307,7 @@ def _is_listlike(val, ensure_nonempty=False, ensure_type: str = None):
         return False
     elif ensure_type == "bool" and not all(isinstance(item, bool) for item in val):
         return False
+        
     return True
 
 
@@ -322,6 +325,7 @@ def _maybe_convert_dataframe(scores):
 
 
 def _is_integerish(val, allow_nan=True):
+
     if isinstance(val, int):
         return True
     else:
@@ -635,8 +639,10 @@ def _line(twogoalline, start_xy, end_xy, facecolor, edgecolor, config):
 
 
 def _line_path(start_xy, end_xy, thickness, config, clockwise):
+
     clipped = start_xy[0] != end_xy[0]
     half_th = thickness / 2
+
     if clipped and config["clip_slanted_lines"]:
         if clockwise:
             path_data = [

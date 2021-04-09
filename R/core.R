@@ -118,14 +118,16 @@ default_config <- list(
 #' ), home_color = "red")
 #' }
 #' @export
-soccerbar <- function(scores,
-                     twogoalline = FALSE,
-                     zerodots = FALSE,
-                     outlined = FALSE,
-                     color = NULL,
-                     show = TRUE,
-                     output_path = NULL,
-                     ...) {
+soccerbar <- function(
+    scores,
+    twogoalline = FALSE,
+    zerodots = FALSE,
+    outlined = FALSE,
+    color = NULL,
+    show = TRUE,
+    output_path = NULL,
+    ...
+) {
     scores <- maybe_convert_dataframe(scores)
 
     scores <- maybe_flatten_vectors(scores)
@@ -302,6 +304,7 @@ soccerbar <- function(scores,
 }
 
 maybe_convert_dataframe <- function(scores) {
+
     if (is.data.frame(scores)) {
         scores <- lapply(
             seq_len(nrow(scores)),
@@ -325,7 +328,6 @@ maybe_convert_dataframe <- function(scores) {
 maybe_flatten_vectors <- function(scores) {
 
     if (is.list(scores)) {
-
         if (
             length(scores) == 3 &&
             is.atomic(scores[[1]]) &&
@@ -357,6 +359,7 @@ maybe_flatten_vectors <- function(scores) {
             }
         }
     }
+
     return(scores)
 }
 
@@ -500,6 +503,7 @@ check_color_and_output_path <- function(color, output_path, scores) {
 }
 
 config_factory <- function(outlined, ...) {
+
     kwargs <- list(...)
     config <- default_config
 
@@ -625,12 +629,14 @@ adjust_away_brightness <- function(color, config) {
     return(color)
 }
 
-line_polygon <- function(twogoalline,
-                         start_xy,
-                         end_xy,
-                         facecolor,
-                         edgecolor,
-                         config) {
+line_polygon <- function(
+    twogoalline,
+    start_xy,
+    end_xy,
+    facecolor,
+    edgecolor,
+    config
+) {
     thickness <- config[["thickness"]]
     edge_thickness <- config[["edge_thickness"]]
     baseline_width <- thickness * config[["baseline_factor"]]
@@ -691,12 +697,15 @@ line_polygon <- function(twogoalline,
             size = 0, fill = facecolor
         )
     )
+
     return(polygon)
 }
 
 line_path <- function(start_xy, end_xy, thickness, config) {
+
     clipped <- start_xy[[1]] != end_xy[[1]]
     half_th <- thickness / 2
+
     if (clipped && config[["clip_slanted_lines"]]) {
         path_data <- data.frame(
             x = c(
@@ -746,6 +755,7 @@ line_path <- function(start_xy, end_xy, thickness, config) {
             bottom_half_circle_path_data
         )
     }
+
     return(path_data)
 }
 
@@ -780,15 +790,18 @@ circle_polygon <- function(x, y, radius, facecolor, edgecolor, edgesize = 0) {
             size = 0, fill = facecolor
         )
     )
+
     return(polygon)
 }
 
 circle <- function(x, y, radius = 1, start_rad = 0, end_rad = 2 * pi) {
+
     tt <- seq(
         start_rad,
         end_rad,
         length.out = as.integer((end_rad - start_rad) / pi) * 100
     )
+
     return(
         data.frame(
             x = x + radius * cos(tt),
@@ -797,15 +810,17 @@ circle <- function(x, y, radius = 1, start_rad = 0, end_rad = 2 * pi) {
     )
 }
 
-plot <- function(patches,
-                 baseline_jumps,
-                 upper_twogoalline_jumps,
-                 lower_twogoalline_jumps,
-                 match_count,
-                 config,
-                 show,
-                 twogoalline = FALSE,
-                 output_path = NULL) {
+plot <- function(
+    patches,
+    baseline_jumps,
+    upper_twogoalline_jumps,
+    lower_twogoalline_jumps,
+    match_count,
+    config,
+    show,
+    twogoalline = FALSE,
+    output_path = NULL
+) {
     padding <- config[["padding"]]
     plot_width <- padding + (match_count + 1) * config[["spacing"]] + padding
     baseline_width <- config[["thickness"]] * config[["baseline_factor"]] / 2
