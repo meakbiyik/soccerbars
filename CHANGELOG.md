@@ -5,9 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - XX.XX.XXXX
+## [0.2.0] - 09.04.2021
 ### Added
 - When outlined=True and twogoalline=True, twogoallines now also jump across the bars (as baseline already did) to make real transparency possible
+- Package is available on PyPI
 
 ### Changed
 - Default spacing from 0.8 to 0.9.
@@ -21,4 +22,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial release of the soccerbars package.
 
 [Unreleased]: https://github.com/meakbiyik/soccerbars/compare/v0.1.0...HEAD
+[0.2.0]: https://github.com/meakbiyik/soccerbars/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/meakbiyik/soccerbars/releases/tag/v0.1.0
