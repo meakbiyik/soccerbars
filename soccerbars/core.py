@@ -307,7 +307,7 @@ def _is_listlike(val, ensure_nonempty=False, ensure_type: str = None):
         return False
     elif ensure_type == "bool" and not all(isinstance(item, bool) for item in val):
         return False
-        
+
     return True
 
 
