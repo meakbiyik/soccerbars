@@ -1,10 +1,13 @@
 [tool.poetry]
 name = "soccerbars"
 version = "0.1.0"
-description = "Multivariate sparklines making use of Gestalt theory (gestaltlines) for sequences of sports results."
+description = "Word-sized tallies of association football results using multivariate sparklines based on Gestalt theory (gestaltlines)."
 authors = ["M. Eren Akbiyik <erenakbiyik@gmail.com>"]
 license = "MIT"
-exclude = ["R/",".vscode/",".gitignore","DESCRIPTION","NAMESPACE","tests/testthat/","tests/testthat.R","man/","inst/",".Rbuildignore"]
+readme = "README.md"
+homepage = "https://github.com/meakbiyik/soccerbars"
+repository = "https://github.com/meakbiyik/soccerbars"
+keywords = ["soccer", "sparklines", "football", "association-football"]
 
 [tool.poetry.dependencies]
 python = "^3.7"

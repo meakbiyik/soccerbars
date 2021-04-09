@@ -1,6 +1,6 @@
 
 <!-- markdownlint-disable MD033 -->
-# soccerbars <img width="90em" height="24em" src="resources/example.png">
+# soccerbars <img width="90em" height="24em" src="https://raw.githubusercontent.com/meakbiyik/soccerbars/master/resources/example.png">
 
 <!-- badges: start -->
 [![R CMD check](https://github.com/meakbiyik/soccerbars/workflows/R%20CMD%20check/badge.svg)](https://github.com/meakbiyik/soccerbars/actions)
@@ -10,9 +10,9 @@
 -->
 <!-- badges: end -->
 
-Multivariate sparklines making use of Gestalt theory (gestaltlines) for sequences of sports results.
+Word-sized tallies of association football results using multivariate sparklines based on Gestalt theory (gestaltlines).
 
-This repository contains a Python package, an R package, and a cmd tool based on Python.
+This repository contains a Python package, an R package, and a command line tool based on Python.
 
 Soccerbars is created by Prof. Dr. Ulrik Brandes of ETH Zürich and this repository is a port of his [LaTeX package](https://github.com/ubrandes-ethz/soccerbars). An introduction to the theory behind this work can be found [here](https://sn.ethz.ch/research/soccerbars.html).
 
@@ -142,21 +142,23 @@ These parameters can be used to customize the output images in all components.
 
 ## Installation
 
-This package is not published in PyPI or CRAN yet, so you can use the git-compatible installation tools of each language.
-
 ### As a Python package
 
 ```bash
-pip install git+https://github.com/meakbiyik/soccerbars.git 
+pip install soccerbars
 ```
 
 ### As an R package
+
+This package is not published in CRAN yet, so you need to use the Github installation functionality of `devtools`.
 
 ```R
 devtools::install_github("meakbiyik/soccerbars")
 ```
 
 ### As a command line tool
+
+Although it is possible to use the command line interface after installing the Python package into the current environment and running `python -m soccerbars`, installation as an isolated tool might be preferrable to keep the environment clean. Following steps will create a new environment and install `soccerbars` for this purpose.
 
 1. Install Python from [here](https://www.python.org/downloads/)
 2. Install [Poetry](https://python-poetry.org/), a dependency management tool for Python, via the following command

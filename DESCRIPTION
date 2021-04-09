@@ -1,6 +1,6 @@
 Package: soccerbars
-Title: Multivariate Sparklines for Sports Results
-Version: 0.0.1
+Title: Word-sized Tallies of Football Results
+Version: 0.1.0
 Authors@R: 
     c(person(given = "Ulrik",
            family = "Brandes",
@@ -10,8 +10,8 @@ Authors@R:
            family = "Akbiyik",
            role = c("cre", "cph"),
            email = "eakbiyik@ethz.ch"))
-Description: Multivariate sparklines making use of Gestalt theory 
-    (gestaltlines) for sequences of sports results.
+Description: Word-sized tallies of association football results using 
+    multivariate sparklines based on Gestalt theory (gestaltlines).
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
