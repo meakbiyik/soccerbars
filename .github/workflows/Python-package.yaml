@@ -9,7 +9,7 @@ on:
   pull_request:
     branches: [ master ]
   release:
-    branches: [ master ]
+    types: [ published ]
 
 jobs:
   build:
@@ -39,7 +39,7 @@ jobs:
       run: |
         poetry run python -m pytest
     - name: Publish package
-      if: startsWith(github.ref, 'refs/tags')
+      if: matrix.python-version == 3.7 && startsWith(github.ref, 'refs/tags')
       env:
         PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
       run: |
