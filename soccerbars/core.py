@@ -581,7 +581,9 @@ def _circle(xy, radius, facecolor, edgecolor, config):
 
     codes, verts = zip(*inner_path_data)
     inner_path = Path(verts, codes)
-    inner_patch = PathPatch(inner_path, facecolor=facecolor, edgecolor=facecolor)
+    inner_patch = PathPatch(
+        inner_path, facecolor=facecolor, edgecolor=facecolor, linewidth=2
+    )
 
     return [outer_patch, inner_patch]
 
@@ -633,7 +635,9 @@ def _line(twogoalline, start_xy, end_xy, facecolor, edgecolor, config):
 
     codes, verts = zip(*inner_path_data)
     inner_path = Path(verts, codes)
-    inner_patch = PathPatch(inner_path, facecolor=facecolor, edgecolor=facecolor)
+    inner_patch = PathPatch(
+        inner_path, facecolor=facecolor, edgecolor=facecolor, linewidth=2
+    )
 
     return [outer_patch, inner_patch]
 
