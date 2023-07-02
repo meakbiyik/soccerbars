@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "soccerbars"
-version = "0.2.0"
+version = "0.2.1"
 description = "Word-sized tallies of association football results using multivariate sparklines based on Gestalt theory (gestaltlines)."
 authors = ["M. Eren Akbiyik <erenakbiyik@gmail.com>"]
 license = "MIT"
