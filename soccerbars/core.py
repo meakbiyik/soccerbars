@@ -154,7 +154,6 @@ def soccerbar(
 
     axes: List[Axes] = []
     for matches_index, matches in enumerate(matchlists):
-
         patches = []
         baseline_jumps = []
         upper_twogoalline_jumps = []
@@ -164,7 +163,6 @@ def soccerbar(
         match_count = len(matches)
 
         for index, match in enumerate(matches):
-
             away_game, scores = match[2], match[:2]
             scores = scores[::-1] if away_game else scores
             match_index = (index + 1) * config["spacing"]
@@ -296,7 +294,6 @@ def soccerbar(
 
 
 def _is_listlike(val, ensure_nonempty=False, ensure_type: str = None):
-
     is_listlike = hasattr(val, "__iter__") and not isinstance(val, str)
 
     if not is_listlike:
@@ -312,7 +309,6 @@ def _is_listlike(val, ensure_nonempty=False, ensure_type: str = None):
 
 
 def _maybe_convert_dataframe(scores):
-
     if type(scores).__name__ == "DataFrame":
         scores = scores.values.tolist()
 
@@ -325,7 +321,6 @@ def _maybe_convert_dataframe(scores):
 
 
 def _is_integerish(val, allow_nan=True):
-
     if isinstance(val, int):
         return True
     else:
@@ -340,9 +335,7 @@ def _is_integerish(val, allow_nan=True):
 
 
 def _maybe_flatten_vectors(scores):
-
     if _is_listlike(scores):
-
         if (
             len(scores) == 3
             and _is_listlike(scores[0], ensure_nonempty=True, ensure_type="integerish")
@@ -370,7 +363,6 @@ def _maybe_flatten_vectors(scores):
 
 
 def _check_scores(scores) -> None:
-
     if not _is_listlike(scores):
         raise TypeError(f"'scores' must be an iterable, not {type(scores)}")
 
@@ -384,7 +376,6 @@ def _check_scores(scores) -> None:
         scores = [scores]
 
     for item in scores:
-
         is_possibly_vectorlist = len(item) == 3 and all(
             len(elem) != 3 or not isinstance(elem[-1], bool) for elem in item[:-1]
         )
@@ -433,7 +424,6 @@ def _check_scores(scores) -> None:
 
 
 def _check_color_and_output_path(color, output_path, scores) -> None:
-
     if _is_listlike(scores[0][0]):
         matchlists = scores
         matchcolors = color
@@ -486,7 +476,6 @@ def _check_color_and_output_path(color, output_path, scores) -> None:
 
 
 def _config_factory(outlined, **kwargs):
-
     config = DEFAULT_CONFIG.copy()
 
     if kwargs.get("away_brighter", None) and kwargs.get("away_darker", None):
@@ -497,7 +486,6 @@ def _config_factory(outlined, **kwargs):
         )
 
     for key, value in kwargs.items():
-
         if key not in config:
             raise KeyError(
                 f"Keyword argument '{key}' is not a valid configuration parameter. "
@@ -529,7 +517,6 @@ def _config_factory(outlined, **kwargs):
 
 
 def _colors(away_game, outlined, config, matchcolor=None):
-
     if matchcolor is not None:
         main_color = to_rgba(matchcolor)
     else:
@@ -545,7 +532,6 @@ def _colors(away_game, outlined, config, matchcolor=None):
 
 
 def _adjust_away_brightness(color, config):
-
     if config["away_brighter"]:
         color = (
             color[0] * 66 / 100 + 34 / 100,
@@ -565,7 +551,6 @@ def _adjust_away_brightness(color, config):
 
 
 def _circle(xy, radius, facecolor, edgecolor, config):
-
     main_path = Path.circle(xy, radius)
     inner_path = Path.circle(xy, radius - config["goalless_edge_thickness"])
 
@@ -589,7 +574,6 @@ def _circle(xy, radius, facecolor, edgecolor, config):
 
 
 def _line(twogoalline, start_xy, end_xy, facecolor, edgecolor, config):
-
     thickness = config["thickness"]
     edge_thickness = config["edge_thickness"]
     baseline_width = thickness * config["baseline_factor"]
@@ -643,7 +627,6 @@ def _line(twogoalline, start_xy, end_xy, facecolor, edgecolor, config):
 
 
 def _line_path(start_xy, end_xy, thickness, config, clockwise):
-
     clipped = start_xy[0] != end_xy[0]
     half_th = thickness / 2
 
@@ -704,11 +687,10 @@ def _plot(
     twogoalline=False,
     output_path: str = None,
 ) -> Axes:
-
     padding = config["padding"]
     plot_width = padding + (match_count + 1) * config["spacing"] + padding
 
-    fig = plt.figure(
+    plt.figure(
         figsize=(
             plot_width,
             2 * MAX_HEIGHT,

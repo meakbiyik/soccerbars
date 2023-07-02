@@ -148,6 +148,12 @@ These parameters can be used to customize the output images in all components.
 pip install soccerbars
 ```
 
+For command line usage, you need to install the package with the `cli` extra.
+
+```bash
+pip install soccerbars[cli]
+```
+
 ### As an R package
 
 This package is not published in CRAN yet, so you need to use the Github installation functionality of `devtools`.

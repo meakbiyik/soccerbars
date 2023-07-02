@@ -100,7 +100,6 @@ def cli(
     output_path: str,
     plot_kwargs: Tuple[str],
 ):
-
     if not matches:
         matches = click.prompt("Matches")
 
@@ -153,5 +152,4 @@ def cli(
 
 
 if __name__ == "__main__":
-
     cli()
